@@ -2,11 +2,121 @@
   "areas": [
     {
       "id": 0,
-      "place": "London",
-      "description": "London, UK",
+      "place": "Binntal",
+      "description": "Binntal Sampling SIte",
       "location": [
-        51.505,
-        -0.09
+        46.38230786578320419,
+        8.27814012307909941
+      ],
+      "sensors": [
+        {
+          "id": 0,
+          "place": "Sensor 0",
+          "description": "Description for Sensor 0",
+          "location": [
+            46.38230786578320419,
+            8.27814012307909941
+          ]
+        },
+        {
+          "id": 1,
+          "place": "Sensor 1",
+          "description": "Description for Sensor 1",
+          "location": [
+            46.38186623337439585,
+            8.27799151928392263
+          ]
+        },
+        {
+          "id": 2,
+          "place": "Sensor 2",
+          "description": "Description for Sensor 2",
+          "location": [
+            46.3814186891362894,
+            8.27799497732366341
+          ]
+        },
+        {
+          "id": 3,
+          "place": "Sensor 3",
+          "description": "Description for Sensor 3",
+          "location": [
+            46.38096931499390507,
+            8.27792233228177921
+          ]
+        },
+        {
+          "id": 4,
+          "place": "Sensor 4",
+          "description": "Description for Sensor 4",
+          "location": [
+            46.38051451536809111,
+            8.27793605246943365
+          ]
+        },
+        {
+          "id": 5,
+          "place": "Sensor 5",
+          "description": "Description for Sensor 5",
+          "location": [
+            46.38006648492084594,
+            8.27800520319045852
+          ]
+        },
+        {
+          "id": 6,
+          "place": "Sensor 6",
+          "description": "Description for Sensor 6",
+          "location": [
+            46.38246671481461902,
+            8.27737143569202516
+          ]
+        },
+        {
+          "id": 7,
+          "place": "Sensor 7",
+          "description": "Description for Sensor 7",
+          "location": [
+            46.38201420584354651,
+            8.27739902828637142
+          ]
+        },
+        {
+          "id": 8,
+          "place": "Sensor 8",
+          "description": "Description for Sensor 8",
+          "location": [
+            46.38156470346784488,
+            8.27734367531285642
+          ]
+        },
+        {
+          "id": 9,
+          "place": "Sensor 9",
+          "description": "Description for Sensor 9",
+          "location": [
+            46.38111991010548962,
+            8.27729876981988433
+          ]
+        },
+        {
+          "id": 10,
+          "place": "Sensor 10",
+          "description": "Description for Sensor 10",
+          "location": [
+            46.38066971731334576,
+            8.27733677186708761
+          ]
+        },
+        {
+          "id": 11,
+          "place": "Sensor 11",
+          "description": "Description for Sensor 11",
+          "location": [
+            46.38021723391943141,
+            8.27736090633433008
+          ]
+        }
       ]
     },
     {
@@ -17,63 +127,6 @@
         46.2334,
         7.3601
       ]
-    }
-  ],
-  "comments": [
-    {
-      "id": 0,
-      "postId": 0,
-      "content": "Comment 1"
-    },
-    {
-      "id": 1,
-      "postId": 0,
-      "content": "Comment 2"
-    },
-    {
-      "id": 2,
-      "postId": 1,
-      "content": "Comment 3"
-    },
-    {
-      "id": 3,
-      "postId": 1,
-      "content": "Comment 4"
-    },
-    {
-      "id": 4,
-      "postId": 2,
-      "content": "Comment 5"
-    },
-    {
-      "id": 5,
-      "postId": 2,
-      "content": "Comment 6"
-    },
-    {
-      "id": 6,
-      "postId": 3,
-      "content": "Comment 7"
-    },
-    {
-      "id": 7,
-      "postId": 3,
-      "content": "Comment 8"
-    },
-    {
-      "id": 8,
-      "postId": 3,
-      "content": "Comment 9"
-    },
-    {
-      "id": 9,
-      "postId": 4,
-      "content": "Comment 10"
-    },
-    {
-      "id": 10,
-      "postId": 4,
-      "content": "Comment 11"
     }
   ]
 }
