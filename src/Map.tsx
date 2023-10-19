@@ -3,8 +3,7 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 
 export const LocationField = ({ source }) => {
     const record = useRecordContext(); // use the RecordContext created by <Show>
-    console.log(record);
-    console.log(record[source]);
+
     if (!record) return null;
     return (
 

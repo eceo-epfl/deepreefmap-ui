@@ -5,7 +5,8 @@ const position = [51.505, -0.09];
 export const AreaList = () => (
     <List>
         <Datagrid rowClick="show">
-            <TextField source="title" />
+            <TextField source="place" />
+            <TextField source="description" />
             <TextField source="location" />
         </Datagrid>
     </List>
@@ -15,7 +16,8 @@ export const AreaList = () => (
 export const AreaShow = () => (
     <Show>
         <SimpleShowLayout>
-            <TextField source="location" />
+            <TextField source="place" />
+            <TextField source="description" />
             <LocationField source="location" />
         </SimpleShowLayout>
     </Show>

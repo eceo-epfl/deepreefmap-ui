@@ -2,11 +2,20 @@
   "areas": [
     {
       "id": 0,
-      "title": "Post 1",
-      "content": "Content 1",
+      "place": "London",
+      "description": "London, UK",
       "location": [
         51.505,
         -0.09
+      ]
+    },
+    {
+      "id": 1,
+      "place": "Sion",
+      "description": "Sion, Valais",
+      "location": [
+        46.2334,
+        7.3601
       ]
     }
   ],
