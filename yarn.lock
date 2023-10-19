@@ -2176,6 +2176,11 @@ keyv@^4.5.3:
   dependencies:
     json-buffer "3.0.1"
 
+leaflet-tilelayer-swiss@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/leaflet-tilelayer-swiss/-/leaflet-tilelayer-swiss-2.3.0.tgz#c59f55c70e41923f35327f03d07470da7f152bfb"
+  integrity sha512-Wt8sOgYyTqrcVikVOuO4SXRantdFJ4iKRG0nM/RL/w53NcLLlpQfIa4JU8TFtynPMnjnJIAnogM2ix/qNebRWQ==
+
 leaflet@^1.9.4:
   version "1.9.4"
   resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.9.4.tgz#23fae724e282fa25745aff82ca4d394748db7d8d"

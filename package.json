@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "leaflet": "^1.9.4",
+    "leaflet-tilelayer-swiss": "^2.3.0",
     "ol": "^8.1.0",
     "ra-data-fakerest": "^4.14.0",
     "react": "^18.2.0",
