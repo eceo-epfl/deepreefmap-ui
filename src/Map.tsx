@@ -1,12 +1,10 @@
 import { useRecordContext, Show, SimpleShowLayout, TextField } from 'react-admin';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
 export const LocationField = ({ source }) => {
     const record = useRecordContext(); // use the RecordContext created by <Show>
-    console.log(record)
     const sensors = record["sensors"];
 
-    console.log(sensors);
     if (!record) return null;
     return (
 
@@ -19,11 +17,16 @@ export const LocationField = ({ source }) => {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {sensors.map((sensor, index) => (
-                <Marker key={index} position={sensor["location"]} />
-            ))}
-            <Marker
-                position={record[source]} />
+            {/* {sensors.map((sensor, index) => (
+                <Marker
+                    key={index}
+                    position={sensor["location"]}
+                >
+                    <Popup>
+                        {sensor["description"]}
+                    </Popup>
+                </Marker>
+            ))} */}
         </MapContainer>
 
     );
