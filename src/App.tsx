@@ -54,7 +54,7 @@ const App = () => {
         // Make the API request
         axios.get(apiUrl)
             .then(response => {
-                const { url, realm, client_id: clientId } = response.data;
+                const { url, realm, clientId: clientId } = response.data;
                 setKeycloakConfig({ url, realm, clientId });
             })
             .catch(error => {
