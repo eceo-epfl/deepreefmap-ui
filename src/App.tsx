@@ -25,12 +25,8 @@ import Layout from './Layout';
 import users from './users';
 import sensors from './sensors';
 import { AreaList, AreaShow } from "./Areas";
+import axios from 'axios';
 
-const config: KeycloakConfig = {
-    url: 'https://enac-it4r-sso.epfl.ch/',
-    realm: 'SOIL',
-    clientId: 'sensormap-frontend-dev-local',
-};
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
@@ -45,13 +41,36 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
 };
 
 const App = () => {
+    const [keycloakConfig, setKeycloakConfig] = useState({
+        url: '',
+        realm: '',
+        clientId: '',
+    });
+
+    useEffect(() => {
+        // Define the API endpoint URL
+        const apiUrl = '/api/config/keycloak';
+
+        // Make the API request
+        axios.get(apiUrl)
+            .then(response => {
+                const { url, realm, client_id: clientId } = response.data;
+                setKeycloakConfig({ url, realm, clientId });
+            })
+            .catch(error => {
+                console.error('Error fetching configuration:', error);
+            });
+    }, []); // The empty dependency array ensures this effect runs only once
+
+
+
     const [keycloak, setKeycloak] = useState<Keycloak>(undefined);
     const authProvider = useRef<AuthProvider>(undefined);
     const dataProvider = useRef<DataProvider>(undefined);
 
     useEffect(() => {
         const initKeyCloakClient = async () => {
-            const keycloakClient = new Keycloak(config);
+            const keycloakClient = new Keycloak(keycloakConfig);
             await keycloakClient.init(initOptions);
             authProvider.current = keycloakAuthProvider(keycloakClient, {
                 onPermissions: getPermissions,
