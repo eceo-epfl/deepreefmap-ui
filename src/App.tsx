@@ -40,12 +40,13 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
     return false;
 };
 
+const [keycloakConfig, setKeycloakConfig] = useState({
+    url: '',
+    realm: '',
+    clientId: '',
+});
+
 const App = () => {
-    const [keycloakConfig, setKeycloakConfig] = useState({
-        url: '',
-        realm: '',
-        clientId: '',
-    });
 
     const [keycloak, setKeycloak] = useState<Keycloak>(undefined);
     const authProvider = useRef<AuthProvider>(undefined);
@@ -60,6 +61,12 @@ const App = () => {
             axios.get(apiUrl)
                 .then(response => {
                     const { url, realm, clientId: clientId } = response.data;
+
+                    if (clientId === "") {
+                        console.error('ClientId is empty.');
+                    } else {
+                        setKeycloakConfig({ url, realm, clientId });
+                    }
                     setKeycloakConfig({ url, realm, clientId });
                 })
                 .catch(error => {
@@ -80,7 +87,7 @@ const App = () => {
         if (!keycloak) {
             initKeyCloakClient();
         }
-    }, [keycloak]);
+    }, [keycloak, keycloakConfig]);
 
     // hide the admin until the dataProvider and authProvider are ready
     if (!keycloak) return <p>Loading...</p>;
