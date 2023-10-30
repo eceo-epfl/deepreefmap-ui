@@ -40,54 +40,47 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
     return false;
 };
 
-const [keycloakConfig, setKeycloakConfig] = useState({
-    url: '',
-    realm: '',
-    clientId: '',
-});
+
 
 const App = () => {
+    const [keycloakConfig, setKeycloakConfig] = useState();
+    const [keycloak, setKeycloak] = useState();
+    const authProvider = useRef();
+    const dataProvider = useRef();
 
-    const [keycloak, setKeycloak] = useState<Keycloak>(undefined);
-    const authProvider = useRef<AuthProvider>(undefined);
-    const dataProvider = useRef<DataProvider>(undefined);
-
+    // Effect to initialize keycloak
     useEffect(() => {
         const initKeyCloakClient = async () => {
-            // Define the API endpoint URL
             const apiUrl = '/api/config/keycloak';
 
-            // Make the API request
-            axios.get(apiUrl)
-                .then(response => {
-                    const { url, realm, clientId: clientId } = response.data;
+            try {
+                const response = await axios.get(apiUrl);
+                const { url, realm, clientId } = response.data;
+                const keycloakClient = new Keycloak({ url, realm, clientId });
+                await keycloakClient.init(initOptions);
+                setKeycloak(keycloakClient);
+            } catch (error) {
+                console.error('Error fetching configuration:', error);
+            }
+        };
 
-                    if (clientId === "") {
-                        console.error('ClientId is empty.');
-                    } else {
-                        setKeycloakConfig({ url, realm, clientId });
-                    }
-                    setKeycloakConfig({ url, realm, clientId });
-                })
-                .catch(error => {
-                    console.error('Error fetching configuration:', error);
-                });
+        if (!keycloak) {
+            initKeyCloakClient();
+        }
+    }, [keycloak]);
 
-            const keycloakClient = new Keycloak(keycloakConfig);
-            await keycloakClient.init(initOptions);
-            authProvider.current = keycloakAuthProvider(keycloakClient, {
+    // Effect to set authProvider and dataProvider
+    useEffect(() => {
+        if (keycloak) {
+            authProvider.current = keycloakAuthProvider(keycloak, {
                 onPermissions: getPermissions,
             });
             dataProvider.current = keyCloakTokenDataProviderBuilder(
                 myDataProvider,
-                keycloakClient
+                keycloak
             );
-            setKeycloak(keycloakClient);
-        };
-        if (!keycloak) {
-            initKeyCloakClient();
         }
-    }, [keycloak, keycloakConfig]);
+    }, [keycloak]);
 
     // hide the admin until the dataProvider and authProvider are ready
     if (!keycloak) return <p>Loading...</p>;
