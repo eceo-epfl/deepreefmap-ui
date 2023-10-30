@@ -47,29 +47,25 @@ const App = () => {
         clientId: '',
     });
 
-    useEffect(() => {
-        // Define the API endpoint URL
-        const apiUrl = '/api/config/keycloak';
-
-        // Make the API request
-        axios.get(apiUrl)
-            .then(response => {
-                const { url, realm, clientId: clientId } = response.data;
-                setKeycloakConfig({ url, realm, clientId });
-            })
-            .catch(error => {
-                console.error('Error fetching configuration:', error);
-            });
-    }, []); // The empty dependency array ensures this effect runs only once
-
-
-
     const [keycloak, setKeycloak] = useState<Keycloak>(undefined);
     const authProvider = useRef<AuthProvider>(undefined);
     const dataProvider = useRef<DataProvider>(undefined);
 
     useEffect(() => {
         const initKeyCloakClient = async () => {
+            // Define the API endpoint URL
+            const apiUrl = '/api/config/keycloak';
+
+            // Make the API request
+            axios.get(apiUrl)
+                .then(response => {
+                    const { url, realm, clientId: clientId } = response.data;
+                    setKeycloakConfig({ url, realm, clientId });
+                })
+                .catch(error => {
+                    console.error('Error fetching configuration:', error);
+                });
+
             const keycloakClient = new Keycloak(keycloakConfig);
             await keycloakClient.init(initOptions);
             authProvider.current = keycloakAuthProvider(keycloakClient, {
