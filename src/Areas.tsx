@@ -1,4 +1,4 @@
-import { Show, SimpleShowLayout, List, Datagrid, TextField, ReferenceManyField, ReferenceManyCount } from "react-admin";
+import { Show, SimpleShowLayout, List, Datagrid, TextField, ReferenceManyField, ReferenceManyCount, useRecordContext } from "react-admin";
 import { LocationField } from './Map';
 const position = [51.505, -0.09];
 
@@ -19,12 +19,21 @@ export const AreaList = () => (
 
 );
 
+const AreaTitle = () => {
+    const record = useRecordContext();
+    // the record can be empty while loading
+    if (!record) return null;
+    return <span>{record.place} Area</span>;
+};
+
 export const AreaShow = () => (
-    <Show>
+    <Show title={<AreaTitle />}>
         <SimpleShowLayout>
             <TextField source="place" />
             <TextField source="description" />
-            <LocationField source="location" />
+            <ReferenceManyField label="Sensors" reference="sensors" target="area_id">
+                <LocationField source="location" />
+            </ReferenceManyField>
 
         </SimpleShowLayout>
     </Show>
