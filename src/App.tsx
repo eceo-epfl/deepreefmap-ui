@@ -27,7 +27,6 @@ import sensors from './sensors';
 import { AreaList, AreaShow } from "./Areas";
 import axios from 'axios';
 
-
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -41,46 +40,41 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
 };
 
 
+const apiUrl = '/api/config/keycloak';
 
 const App = () => {
-    const [keycloakConfig, setKeycloakConfig] = useState();
     const [keycloak, setKeycloak] = useState();
-    const authProvider = useRef();
-    const dataProvider = useRef();
+    const [loading, setLoading] = useState(true);
+    const authProvider = useRef<AuthProvider>();
+    const dataProvider = useRef<DataProvider>();
 
-    // Effect to initialize keycloak
     useEffect(() => {
-        const initKeyCloakClient = async () => {
-            const apiUrl = '/api/config/keycloak';
-
+        async function fetchData() {
             try {
                 const response = await axios.get(apiUrl);
-                const { url, realm, clientId } = response.data;
-                const keycloakClient = new Keycloak({ url, realm, clientId });
+                const keycloakConfig = response.data;
+
+                // Initialize Keycloak here, once you have the configuration
+                const keycloakClient = new Keycloak(keycloakConfig);
                 await keycloakClient.init(initOptions);
+                authProvider.current = keycloakAuthProvider(keycloakClient, {
+                    onPermissions: getPermissions,
+                });
+                dataProvider.current = keyCloakTokenDataProviderBuilder(
+                    myDataProvider,
+                    keycloakClient
+                );
                 setKeycloak(keycloakClient);
+                setLoading(false);
             } catch (error) {
-                console.error('Error fetching configuration:', error);
+                console.error('Error fetching data:', error);
+                setLoading(false);
             }
-        };
-
-        if (!keycloak) {
-            initKeyCloakClient();
         }
-    }, [keycloak]);
 
-    // Effect to set authProvider and dataProvider
-    useEffect(() => {
-        if (keycloak) {
-            authProvider.current = keycloakAuthProvider(keycloak, {
-                onPermissions: getPermissions,
-            });
-            dataProvider.current = keyCloakTokenDataProviderBuilder(
-                myDataProvider,
-                keycloak
-            );
-        }
-    }, [keycloak]);
+        fetchData();
+    }, []);
+
 
     // hide the admin until the dataProvider and authProvider are ready
     if (!keycloak) return <p>Loading...</p>;
