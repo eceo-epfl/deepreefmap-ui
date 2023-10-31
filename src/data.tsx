@@ -535,7 +535,7 @@ export default {
                 46.38230786578320419,
                 8.27814012307909941
             ],
-            area_id: 0
+            area_id: 0,
         },
         {
             id: 1,
@@ -648,4 +648,42 @@ export default {
             area_id: 0
         }
     ],
+    sensor_data: [
+        { id: 1, time: "2019-01-01T00:00:00.000Z", value: 23.46, sensor_id: 0 },
+        { id: 2, time: "2019-01-02T00:00:00.000Z", value: 25.75, sensor_id: 0 },
+        { id: 3, time: "2019-01-03T00:00:00.000Z", value: 26.85, sensor_id: 0 },
+        { id: 4, time: "2019-01-04T00:00:00.000Z", value: 23.11, sensor_id: 0 },
+        { id: 5, time: "2019-01-05T00:00:00.000Z", value: 22.11, sensor_id: 0 },
+        { id: 6, time: "2019-01-06T00:00:00.000Z", value: 20.02, sensor_id: 0 },
+        { id: 7, time: "2019-01-07T00:00:00.000Z", value: 25.58, sensor_id: 0 },
+        { id: 8, time: "2019-01-08T00:00:00.000Z", value: 28.65, sensor_id: 0 },
+        { id: 9, time: "2019-01-09T00:00:00.000Z", value: 22.45, sensor_id: 0 },
+        { id: 10, time: "2019-01-10T00:00:00.000Z", value: 20.44, sensor_id: 0 },
+        { id: 11, time: "2019-01-11T00:00:00.000Z", value: 23.65, sensor_id: 0 },
+        { id: 12, time: "2019-01-12T00:00:00.000Z", value: 10.45, sensor_id: 0 },
+        { id: 13, time: "2019-01-13T00:00:00.000Z", value: 28.88, sensor_id: 0 },
+        { id: 14, time: "2019-01-01T00:00:00.000Z", value: 23.46, sensor_id: 1 },
+        { id: 15, time: "2019-01-02T00:00:00.000Z", value: 25.75, sensor_id: 1 },
+        { id: 16, time: "2019-01-03T00:00:00.000Z", value: 26.85, sensor_id: 1 },
+        { id: 17, time: "2019-01-04T00:00:00.000Z", value: 23.11, sensor_id: 1 },
+        { id: 18, time: "2019-01-05T00:00:00.000Z", value: 22.11, sensor_id: 1 },
+        { id: 19, time: "2019-01-06T00:00:00.000Z", value: 20.02, sensor_id: 1 },
+        { id: 20, time: "2019-01-07T00:00:00.000Z", value: 25.58, sensor_id: 1 },
+        { id: 21, time: "2019-01-09T00:00:00.000Z", value: 22.45, sensor_id: 1 },
+        { id: 22, time: "2019-01-10T00:00:00.000Z", value: 20.44, sensor_id: 1 },
+        { id: 23, time: "2019-01-11T00:00:00.000Z", value: 23.65, sensor_id: 1 },
+        { id: 24, time: "2019-01-12T00:00:00.000Z", value: 10.45, sensor_id: 1 },
+        { id: 25, time: "2019-01-13T00:00:00.000Z", value: 28.88, sensor_id: 1 },
+        { id: 26, time: "2019-01-01T00:00:00.000Z", value: 23.46, sensor_id: 2 },
+        { id: 27, time: "2019-01-01T00:00:00.000Z", value: 23.46, sensor_id: 3 },
+        { id: 28, time: "2019-01-02T00:00:00.000Z", value: 25.75, sensor_id: 4 },
+        { id: 29, time: "2019-01-03T00:00:00.000Z", value: 26.85, sensor_id: 5 },
+        { id: 30, time: "2019-01-04T00:00:00.000Z", value: 23.11, sensor_id: 6 },
+        { id: 31, time: "2019-01-05T00:00:00.000Z", value: 22.11, sensor_id: 7 },
+        { id: 32, time: "2019-01-06T00:00:00.000Z", value: 20.02, sensor_id: 8 },
+        { id: 33, time: "2019-01-07T00:00:00.000Z", value: 25.58, sensor_id: 9 },
+        { id: 34, time: "2019-01-08T00:00:00.000Z", value: 28.65, sensor_id: 10 },
+        { id: 35, time: "2019-01-09T00:00:00.000Z", value: 22.45, sensor_id: 11 },
+        { id: 36, time: "2019-01-10T00:00:00.000Z", value: 20.44, sensor_id: 12 },
+    ]
 };

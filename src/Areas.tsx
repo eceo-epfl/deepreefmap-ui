@@ -31,9 +31,16 @@ export const AreaShow = () => (
         <SimpleShowLayout>
             <TextField source="place" />
             <TextField source="description" />
+            <ReferenceManyCount
+                label="Sensors"
+                reference="sensors"
+                target="area_id"
+                link
+            />
             <ReferenceManyField label="Sensors" reference="sensors" target="area_id">
                 <LocationField source="location" />
             </ReferenceManyField>
+
 
         </SimpleShowLayout>
     </Show>

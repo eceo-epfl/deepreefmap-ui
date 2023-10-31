@@ -23,6 +23,4 @@ const SensorList = () => (
 
 );
 
-
-
 export default SensorList;
