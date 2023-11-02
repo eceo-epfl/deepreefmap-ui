@@ -1,9 +1,11 @@
-import { useRecordContext, useRedirect, Show, SimpleShowLayout, TextField, useGetManyReference } from 'react-admin';
+import { useRecordContext, useRedirect, Show, SimpleShowLayout, TextField, useGetManyReference, useCreatePath } from 'react-admin';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Tooltip } from 'react-leaflet';
 import { CRS } from 'leaflet';
+import { Link } from 'react-router-dom';
 
 export const LocationFieldPoints = ({ source }) => {
     const record = useRecordContext();
+    const createPath = useCreatePath();
     const { data, isLoading, error } = useGetManyReference(
         'sensors',
         {
@@ -16,7 +18,7 @@ export const LocationFieldPoints = ({ source }) => {
 
     if (!record) return null;
     if (!data) return null;
-    //
+
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
@@ -35,7 +37,13 @@ export const LocationFieldPoints = ({ source }) => {
                             position={sensor["location"]}
                         >
                             <Popup>
+                                <b>{sensor["name"]}</b>
+                                <br />
                                 {sensor["description"]}
+                                <br /><br />
+                                <Link to={createPath({ type: 'show', resource: 'sensors', id: index })}>
+                                    Go to Sensor</Link>
+
                             </Popup>
                         </Marker>
                     ))
