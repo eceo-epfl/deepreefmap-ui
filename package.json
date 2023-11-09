@@ -16,6 +16,7 @@
     "leaflet-tilelayer-swiss": "^2.3.0",
     "ol": "^8.1.0",
     "ra-data-fakerest": "^4.14.0",
+    "ra-data-simple-rest": "^4.15.2",
     "ra-input-rich-text": "^4.15.1",
     "ra-keycloak": "^1.0.0",
     "ra-language-french": "^4.15.1",

@@ -3346,6 +3346,13 @@ ra-data-fakerest@^4.14.0:
   dependencies:
     fakerest "^3.0.0"
 
+ra-data-simple-rest@^4.15.2:
+  version "4.15.2"
+  resolved "https://registry.yarnpkg.com/ra-data-simple-rest/-/ra-data-simple-rest-4.15.2.tgz#09ca08d4bf7a16c7c9032895086b677a9af30dff"
+  integrity sha512-mb6dno/Y//EDDb3F6xmTYmA8tZyJT9+F4RUKPpDcLtHZWuJB134cGp6+Fznqcnew9jQM4LQbEDvmxZci575hlw==
+  dependencies:
+    query-string "^7.1.1"
+
 ra-i18n-polyglot@^4.15.0:
   version "4.15.0"
   resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-4.15.0.tgz#4842a7352dd1f8567888cc70d783aaa62d463cf0"

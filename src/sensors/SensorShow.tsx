@@ -13,9 +13,19 @@ import {
     FileInput,
     FileField,
     useGetManyReference,
-    useRecordContext
+    useRecordContext,
+    ArrayField
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
-import { LineChart, Line, Label, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+    LineChart,
+    Line,
+    Label,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+} from 'recharts';
 
 
 const SensorShow = () => (
@@ -24,38 +34,29 @@ const SensorShow = () => (
             <TextField source="id" />
             <TextField source="name" />
             <TextField source="description" />
-            <TextField source="location" />
+            <TextField source="geom.coordinates" />
             <ReferenceField
                 source='area_id'
                 reference='areas'
                 link="show"
             >
-                <TextField source='place' />
+                <TextField source='name' />
             </ReferenceField>
             <TabbedShowLayout>
                 <TabbedShowLayout.Tab label="Plot">
-                    <ReferenceManyField
-                        label='Sensor Data'
-                        target='sensor_id'
-                        reference='sensor_data'
-                        sort={{ field: 'time', order: 'DESC' }}
-                    >
-                        <SensorPlot />
-                    </ReferenceManyField>
+                    <SensorPlot source="data" />
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="summary">
                     <List>
-                        <ReferenceManyField
-                            label='Sensor Data'
-                            target='sensor_id'
-                            reference='sensor_data'
-                            sort={{ field: 'time', order: 'DESC' }}
-                        >
-                            <Datagrid>
+                        <ArrayField source="data">
+                            <Datagrid >
                                 <TextField source="time" />
-                                <TextField source="value" />
+                                <TextField source="temperature_1" />
+                                <TextField source="temperature_2" />
+                                <TextField source="temperature_3" />
+                                <TextField source="soil_moisture_count" />
                             </Datagrid>
-                        </ReferenceManyField>
+                        </ArrayField>
                     </List>
                 </TabbedShowLayout.Tab>
 
@@ -67,16 +68,9 @@ const SensorShow = () => (
 export default SensorShow;
 
 
-export const SensorPlot = () => {
+export const SensorPlot = ({ source }) => {
     const record = useRecordContext();
-    const { data, isLoading, error } = useGetManyReference(
-        'sensor_data',
-        {
-            target: 'sensor_id',
-            id: record.id,
-        }
-    );
-
+    const data = record[source]
     console.log("Data", data);
 
     return (
@@ -95,15 +89,20 @@ export const SensorPlot = () => {
             <XAxis dataKey="time" >
                 <Label value="Time" offset={-5} position="insideBottom" />
             </XAxis>
-            <YAxis>
+            <YAxis domain={['dataMin', 'dataMax']}>
                 <Label value="Temperature (°C)" angle={-90} offset={5} position="insideLeft" />
             </YAxis>
             <Tooltip />
             <Legend />
 
-            <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+            <Line type="monotone" dataKey="temperature_1" stroke="#8884d8" activeDot={{ r: 8 }} />
+            <Line type="monotone" dataKey="temperature_2" stroke="#82ca9d" activeDot={{ r: 8 }} />
+            <Line type="monotone" dataKey="temperature_3" stroke="#ffc658" activeDot={{ r: 8 }} />
 
-        </LineChart>
+
+
+        </LineChart >
+
     );
 
 };

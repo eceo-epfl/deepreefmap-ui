@@ -1,11 +1,14 @@
-import fakeRestProvider from 'ra-data-fakerest';
+// import fakeRestProvider from 'ra-data-fakerest';
+import simpleRestProvider from 'ra-data-simple-rest';
 import { DataProvider } from 'react-admin';
 import get from 'lodash/get';
 import Keycloak from 'keycloak-js';
 import data from './data';
 import addUploadFeature from './addUploadFeature';
 
-const dataProvider = fakeRestProvider(data, true);
+const dataProvider = simpleRestProvider('http://localhost:8080/api');
+
+// const dataProvider = fakeRestProvider(data, true);
 
 const addTagsSearchSupport = (dataProvider: DataProvider) => ({
     ...dataProvider,

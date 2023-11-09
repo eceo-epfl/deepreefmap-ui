@@ -3,12 +3,11 @@ import { Fragment, useState } from 'react';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 
-import { List, Datagrid, TextField, ReferenceOneField, ReferenceField } from "react-admin";
+import { List, Datagrid, TextField, Count, ReferenceOneField, ReferenceField, ArrayField } from "react-admin";
 
 const SensorList = () => (
     <List>
         <Datagrid rowClick="show">
-            <TextField source="id" />
             <TextField source="name" />
             <TextField source="description" />
             <ReferenceField
@@ -16,7 +15,7 @@ const SensorList = () => (
                 reference='areas'
                 link="show"
             >
-                <TextField source='place' />
+                <TextField source='name' />
             </ReferenceField>
         </Datagrid>
     </List>

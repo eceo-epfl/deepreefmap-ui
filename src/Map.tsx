@@ -22,7 +22,7 @@ export const LocationFieldPoints = ({ source }) => {
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
-            center={record["centroid"]}
+            center={[46.38138404346455, 8.275374887970651]}
             zoom={17}
             scrollWheelZoom={true}>
             <TileLayer
@@ -34,14 +34,14 @@ export const LocationFieldPoints = ({ source }) => {
                     data.map((sensor, index) => (
                         < Marker
                             key={index}
-                            position={sensor["location"]}
+                            position={sensor["geom"]["coordinates"]}
                         >
                             <Popup>
                                 <b>{sensor["name"]}</b>
                                 <br />
                                 {sensor["description"]}
                                 <br /><br />
-                                <Link to={createPath({ type: 'show', resource: 'sensors', id: index })}>
+                                <Link to={createPath({ type: 'show', resource: 'sensors', id: sensor['id'] })}>
                                     Go to Sensor</Link>
 
                             </Popup>
@@ -79,10 +79,10 @@ export const LocationFieldAreas = ({ rowClick, area, center }) => {
                         eventHandlers={{
                             mouseover: labelFeature,
                             click: () => {
-                                redirect('show', 'areas', index);
+                                redirect('show', 'areas', sensor['id']);
                             }
                         }}
-                        positions={sensor["location"]}
+                        positions={sensor["geom"]['coordinates']}
                     >
                     </Polygon>
                 )
