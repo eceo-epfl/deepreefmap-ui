@@ -39,7 +39,6 @@ export const AreaList = () => {
             <Datagrid rowClick="show">
                 <TextField source="name" />
                 <TextField source="description" />
-                <TextField source="geom" />
                 <ReferenceManyCount
                     label="Sensors"
                     reference="sensors"

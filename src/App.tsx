@@ -10,15 +10,13 @@ import {
     TitlePortal,
 } from 'react-admin';
 import { Route } from 'react-router-dom';
+import simpleRestProvider from 'ra-data-simple-rest';
 import Keycloak, {
     KeycloakConfig,
     KeycloakTokenParsed,
     KeycloakInitOptions,
 } from 'keycloak-js';
-import { keycloakAuthProvider } from 'ra-keycloak';
-
-import CustomRouteLayout from './customRouteLayout';
-import CustomRouteNoLayout from './customRouteNoLayout';
+import { keycloakAuthProvider, httpClient } from 'ra-keycloak';
 import myDataProvider, {
     keyCloakTokenDataProviderBuilder,
 } from './dataProvider';
@@ -64,9 +62,9 @@ const App = () => {
                 authProvider.current = keycloakAuthProvider(keycloakClient, {
                     onPermissions: getPermissions,
                 });
-                dataProvider.current = keyCloakTokenDataProviderBuilder(
-                    myDataProvider,
-                    keycloakClient
+                dataProvider.current = simpleRestProvider(
+                    '/api',
+                    httpClient(keycloakClient)
                 );
                 setKeycloak(keycloakClient);
                 setLoading(false);
