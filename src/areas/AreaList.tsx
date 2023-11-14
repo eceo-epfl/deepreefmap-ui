@@ -8,6 +8,8 @@ import {
     TopToolbar,
     CreateButton,
     ExportButton,
+    ArrayField,
+    Count,
 } from "react-admin";
 import { LocationFieldAreas } from '../Map';
 
@@ -33,12 +35,11 @@ export const AreaList = () => {
         <List actions={<AreaListActions />}>
             <LocationFieldAreas
                 rowClick="show"
-                area={data} />
+                areas={data} />
             <Datagrid rowClick="show">
                 <TextField source="name" />
                 <TextField source="description" />
                 <TextField source="geom" />
-                {/* <Count  /> */}
                 <ReferenceManyCount
                     label="Sensors"
                     reference="sensors"

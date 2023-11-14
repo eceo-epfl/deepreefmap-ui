@@ -49,38 +49,34 @@ export const LocationFieldPoints = ({ source }) => {
     );
 };
 
-export const LocationFieldAreas = ({ rowClick, area }) => {
+export const LocationFieldAreas = ({ rowClick, areas }) => {
     const redirect = useRedirect();
-    const labelFeature = () => {
-        return (
-            <Tooltip>
-                Hello
-            </Tooltip>
-        )
-    };
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
             // Use the bounds of all areas to set the bounds of the map
-            bounds={area.map((sensor) => sensor["geom"]["coordinates"])}
+            bounds={areas.map((area) => area["geom"]["coordinates"])}
             scrollWheelZoom={true} >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {
-                area.map(
-                    (sensor, index) => (
+                areas.map(
+                    (area, index) => (
                         < Polygon
                             key={index}
                             eventHandlers={{
-                                mouseover: labelFeature,
                                 click: () => {
-                                    redirect('show', 'areas', sensor['id']);
+                                    redirect('show', 'areas', area['id']);
                                 }
                             }}
-                            positions={sensor["geom"]['coordinates']}
+                            positions={area["geom"]['coordinates']}
                         >
+                            {console.log(area.name)}
+                            <Tooltip permanent>{area.name}</Tooltip>
+
+
                         </Polygon>
                     )
 
