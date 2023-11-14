@@ -6,6 +6,8 @@ import {
     CustomRoutes,
     AuthProvider,
     DataProvider,
+    AppBar,
+    TitlePortal,
 } from 'react-admin';
 import { Route } from 'react-router-dom';
 import Keycloak, {
@@ -24,8 +26,10 @@ import i18nProvider from './i18nProvider';
 import Layout from './Layout';
 import users from './users';
 import sensors from './sensors';
-import { AreaList, AreaShow } from "./Areas";
+import areas from "./areas";
 import axios from 'axios';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { IconButton } from '@mui/material';
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
@@ -89,11 +93,7 @@ const App = () => {
         >
             {permissions => (
                 <>
-                    <Resource
-                        name="areas"
-                        list={AreaList}
-                        show={AreaShow}
-                    />
+                    <Resource name="areas" {...areas} />
                     <Resource name="sensors" {...sensors} />
                     {permissions ? (
                         <>

@@ -1,0 +1,75 @@
+# Development docker-compose. Assuming the folders of BBF/API are in the folders
+# relative to this repository, point /etc/hosts to soil 127.0.0.1 and connect
+# to http://soil:88
+
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.9.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+    ports:
+      - "88:80"
+      - "8088:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  soil-api:
+    build:
+      context: ../soil-api
+    environment:
+      - DB_HOST=sensormap-db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=psql
+      - DB_NAME=postgres
+      - DB_PREFIX=postgresql+asyncpg
+    labels:
+      - "traefik.http.routers.soil-api.rule=Host(`soil`)"
+      - "traefik.http.services.soil-api.loadbalancer.server.port=8000"
+    depends_on:
+        - sensormap-db
+    volumes:
+      - ../soil-api/app:/app/app
+
+  sensormap-bff:
+    build:
+      context: ../sensormap-bff
+    environment:
+      - KEYCLOAK_CLIENT_ID=sensormap-frontend-local
+      - KEYCLOAK_REALM=SOIL
+      - KEYCLOAK_URL=https://enac-it4r-sso.epfl.ch/
+      - SOIL_API_URL=http://soil-api:8000
+    labels:
+      - "traefik.http.routers.sensormap-bff.rule=Host(`soil`) && PathPrefix(`/api`)"
+      - "traefik.http.services.sensormap-bff.loadbalancer.server.port=8000"
+    volumes:
+      - ../sensormap-bff/app:/app/app
+    entrypoint: ["uvicorn", "--host=0.0.0.0",
+              "--timeout-keep-alive=0", "app.main:app", "--reload"]
+
+  sensormap-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev  # Uses the dockerfile containing yarn dev
+    labels:
+      - "traefik.http.routers.sensormap-ui.rule=Host(`soil`)"
+      - "traefik.http.services.sensormap-ui.loadbalancer.server.port=5173"
+    volumes:
+      - ../sensormap-ui:/app
+
+  sensormap-db:
+    image: postgis/postgis:16-master
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=psql
+      - POSTGRES_DB=postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - sensormap-db-data:/var/lib/postgresql/data
+
+volumes:
+  sensormap-db-data:

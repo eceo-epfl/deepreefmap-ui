@@ -6,7 +6,7 @@ import Keycloak from 'keycloak-js';
 import data from './data';
 import addUploadFeature from './addUploadFeature';
 
-const dataProvider = simpleRestProvider('http://localhost:8080/api');
+const dataProvider = simpleRestProvider('/api');
 
 // const dataProvider = fakeRestProvider(data, true);
 

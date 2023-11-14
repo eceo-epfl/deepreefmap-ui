@@ -1,5 +1,5 @@
-import { useRecordContext, useRedirect, Show, SimpleShowLayout, TextField, useGetManyReference, useCreatePath } from 'react-admin';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Tooltip } from 'react-leaflet';
+import { useRecordContext, useRedirect, Show, SimpleShowLayout, TextField, useGetManyReference, useCreatePath, useEffect } from 'react-admin';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Tooltip, useMap } from 'react-leaflet';
 import { CRS } from 'leaflet';
 import { Link } from 'react-router-dom';
 
@@ -22,8 +22,8 @@ export const LocationFieldPoints = ({ source }) => {
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
-            center={[46.38138404346455, 8.275374887970651]}
-            zoom={17}
+            bounds={data.map((sensor) => sensor["geom"]["coordinates"])}
+            // zoom={17}
             scrollWheelZoom={true}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -52,7 +52,7 @@ export const LocationFieldPoints = ({ source }) => {
     );
 };
 
-export const LocationFieldAreas = ({ rowClick, area, center }) => {
+export const LocationFieldAreas = ({ rowClick, area }) => {
     const redirect = useRedirect();
     const labelFeature = () => {
         return (
@@ -64,31 +64,31 @@ export const LocationFieldAreas = ({ rowClick, area, center }) => {
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
-            center={center}
-            zoom={17}
-
+            // Use the bounds of all areas to set the bounds of the map
+            bounds={area.map((sensor) => sensor["geom"]["coordinates"])}
             scrollWheelZoom={true} >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {
-                area.map((sensor, index) => (
-                    < Polygon
-                        key={index}
-                        eventHandlers={{
-                            mouseover: labelFeature,
-                            click: () => {
-                                redirect('show', 'areas', sensor['id']);
-                            }
-                        }}
-                        positions={sensor["geom"]['coordinates']}
-                    >
-                    </Polygon>
-                )
+                area.map(
+                    (sensor, index) => (
+                        < Polygon
+                            key={index}
+                            eventHandlers={{
+                                mouseover: labelFeature,
+                                click: () => {
+                                    redirect('show', 'areas', sensor['id']);
+                                }
+                            }}
+                            positions={sensor["geom"]['coordinates']}
+                        >
+                        </Polygon>
+                    )
+
                 )
             }
         </MapContainer >
-
     );
 };

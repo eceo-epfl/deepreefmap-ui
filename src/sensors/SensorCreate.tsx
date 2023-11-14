@@ -9,13 +9,15 @@ import {
     TranslatableInputs,
 } from 'react-admin';
 
+
 const SensorCreate = () => (
     <Create redirect="list">
         <SimpleForm>
             <TextField source="id" />
-            <TranslatableInputs locales={['en', 'fr']}>
-                <TextInput source="name" validate={[required()]} />
-            </TranslatableInputs>
+            <TextInput source="name" validate={[required()]} />
+            <TextInput source="description" validate={[required()]} />
+            <TextInput source="latitude" validate={[required()]} />
+            <TextInput source="longitude" validate={[required()]} />
         </SimpleForm>
     </Create>
 );

@@ -14,7 +14,11 @@ import {
     FileField,
     useGetManyReference,
     useRecordContext,
-    ArrayField
+    ArrayField,
+    EditButton,
+    TopToolbar,
+    DeleteButton,
+    usePermissions,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import {
     LineChart,
@@ -27,9 +31,18 @@ import {
     Legend,
 } from 'recharts';
 
+const SensorShowActions = () => {
+    const { permissions } = usePermissions();
+    return (
+        <TopToolbar>
+            {permissions === 'admin' && <><EditButton /><DeleteButton /></>}
+        </TopToolbar>
+    );
+}
+
 
 const SensorShow = () => (
-    <Show>
+    <Show actions={<SensorShowActions />}>
         <SimpleShowLayout>
             <TextField source="id" />
             <TextField source="name" />
@@ -49,7 +62,7 @@ const SensorShow = () => (
                 <TabbedShowLayout.Tab label="summary">
                     <List>
                         <ArrayField source="data">
-                            <Datagrid >
+                            <Datagrid isRowSelectable={false}>
                                 <TextField source="time" />
                                 <TextField source="temperature_1" />
                                 <TextField source="temperature_2" />

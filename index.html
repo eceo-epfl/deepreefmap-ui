@@ -7,7 +7,8 @@
     <meta name="theme-color" content="#000000" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="shortcut icon" href="./favicon.ico" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
 
     <title>sensormap-frontend</title>
     <style>
@@ -102,6 +103,10 @@
             /* Adjust the size of your logo */
             max-width: 10%;
             /* Ensure the logo scales properly */
+        }
+
+        .sr-only {
+            display: none;
         }
 
         @-webkit-keyframes load2 {
