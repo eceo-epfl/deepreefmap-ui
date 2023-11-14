@@ -32,7 +32,7 @@ export const LocationFieldPoints = ({ source }) => {
                         < Marker
                             key={index}
                             position={sensor["geom"]["coordinates"]}
-                        >
+                        ><Tooltip permanent>{sensor["name"]}</Tooltip>
                             <Popup>
                                 <b>{sensor["name"]}</b>
                                 <br />
