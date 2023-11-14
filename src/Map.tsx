@@ -11,8 +11,6 @@ export const LocationFieldPoints = ({ source }) => {
         {
             target: 'area_id',
             id: record.id,
-            // pagination: { page: 1, perPage: 10 },
-            // sort: { field: 'published_at', order: 'DESC' }
         }
     );
 
@@ -22,8 +20,7 @@ export const LocationFieldPoints = ({ source }) => {
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
-            bounds={data.map((sensor) => sensor["geom"]["coordinates"])}
-            // zoom={17}
+            bounds={record["geom"]["coordinates"]}
             scrollWheelZoom={true}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
