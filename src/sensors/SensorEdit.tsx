@@ -28,15 +28,14 @@ const SensorEdit = () => {
                 <TextInput source="description" validate={[required()]} />
                 <NumberInput source="latitude" validate={[required()]} />
                 <NumberInput source="longitude" validate={[required()]} />
-
                 <ReferenceInput source="area_id" reference="areas" >
                     <SelectInput
                         label="Area"
                         source="area_id"
                         optionText="name" />
                 </ReferenceInput>
-                <FileInput source="attachments" multiple={false}>
-                    <FileField source="src" title="title" />
+                <FileInput label="Instrument data" source="instrumentdata" multiple={true}>
+                    <FileField />
                 </FileInput>
             </SimpleForm>
         </Edit>

@@ -1,40 +1,43 @@
-/**
- * For posts update only, convert uploaded image in base 64 and attach it to
- * the `picture` sent property, with `src` and `title` attributes.
- */
+// This allows instrument data to be uploaded as base64 strings
+
 const addUploadCapabilities = dataProvider => ({
     ...dataProvider,
     update: (resource, params) => {
-        if (resource !== 'posts' || !params.data.pictures) {
+        console.log("UPLOADING", resource, params);
+        if (resource !== 'sensors') {
             // fallback to the default implementation
             return dataProvider.update(resource, params);
         }
-        // The posts edition form uses a file upload widget for the pictures field.
-        // Freshly dropped pictures are File objects
-        // and must be converted to base64 strings
-        const newPictures = params.data.pictures.filter(
+        // The sensors update uses a file upload widget for the instrument
+        // data field.
+        // A new data file is an updated version of the existing file.
+        // and are converted to base64 strings to be unwrapped and stored
+        // in the DB
+        console.log("PARAMS", params.data.instrumentdata);
+        const newInstrumentData = params.data.instrumentdata.filter(
             p => p.rawFile instanceof File
         );
-        const formerPictures = params.data.pictures.filter(
-            p => !(p.rawFile instanceof File)
-        );
 
-        return Promise.all(newPictures.map(convertFileToBase64))
-            .then(base64Pictures =>
-                base64Pictures.map(picture64 => ({
-                    src: picture64,
+        return Promise.all(newInstrumentData.map(convertFileToBase64))
+            .then(base64InstrumentData =>
+                base64InstrumentData.map(instrumentdata64 => ({
+                    src: instrumentdata64,
                     title: `${params.data.title}`,
                 }))
             )
-            .then(transformedNewPictures =>
+            .then(transformedNewInstrumentData =>
                 dataProvider.update(resource, {
                     ...params,
                     data: {
-                        ...params.data,
-                        pictures: [
-                            ...transformedNewPictures,
-                            ...formerPictures,
-                        ],
+
+                        id: params.data.id,
+                        name: params.data.name,
+                        description: params.data.description,
+                        geom: params.data.geom,
+                        area_id: params.data.area_id,
+                        latitude: params.data.latitude,
+                        longitude: params.data.longitude,
+                        instrumentdata: transformedNewInstrumentData[0].src,
                     },
                 })
             );

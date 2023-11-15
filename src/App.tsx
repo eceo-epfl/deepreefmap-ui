@@ -23,7 +23,7 @@ import users from './users';
 import sensors from './sensors';
 import areas from "./areas";
 import axios from 'axios';
-
+import addUploadCapabilities from './addUploadFeature'
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -57,9 +57,11 @@ const App = () => {
                 authProvider.current = keycloakAuthProvider(keycloakClient, {
                     onPermissions: getPermissions,
                 });
-                dataProvider.current = simpleRestProvider(
-                    '/api',
-                    httpClient(keycloakClient)
+                dataProvider.current = addUploadCapabilities(
+                    simpleRestProvider(
+                        '/api',
+                        httpClient(keycloakClient)
+                    )
                 );
                 setKeycloak(keycloakClient);
                 setLoading(false);

@@ -69,6 +69,8 @@ const SensorShow = () => (
                         </ArrayField>
                     </List>
                 </TabbedShowLayout.Tab>
+                <TabbedShowLayout.Tab label="Upload instrument data">
+                </TabbedShowLayout.Tab>
 
             </TabbedShowLayout>
         </SimpleShowLayout>
