@@ -10,9 +10,8 @@ import {
     SaveButton,
     useRedirect,
 } from 'react-admin';
-import { Map, TileLayer, FeatureGroup, Circle, MapContainer } from 'react-leaflet';
-import { EditControl } from "react-leaflet-draw"
 import { useState } from 'react';
+import { LocationFieldAreasCreate } from '../maps/Areas';
 
 const AreaCreate = () => {
     const [getCoordinates, setCoordinates] = useState(null);
@@ -27,15 +26,13 @@ const AreaCreate = () => {
                 <SaveButton disabled={props.pristine || invalid_coordinates} />
             </Toolbar>
         )
-    }
-        ;
-    const handleOnSubmit = (e) => {
-        console.log("SUBMISSION", e);
+    };
 
+    const handleOnSubmit = (e) => {
         create('areas', { data: { ...e, geom: getCoordinates } });
         redirect('list', 'areas');
-
     };
+
     const onCreated = (e) => {
         const coordinates = e.layer.getLatLngs();
 
@@ -56,23 +53,7 @@ const AreaCreate = () => {
                 <TextField source="id" />
                 <TextInput source="name" validate={[required()]} />
                 <TextInput source="description" validate={[required()]} />
-                <MapContainer style={{ width: '80%', height: '500px' }}
-                    center={[46.48, 8.13]}
-                    zoom={7}
-                    scrollWheelZoom={true}>
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <FeatureGroup>
-                        <EditControl
-                            position='topright'
-                            onCreated={onCreated}
-                            onDeleted={onDeleted}
-
-                        />
-                    </FeatureGroup>
-                </MapContainer>
+                <LocationFieldAreasCreate onCreated={onCreated} onDeleted={onDeleted} />
             </SimpleForm>
         </Create >
 

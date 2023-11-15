@@ -11,7 +11,7 @@ import {
     ArrayField,
     Count,
 } from "react-admin";
-import { LocationFieldAreas } from '../Map';
+import { LocationFieldAreas } from '../maps/Areas';
 
 
 const AreaListActions = () => {
@@ -30,11 +30,10 @@ export const AreaList = () => {
     );
 
     if (isLoading) return <p>Loading areas...</p>;
-    console.log(data);
+
     return (
         <List actions={<AreaListActions />}>
             <LocationFieldAreas
-                rowClick="show"
                 areas={data} />
             <Datagrid rowClick="show">
                 <TextField source="name" />

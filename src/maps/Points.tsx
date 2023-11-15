@@ -1,6 +1,7 @@
 import { useRecordContext, useRedirect, Show, SimpleShowLayout, TextField, useGetManyReference, useCreatePath, useEffect } from 'react-admin';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Tooltip, useMap } from 'react-leaflet';
 import { CRS } from 'leaflet';
+import L from 'leaflet';
 import { Link } from 'react-router-dom';
 
 export const LocationFieldPoints = ({ source }) => {
@@ -17,14 +18,16 @@ export const LocationFieldPoints = ({ source }) => {
     if (!record) return null;
     if (!data) return null;
 
+
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
             bounds={record["geom"]["coordinates"]}
-            scrollWheelZoom={true}>
+            scrollWheelZoom={true}
+        >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url="https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
             />
             {isLoading ? null :
                 (
@@ -73,7 +76,6 @@ export const LocationFieldAreas = ({ rowClick, areas }) => {
                             }}
                             positions={area["geom"]['coordinates']}
                         >
-                            {console.log(area.name)}
                             <Tooltip permanent>{area.name}</Tooltip>
 
 

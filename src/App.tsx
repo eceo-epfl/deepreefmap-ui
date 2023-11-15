@@ -17,17 +17,12 @@ import Keycloak, {
     KeycloakInitOptions,
 } from 'keycloak-js';
 import { keycloakAuthProvider, httpClient } from 'ra-keycloak';
-import myDataProvider, {
-    keyCloakTokenDataProviderBuilder,
-} from './dataProvider';
 import i18nProvider from './i18nProvider';
 import Layout from './Layout';
 import users from './users';
 import sensors from './sensors';
 import areas from "./areas";
 import axios from 'axios';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { IconButton } from '@mui/material';
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 

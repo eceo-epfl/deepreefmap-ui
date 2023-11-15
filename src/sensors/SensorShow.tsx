@@ -1,18 +1,11 @@
-import * as React from 'react';
 import {
     Show,
     SimpleShowLayout,
     TextField,
-    TranslatableFields,
-    BooleanField,
     ReferenceField,
-    ReferenceManyField,
     TabbedShowLayout,
     Datagrid,
     List,
-    FileInput,
-    FileField,
-    useGetManyReference,
     useRecordContext,
     ArrayField,
     EditButton,
@@ -84,7 +77,6 @@ export default SensorShow;
 export const SensorPlot = ({ source }) => {
     const record = useRecordContext();
     const data = record[source]
-    console.log("Data", data);
 
     return (
         <LineChart

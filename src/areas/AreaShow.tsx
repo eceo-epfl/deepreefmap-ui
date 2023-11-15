@@ -9,7 +9,7 @@ import {
     DeleteButton,
     usePermissions,
 } from "react-admin";
-import { LocationFieldPoints, LocationFieldAreas } from '../Map';
+import { LocationFieldPoints } from '../maps/Points';
 
 
 const AreaTitle = () => {
