@@ -6,7 +6,7 @@ import {
     TextField,
     TextInput,
     required,
-    TranslatableInputs,
+    TranslatableInputs, ReferenceInput, SelectInput
 } from 'react-admin';
 
 
@@ -18,6 +18,13 @@ const SensorCreate = () => (
             <TextInput source="description" validate={[required()]} />
             <TextInput source="latitude" validate={[required()]} />
             <TextInput source="longitude" validate={[required()]} />
+            <ReferenceInput source="area_id" reference="areas" >
+                <SelectInput
+                    label="Area"
+                    source="area_id"
+                    optionText="name" />
+            </ReferenceInput>
+
         </SimpleForm>
     </Create>
 );

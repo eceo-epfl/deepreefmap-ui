@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, Tooltip, useMap } from
 import { CRS } from 'leaflet';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
+import { BaseLayers } from './Layers';
 
 export const LocationFieldPoints = ({ source }) => {
     const record = useRecordContext();
@@ -25,10 +26,7 @@ export const LocationFieldPoints = ({ source }) => {
             bounds={record["geom"]["coordinates"]}
             scrollWheelZoom={true}
         >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
-            />
+            <BaseLayers />
             {isLoading ? null :
                 (
                     data.map((sensor, index) => (
@@ -60,10 +58,7 @@ export const LocationFieldAreas = ({ rowClick, areas }) => {
             // Use the bounds of all areas to set the bounds of the map
             bounds={areas.map((area) => area["geom"]["coordinates"])}
             scrollWheelZoom={true} >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <BaseLayers />
             {
                 areas.map(
                     (area, index) => (

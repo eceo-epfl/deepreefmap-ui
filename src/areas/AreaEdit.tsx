@@ -1,21 +1,21 @@
 /* eslint react/jsx-key: off */
-import * as React from 'react';
-import { useParams } from 'react-router';
 import {
     Edit,
     SimpleForm,
-    TextField,
     TextInput,
-    required,
-    List,
-    Datagrid,
-    ResourceContextProvider,
-    EditButton,
-    TranslatableInputs,
+    required
 } from 'react-admin';
 
 const AreaEdit = () => {
-
+    return (
+        <Edit>
+            <SimpleForm>
+                <TextInput disabled label="Id" source="id" />
+                <TextInput source="name" validate={required()} />
+                <TextInput source="description" validate={required()} />
+            </SimpleForm>
+        </Edit>
+    )
 };
 
 export default AreaEdit;

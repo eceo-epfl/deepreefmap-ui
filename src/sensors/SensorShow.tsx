@@ -2,6 +2,7 @@ import {
     Show,
     SimpleShowLayout,
     TextField,
+    NumberField,
     ReferenceField,
     TabbedShowLayout,
     Datagrid,
@@ -24,6 +25,7 @@ import {
     Legend,
 } from 'recharts';
 
+
 const SensorShowActions = () => {
     const { permissions } = usePermissions();
     return (
@@ -40,7 +42,8 @@ const SensorShow = () => (
             <TextField source="id" />
             <TextField source="name" />
             <TextField source="description" />
-            <TextField source="geom.coordinates" />
+            <NumberField source="latitude" />
+            <NumberField source="longitude" />
             <ReferenceField
                 source='area_id'
                 reference='areas'
@@ -48,6 +51,7 @@ const SensorShow = () => (
             >
                 <TextField source='name' />
             </ReferenceField>
+
             <TabbedShowLayout>
                 <TabbedShowLayout.Tab label="Plot">
                     <SensorPlot source="data" />

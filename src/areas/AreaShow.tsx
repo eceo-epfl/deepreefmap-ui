@@ -23,7 +23,10 @@ const AreaShowActions = () => {
     const { permissions } = usePermissions();
     return (
         <TopToolbar>
-            {permissions === 'admin' && <><EditButton /><DeleteButton /></>}
+            {permissions === 'admin' && <>
+                <EditButton />
+                <DeleteButton />
+            </>}
         </TopToolbar>
     );
 }

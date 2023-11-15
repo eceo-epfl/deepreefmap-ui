@@ -8,11 +8,15 @@ import {
     Polygon,
     Tooltip,
     FeatureGroup,
+
 } from 'react-leaflet';
 import { EditControl } from "react-leaflet-draw"
+import { BaseLayers } from './Layers';
+
 
 export const LocationFieldAreas = ({ areas }) => {
     const redirect = useRedirect();
+
     return (
         <MapContainer
             style={{ width: '100%', height: '700px' }}
@@ -20,10 +24,7 @@ export const LocationFieldAreas = ({ areas }) => {
             bounds={areas.map((area) => area["geom"]["coordinates"])}
             scrollWheelZoom={true}
         >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
-            />
+            <BaseLayers />
             {
                 areas.map(
                     (area, index) => (
@@ -57,10 +58,7 @@ export const LocationFieldAreasCreate = ({ areas, onCreated, onDeleted }) => {
             center={[46.8, 8.13]}
             zoom={8}
             scrollWheelZoom={true}>
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
-            />
+            <BaseLayers />
             <FeatureGroup>
                 <EditControl
                     position='topright'
