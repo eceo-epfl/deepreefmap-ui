@@ -36,6 +36,7 @@ const SensorList = () => {
     return (
         <List disableSyncWithLocation
             actions={<SensorListActions />}
+            perPage={25}
         >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
@@ -43,7 +44,6 @@ const SensorList = () => {
             >
                 <TextField source="name" />
                 <TextField source="description" />
-                {/* <ArrayField source="data"> */}
                 <TextField
                     label="Records"
                     source="data.qty_records"
@@ -61,7 +61,6 @@ const SensorList = () => {
                     sortable={false}
                     showTime={true}
                 />
-                {/* </ArrayField> */}
                 <ReferenceField
                     source='area_id'
                     reference='areas'

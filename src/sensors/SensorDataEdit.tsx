@@ -25,7 +25,7 @@ const SensorDataEdit = () => {
             <SimpleForm>
                 <TextField source="id" />
                 <TextInput source="name" validate={[required()]} />
-                <TextInput source="description" validate={[required()]} />
+                <TextInput source="description" />
                 <NumberInput source="latitude" validate={[required()]} />
                 <NumberInput source="longitude" validate={[required()]} />
                 <ReferenceInput source="area_id" reference="areas" >

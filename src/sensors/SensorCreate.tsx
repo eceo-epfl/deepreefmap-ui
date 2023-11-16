@@ -6,18 +6,22 @@ import {
     TextField,
     TextInput,
     required,
-    TranslatableInputs, ReferenceInput, SelectInput
+    FileInput, FileField, ReferenceInput, SelectInput
 } from 'react-admin';
 
 
 const SensorCreate = () => (
     <Create redirect="list">
         <SimpleForm>
-            <TextField source="id" />
-            <TextInput source="name" validate={[required()]} />
-            <TextInput source="description" validate={[required()]} />
-            <TextInput source="latitude" validate={[required()]} />
-            <TextInput source="longitude" validate={[required()]} />
+            Upload the .gpx file from the GPS:
+            <FileInput
+                label="GPS (.gpx) data"
+                accept=".gpx"
+                source="gpx"
+                multiple={true}>
+                <FileField source="src" title="title" />
+            </FileInput>
+            Define the area to which this sensor belongs:
             <ReferenceInput source="area_id" reference="areas" >
                 <SelectInput
                     label="Area"

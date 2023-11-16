@@ -13,6 +13,7 @@ import {
     TopToolbar,
     DeleteButton,
     usePermissions,
+    DateField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import {
     LineChart,
@@ -35,7 +36,6 @@ const SensorShowActions = () => {
     );
 }
 
-
 const SensorShow = () => (
     <Show actions={<SensorShowActions />}>
         <SimpleShowLayout>
@@ -51,12 +51,29 @@ const SensorShow = () => (
             >
                 <TextField source='name' />
             </ReferenceField>
+            <TextField
+                label="Records"
+                source="data.qty_records"
+                sortable={false}
+            />
+            <DateField
+                label="Data start"
+                source="data.start_date"
+                sortable={false}
+                showTime={true}
+            />
+            <DateField
+                label="Data end"
+                source="data.end_date"
+                sortable={false}
+                showTime={true}
+            />
 
             <TabbedShowLayout>
                 <TabbedShowLayout.Tab label="Plot">
-                    <SensorPlot source="data" />
+                    <SensorPlot source="temperature_plot" />
                 </TabbedShowLayout.Tab>
-                <TabbedShowLayout.Tab label="summary">
+                {/* <TabbedShowLayout.Tab label="summary">
                     <List disableSyncWithLocation>
                         <ArrayField source="data">
                             <Datagrid isRowSelectable={false}>
@@ -68,7 +85,7 @@ const SensorShow = () => (
                             </Datagrid>
                         </ArrayField>
                     </List>
-                </TabbedShowLayout.Tab>
+                </TabbedShowLayout.Tab> */}
                 <TabbedShowLayout.Tab label="Upload instrument data">
 
                 </TabbedShowLayout.Tab>
