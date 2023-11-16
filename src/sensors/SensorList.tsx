@@ -44,6 +44,10 @@ const SensorList = () => {
             >
                 <TextField source="name" />
                 <TextField source="description" />
+                <TextField source="comment" />
+                <NumberField source="elevation" />
+                <NumberField source="latitude" />
+                <NumberField source="longitude" />
                 <TextField
                     label="Records"
                     source="data.qty_records"

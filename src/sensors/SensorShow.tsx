@@ -42,6 +42,8 @@ const SensorShow = () => (
             <TextField source="id" />
             <TextField source="name" />
             <TextField source="description" />
+            <TextField source="comment" />
+            <TextField source="elevation" />
             <NumberField source="latitude" />
             <NumberField source="longitude" />
             <ReferenceField
