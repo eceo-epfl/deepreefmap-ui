@@ -24,6 +24,7 @@ import sensors from './sensors';
 import areas from "./areas";
 import axios from 'axios';
 import addUploadCapabilities from './addUploadFeature'
+import SensorDataShow from './sensors/SensorDataShow';
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -76,7 +77,7 @@ const App = () => {
 
 
     // hide the admin until the dataProvider and authProvider are ready
-    if (!keycloak) return <p>Loading...</p>;
+    if (!keycloak & loading) return <p>Loading...</p>;
 
     return (
         <Admin
@@ -89,7 +90,8 @@ const App = () => {
             {permissions => (
                 <>
                     <Resource name="areas" {...areas} />
-                    <Resource name="sensors" {...sensors} />
+                    <Resource name="sensors" {...sensors.sensor} />
+                    <Resource name="sensordata" {...sensors.sensordata} />
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (

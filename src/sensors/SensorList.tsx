@@ -1,27 +1,25 @@
-import * as React from 'react';
-import { Fragment, useState } from 'react';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-
 import {
     List,
     Datagrid,
     TextField,
-    BulkDeleteWithConfirmButton,
     ReferenceField,
-    useAuthState,
-    Loading,
-    BulkDeleteButton,
     usePermissions,
-    DeleteButton,
     TopToolbar,
     CreateButton,
     ExportButton,
+    NumberField,
+    DateField,
+    ReferenceManyCount,
+    ArrayField,
+    SavedQueriesList,
+    FilterLiveSearch,
+    FilterList,
+    FilterListItem
 } from "react-admin";
+import { Card, CardContent } from '@mui/material';
+import MailIcon from '@mui/icons-material/MailOutline';
+import CategoryIcon from '@mui/icons-material/LocalOffer';
 
-const UserBulkActionButtons = props => (
-    <BulkDeleteWithConfirmButton {...props} />
-);
 const SensorListActions = () => {
     const { permissions } = usePermissions();
     return (
@@ -36,13 +34,34 @@ const SensorList = () => {
     const { permissions } = usePermissions();
 
     return (
-        <List actions={<SensorListActions />}>
+        <List disableSyncWithLocation
+            actions={<SensorListActions />}
+        >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
                 rowClick="show"
             >
                 <TextField source="name" />
                 <TextField source="description" />
+                {/* <ArrayField source="data"> */}
+                <TextField
+                    label="Records"
+                    source="data.qty_records"
+                    sortable={false}
+                />
+                <DateField
+                    label="Data start"
+                    source="data.start_date"
+                    sortable={false}
+                    showTime={true}
+                />
+                <DateField
+                    label="Data end"
+                    source="data.end_date"
+                    sortable={false}
+                    showTime={true}
+                />
+                {/* </ArrayField> */}
                 <ReferenceField
                     source='area_id'
                     reference='areas'

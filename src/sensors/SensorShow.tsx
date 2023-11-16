@@ -57,7 +57,7 @@ const SensorShow = () => (
                     <SensorPlot source="data" />
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="summary">
-                    <List>
+                    <List disableSyncWithLocation>
                         <ArrayField source="data">
                             <Datagrid isRowSelectable={false}>
                                 <TextField source="time" />
@@ -70,6 +70,7 @@ const SensorShow = () => (
                     </List>
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label="Upload instrument data">
+
                 </TabbedShowLayout.Tab>
 
             </TabbedShowLayout>
