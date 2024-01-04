@@ -35,9 +35,11 @@ services:
     build:
       context: ../sensormap-bff
     environment:
-      - KEYCLOAK_CLIENT_ID=sensormap-frontend-local
-      - KEYCLOAK_REALM=SOIL
-      - KEYCLOAK_URL=https://enac-it4r-sso.epfl.ch/
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
+      - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
       - SOIL_API_URL=http://soil-api:8000
     labels:
       - "traefik.http.routers.sensormap-bff.rule=Host(`soil`) && PathPrefix(`/api`)"

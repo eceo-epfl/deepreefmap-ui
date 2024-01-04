@@ -1,4 +1,5 @@
 // This allows instrument data to be uploaded as base64 strings
+import { fetchUtils } from 'ra-core';
 
 const addUploadCapabilities = dataProvider => ({
     ...dataProvider,
@@ -28,7 +29,6 @@ const addUploadCapabilities = dataProvider => ({
                     dataProvider.update(resource, {
                         ...params,
                         data: {
-
                             id: params.data.id,
                             name: params.data.name,
                             description: params.data.description,
@@ -51,13 +51,13 @@ const addUploadCapabilities = dataProvider => ({
     // else if sensor and a create operation, then the instrument data is
     // a .gpx file, which is converted to a base64 string and stored in the
     // gps field
-    create: (resource, params) => {
-        console.log("CREATING: Uploading...", resource, params);
+    createMany: (resource, params) => {
         if (resource === 'sensors') {
             const gpsData = params.data.gpx.filter(
                 p => p.rawFile instanceof File
             );
-
+            console.log("CREATING: Uploading many ...", resource, params);
+            console.log(dataProvider)
             return Promise.all(gpsData.map(convertFileToBase64))
                 .then(base64GPSData =>
                     base64GPSData.map(gps64Data => ({
@@ -66,18 +66,28 @@ const addUploadCapabilities = dataProvider => ({
                     }))
                 )
                 .then(transformedGPSData =>
-                    dataProvider.create(resource, {
-                        data: {
+                    fetchUtils.fetchJson(
+                        `${dataProvider.apiUrl}/sensors/many`, {
+                        method: 'POST',
+                        body: JSON.stringify({
                             area_id: params.data.area_id,
                             gpsx_files: [
                                 ...transformedGPSData
                             ],
-                        },
-                    })
-                );
+                        })
+                    })).then(
+                        responses => (
+                            { data: responses.map(({ json }) => json.id) }
+                        )
+                    );
         } else {
+            console.log(
+                "createMany is not supported and will loop create() instead"
+            );
             // fallback to the default implementation
-            return dataProvider.create(resource, params);
+            for (let i = 0; i < params.data.length; i++) {
+                dataProvider.create(resource, params.data[i]);
+            }
         }
     }
 });

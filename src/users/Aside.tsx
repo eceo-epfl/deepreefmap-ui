@@ -40,14 +40,12 @@ const Aside = () => {
               }}
         >*/
         <Root className={classes.root}>
-            <Typography variant="h6">App Users</Typography>
+            <Typography variant="h6">Admin Users</Typography>
             <Typography variant="body2">
-                Eiusmod adipisicing tempor duis qui. Ullamco aliqua tempor
-                incididunt aliquip aliquip qui ad minim aliqua. Aute et magna
-                quis pariatur irure sunt. Aliquip velit consequat dolore ullamco
-                laborum voluptate cupidatat. Proident minim reprehenderit id
-                dolore elit sit occaecat ad amet tempor esse occaecat enim.
-                Laborum aliqua excepteur qui ipsum in dolor et cillum est.
+                These users have admin access to the portal, allowing them to
+                manage data and users. To remove admin access, delete the user
+                and to add other users as admins, add them by their EPFL
+                username.
             </Typography>
         </Root>
     );

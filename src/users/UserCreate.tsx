@@ -5,86 +5,70 @@ import {
     Create,
     FormTab,
     SaveButton,
+    List,
+    Datagrid,
+    TextField,
     AutocompleteInput,
+    BooleanField,
     TabbedForm,
     TextInput,
     Toolbar,
+    SearchInput,
     required,
+    SelectInput,
     useNotify,
     usePermissions,
+    useDataProvider,
+    useRefresh,
 } from 'react-admin';
 
 import Aside from './Aside';
 
-const UserEditToolbar = ({ permissions, ...props }) => {
-    const notify = useNotify();
-    const { reset } = useFormContext();
-
-    return (
-        <Toolbar {...props}>
-            <SaveButton label="user.action.save_and_show" />
-            {permissions === 'admin' && (
-                <SaveButton
-                    label="user.action.save_and_add"
-                    mutationOptions={{
-                        onSuccess: data => {
-                            notify('ra.notification.created', {
-                                type: 'info',
-                                messageArgs: {
-                                    smart_count: 1,
-                                },
-                            });
-                            reset();
-                        },
-                    }}
-                    type="button"
-                    variant="text"
-                />
-            )}
-        </Toolbar>
-    );
-};
-
-const isValidName = async value =>
-    new Promise<string>(resolve =>
-        setTimeout(() =>
-            resolve(value === 'Admin' ? "Can't be Admin" : undefined)
-        )
-    );
 
 const UserCreate = () => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useDataProvider();
+
     const { permissions } = usePermissions();
+    const handleRowClick = (id, basePath, record) => {
+        // Custom logic for handling row click
+        console.log(`Row with ID ${id} clicked`);
+
+        dataProvider
+            .update('users', { id, data: { admin: true } })
+            .then(() => {
+                notify('User updated successfully');
+                refresh();
+            })
+            .catch((error) => {
+                console.error('Error updating user:', error);
+                notify('Error updating user', 'error');
+            });
+    };
+
+
+    const postFilters = [
+        <SearchInput source="username" placeholder="EPFL Username" alwaysOn />
+    ];
     return (
-        <Create aside={<Aside />} redirect="show">
-            <TabbedForm
-                mode="onBlur"
-                warnWhenUnsavedChanges
-                toolbar={<UserEditToolbar permissions={permissions} />}
+        <Create aside={< Aside />} redirect="show" >
+            <h2>Add admin user</h2>
+            <List
+                filters={postFilters}
+                actions={null}
+                pagination={null}
+                disableSyncWithLocation
             >
-                <FormTab label="user.form.summary" path="">
-                    <TextInput
-                        source="name"
-                        defaultValue="Slim Shady"
-                        autoFocus
-                        validate={[required(), isValidName]}
-                    />
-                </FormTab>
-                {permissions === 'admin' && (
-                    <FormTab label="user.form.security" path="security">
-                        <AutocompleteInput
-                            source="role"
-                            choices={[
-                                { id: '', name: 'None' },
-                                { id: 'admin', name: 'Admin' },
-                                { id: 'user', name: 'User' },
-                                { id: 'user_simple', name: 'UserSimple' },
-                            ]}
-                            validate={[required()]}
-                        />
-                    </FormTab>
-                )}
-            </TabbedForm>
-        </Create>
+                <Datagrid bulkActionButtons={false} rowClick={handleRowClick}>
+                    <TextField source="username" />
+                    <TextField source="firstName" />
+                    <TextField source="lastName" />
+                    <TextField source="email" />
+                    <BooleanField source="admin" />
+                </Datagrid>
+            </List>
+        </Create >
     );
 };
 

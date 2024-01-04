@@ -6,64 +6,67 @@ import * as React from 'react';
 import {
     BulkDeleteWithConfirmButton,
     Datagrid,
-    List,
+    InfiniteList,
     SearchInput,
     SimpleList,
     TextField,
     TextInput,
+    BooleanField,
     usePermissions,
+    useRefresh,
+    useDataProvider,
+    useNotify,
 } from 'react-admin';
 
 import Aside from './Aside';
 import UserEditEmbedded from './UserEditEmbedded';
 export const UserIcon = PeopleIcon;
 
-const getUserFilters = permissions =>
-    [
-        <SearchInput source="q" alwaysOn />,
-        <TextInput source="name" />,
-        permissions === 'admin' ? <TextInput source="role" /> : null,
-    ].filter(filter => filter !== null);
-
-const UserBulkActionButtons = props => (
-    <BulkDeleteWithConfirmButton {...props} />
-);
-
-const rowClick = memoize(permissions => (id, resource, record) => {
-    return permissions === 'admin'
-        ? Promise.resolve('edit')
-        : Promise.resolve('show');
-});
 
 const UserList = () => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useDataProvider();
+
     const { permissions } = usePermissions();
+    const handleRowClick = (id, basePath, record) => {
+        // Custom logic for handling row click
+        console.log(`Row with ID ${id} clicked`);
+
+        // Example: Navigate to a custom route
+        // Update the user-id with an updated value
+        //
+        dataProvider
+            .update('users', { id, data: { admin: false } })
+            .then(() => {
+                notify('User updated successfully');
+                refresh();
+            })
+            .catch((error) => {
+                console.error('Error updating user:', error);
+                notify('Error updating user', 'error');
+            });
+    };
     return (
-        <List
-            filters={getUserFilters(permissions)}
-            filterDefaultValues={{ role: 'user' }}
-            sort={{ field: 'name', order: 'ASC' }}
+        <InfiniteList
+            disableSyncWithLocation
+            filterDefaultValues={{ admin: true }}
             aside={<Aside />}
         >
-            {useMediaQuery((theme: Theme) => theme.breakpoints.down('md')) ? (
-                <SimpleList
-                    primaryText={record => record.name}
-                    secondaryText={record =>
-                        permissions === 'admin' ? record.role : null
-                    }
-                />
-            ) : (
-                <Datagrid
-                    rowClick={rowClick(permissions)}
-                    expand={<UserEditEmbedded />}
-                    bulkActionButtons={<UserBulkActionButtons />}
-                    optimized
-                >
-                    <TextField source="id" />
-                    <TextField source="name" />
-                    {permissions === 'admin' && <TextField source="role" />}
-                </Datagrid>
-            )}
-        </List>
+            <h2>Admin users</h2>
+            <Datagrid
+                bulkActionButtons={false}
+                rowClick={handleRowClick}
+                optimized
+            >
+                <TextField source="username" />
+                <TextField source="firstName" />
+                <TextField source="lastName" />
+                <TextField source="email" />
+                <BooleanField source="admin" />
+            </Datagrid>
+
+        </InfiniteList>
     );
 };
 

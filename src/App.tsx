@@ -16,7 +16,8 @@ import Keycloak, {
     KeycloakTokenParsed,
     KeycloakInitOptions,
 } from 'keycloak-js';
-import { keycloakAuthProvider, httpClient } from 'ra-keycloak';
+import { httpClient } from 'ra-keycloak';
+import { keycloakAuthProvider } from './authProvider';
 import i18nProvider from './i18nProvider';
 import Layout from './Layout';
 import users from './users';
