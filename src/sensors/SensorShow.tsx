@@ -83,7 +83,7 @@ const SensorShow = () => (
                                 <TextField source="temperature_1" />
                                 <TextField source="temperature_2" />
                                 <TextField source="temperature_3" />
-                                <TextField source="soil_moisture_count" />
+                                <TextField source="river_moisture_count" />
                             </Datagrid>
                         </ArrayField>
                     </List>

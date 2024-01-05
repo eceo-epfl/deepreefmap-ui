@@ -1,6 +1,6 @@
 # Development docker-compose. Assuming the folders of BBF/API are in the folders
-# relative to this repository, point /etc/hosts to soil 127.0.0.1 and connect
-# to http://soil:88
+# relative to this repository, point /etc/hosts to river 127.0.0.1 and connect
+# to http://river:88
 
 version: '3.8'
 
@@ -16,50 +16,50 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  soil-api:
+  river-api:
     build:
-      context: ../soil-api
+      context: ../river-api
     environment:
-      - DB_HOST=sensormap-db
+      - DB_HOST=astroriver-db
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=psql
       - DB_NAME=postgres
       - DB_PREFIX=postgresql+asyncpg
     depends_on:
-        - sensormap-db
+        - astroriver-db
     volumes:
-      - ../soil-api/app:/app/app
+      - ../river-api/app:/app/app
 
-  sensormap-bff:
+  astroriver-bff:
     build:
-      context: ../sensormap-bff
+      context: ../astroriver-bff
     environment:
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
       - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
       - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_URL=${KEYCLOAK_URL}
-      - SOIL_API_URL=http://soil-api:8000
+      - RIVER_API_URL=http://river-api:8000
     labels:
-      - "traefik.http.routers.sensormap-bff.rule=Host(`soil`) && PathPrefix(`/api`)"
-      - "traefik.http.services.sensormap-bff.loadbalancer.server.port=8000"
+      - "traefik.http.routers.astroriver-bff.rule=Host(`river`) && PathPrefix(`/api`)"
+      - "traefik.http.services.astroriver-bff.loadbalancer.server.port=8000"
     volumes:
-      - ../sensormap-bff/app:/app/app
+      - ../astroriver-bff/app:/app/app
     entrypoint: ["uvicorn", "--host=0.0.0.0",
               "--timeout-keep-alive=0", "app.main:app", "--reload"]
 
-  sensormap-ui:
+  astroriver-ui:
     build:
       context: .
       dockerfile: Dockerfile.dev  # Uses the dockerfile containing yarn dev
     labels:
-      - "traefik.http.routers.sensormap-ui.rule=Host(`soil`)"
-      - "traefik.http.services.sensormap-ui.loadbalancer.server.port=5173"
+      - "traefik.http.routers.astroriver-ui.rule=Host(`river`)"
+      - "traefik.http.services.astroriver-ui.loadbalancer.server.port=5173"
     volumes:
-      - ../sensormap-ui:/app
+      - ../astroriver-ui:/app
 
-  sensormap-db:
+  astroriver-db:
     image: postgis/postgis:16-master
     environment:
       - POSTGRES_USER=postgres
@@ -68,7 +68,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - sensormap-db-data:/var/lib/postgresql/data
+      - astroriver-db-data:/var/lib/postgresql/data
 
 volumes:
-  sensormap-db-data:
+  astroriver-db-data:

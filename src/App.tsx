@@ -22,7 +22,7 @@ import i18nProvider from './i18nProvider';
 import Layout from './Layout';
 import users from './users';
 import sensors from './sensors';
-import areas from "./areas";
+import data from "./data";
 import axios from 'axios';
 import addUploadCapabilities from './addUploadFeature'
 import SensorDataShow from './sensors/SensorDataShow';
@@ -85,14 +85,15 @@ const App = () => {
             authProvider={authProvider.current}
             dataProvider={dataProvider.current}
             i18nProvider={i18nProvider}
-            title="SOIL Sensor Map"
+            title="AstroRiver"
             layout={Layout}
         >
             {permissions => (
                 <>
-                    <Resource name="areas" {...areas} />
-                    <Resource name="sensors" {...sensors.sensor} />
-                    <Resource name="sensordata" {...sensors.sensordata} />
+                    <Resource name="data" {...data} />
+                    <Resource name="sensorstatus" {...sensors.status} />
+                    <Resource name="sensorparameters" {...sensors.parameters} />
+                    <Resource name="astrocast" {...sensors.astrocast} />
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (

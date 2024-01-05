@@ -5,22 +5,42 @@ import SensorShow from './SensorShow';
 import SensorDataCreate from './SensorDataCreate';
 import SensorDataEdit from './SensorDataEdit';
 import SensorDataShow from './SensorDataShow';
+import NothingList from '../NothingToSee';
 
-const sensor = {
-    create: SensorCreate,
-    edit: SensorEdit,
-    list: SensorList,
-    show: SensorShow,
+const status = {
+    // create: SensorCreate,
+    // edit: SensorEdit,
+    list: NothingList,
+    // show: SensorShow,
+    options: {
+        label: 'Sensor Status',
+    },
 };
 
 
-const sensordata = {
-    create: SensorDataCreate,
-    edit: SensorDataEdit,
-    show: SensorDataShow,
+const parameters = {
+    // create: SensorDataCreate,
+    // edit: SensorDataEdit,
+    // show: SensorDataShow,
+    list: NothingList,
+    options: {
+        label: 'Sensor Parameters',
+    },
 };
+
+const astrocast = {
+    // create: SensorDataCreate,
+    // edit: SensorDataEdit,
+    // show: SensorDataShow,
+    list: NothingList,
+    options: {
+        label: 'Astrocast',
+    },
+};
+
 
 export default {
-    sensor,
-    sensordata,
+    status: status,
+    parameters: parameters,
+    astrocast: astrocast,
 };
