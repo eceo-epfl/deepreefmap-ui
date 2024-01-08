@@ -97,9 +97,6 @@ const SensorShow = () => (
     </Show >
 );
 
-export default SensorShow;
-
-
 export const SensorPlot = ({ source }) => {
     const record = useRecordContext();
     const data = record[source]
@@ -137,3 +134,5 @@ export const SensorPlot = ({ source }) => {
     );
 
 };
+
+export default SensorShow;

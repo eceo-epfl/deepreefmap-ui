@@ -1,20 +1,77 @@
-// In your resource file (e.g., posts.js)
-import React from 'react';
-import { List, Datagrid, TextField, SimpleList } from 'react-admin';
+import {
+    List,
+    Datagrid,
+    TextField,
+    ReferenceField,
+    usePermissions,
+    TopToolbar,
+    CreateButton,
+    ExportButton,
+    NumberField,
+    DateField,
+    ReferenceManyCount,
+    ArrayField,
+    SavedQueriesList,
+    FilterLiveSearch,
+    FilterList,
+    FilterListItem,
+    BooleanField
+} from "react-admin";
+import { Card, CardContent } from '@mui/material';
+import MailIcon from '@mui/icons-material/MailOutline';
+import CategoryIcon from '@mui/icons-material/LocalOffer';
+import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
+const SensorListActions = () => {
+    const { permissions } = usePermissions();
+    return (
+        <TopToolbar>
+            {permissions === 'admin' && <><CreateButton /></>}
+            <ExportButton />
+        </TopToolbar>
+    );
+}
 
-const CustomEmptyList = () => (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-        Nothing here just yet.
-    </div>
-);
+const SensorList = () => {
+    const { permissions } = usePermissions();
 
-export const SensorList = (props) => (
-    <List {...props} empty={<CustomEmptyList />}>
-        {/* Your list fields go here */}
-        <Datagrid>
-            <TextField source="id" />
-            <TextField source="title" />
-            {/* Add other fields as needed */}
-        </Datagrid>
-    </List>
-);
+    // Set to green icon
+    const TrueIcon = () => <Brightness1TwoToneIcon color="success" />;
+    // Set to red icon
+    const FalseIcon = () => <Brightness1TwoToneIcon color="error" />; TrueIcon
+
+    return (
+        <List disableSyncWithLocation
+            actions={<SensorListActions />}
+            perPage={25}
+        >
+            <Datagrid
+                bulkActionButtons={permissions === 'admin' ? true : false}
+                rowClick="show"
+            >
+                <TextField source="name" />
+                <TextField source="description" />
+                <BooleanField source="healthy" label="Health" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
+                <NumberField source="temperature_1" />
+                <NumberField source="temperature_2" />
+                <TextField
+                    label="Records"
+                    source="data.qty_records"
+                    sortable={false}
+                />
+                <NumberField
+                    source="battery_voltage"
+                    sortable={false}
+                />
+                <DateField
+                    label="Data end"
+                    source="last_data_utc"
+                    sortable={false}
+                    showTime={true}
+                />
+            </Datagrid>
+        </List >
+
+    )
+};
+
+export default SensorList;

@@ -7,11 +7,11 @@ import SensorDataEdit from './SensorDataEdit';
 import SensorDataShow from './SensorDataShow';
 import NothingList from '../NothingToSee';
 
-const status = {
-    // create: SensorCreate,
-    // edit: SensorEdit,
-    list: NothingList,
-    // show: SensorShow,
+const sensor = {
+    create: SensorCreate,
+    edit: SensorEdit,
+    list: SensorList,
+    show: SensorShow,
     options: {
         label: 'Sensor Status',
     },
@@ -40,7 +40,7 @@ const astrocast = {
 
 
 export default {
-    status: status,
+    sensor: sensor,
     parameters: parameters,
     astrocast: astrocast,
 };
