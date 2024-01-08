@@ -90,9 +90,9 @@ const App = () => {
         >
             {permissions => (
                 <>
-                    <Resource name="data" {...data} />
                     <Resource name="sensors" {...sensors.sensor} />
                     <Resource name="sensorparameters" {...sensors.parameters} />
+                    <Resource name="data" {...data} />
                     <Resource name="astrocast" {...sensors.astrocast} />
                     {permissions ? (
                         <>
