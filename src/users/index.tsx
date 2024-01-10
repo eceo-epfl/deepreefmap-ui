@@ -7,8 +7,5 @@ import UserShow from './UserShow';
 export default {
     list: UserList,
     create: UserCreate,
-    // edit: UserEdit,
-    // show: UserShow,
     icon: PeopleIcon,
-    // recordRepresentation: record => `${record.name} (${record.role})`,
 };

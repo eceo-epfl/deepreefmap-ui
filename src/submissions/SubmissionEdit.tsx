@@ -19,7 +19,7 @@ import {
     SelectInput,
 } from 'react-admin';
 
-const SensorDataEdit = () => {
+const SubmissionEdit = () => {
     return (
         <Edit>
             <SimpleForm>
@@ -42,4 +42,4 @@ const SensorDataEdit = () => {
     )
 };
 
-export default SensorDataEdit;
+export default SubmissionEdit;

@@ -1,4 +1,4 @@
-# astroriver-frontend
+# deepreefmap-frontend
 
 ## Installation
 

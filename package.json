@@ -1,5 +1,5 @@
 {
-  "name": "astroriver-frontend",
+  "name": "deepreefmap-frontend",
   "private": true,
   "scripts": {
     "dev": "vite",

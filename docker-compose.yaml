@@ -1,6 +1,6 @@
 # Development docker-compose. Assuming the folders of BBF/API are in the folders
-# relative to this repository, point /etc/hosts to river 127.0.0.1 and connect
-# to http://river:88
+# relative to this repository, point /etc/hosts to eceo 127.0.0.1 and connect
+# to http://eceo:88
 
 version: '3.8'
 
@@ -16,50 +16,50 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  river-api:
+  eceo-api:
     build:
-      context: ../river-api
+      context: ../eceo-api
     environment:
-      - DB_HOST=astroriver-db
+      - DB_HOST=deepreefmap-db
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=psql
       - DB_NAME=postgres
       - DB_PREFIX=postgresql+asyncpg
     depends_on:
-        - astroriver-db
+        - deepreefmap-db
     volumes:
-      - ../river-api/app:/app/app
+      - ../eceo-api/app:/app/app
 
-  astroriver-bff:
+  deepreefmap-bff:
     build:
-      context: ../astroriver-bff
+      context: ../deepreefmap-bff
     environment:
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
       - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
       - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_URL=${KEYCLOAK_URL}
-      - RIVER_API_URL=http://river-api:8000
+      - ECEO_API_URL=http://eceo-api:8000
     labels:
-      - "traefik.http.routers.astroriver-bff.rule=Host(`river`) && PathPrefix(`/api`)"
-      - "traefik.http.services.astroriver-bff.loadbalancer.server.port=8000"
+      - "traefik.http.routers.deepreefmap-bff.rule=Host(`eceo`) && PathPrefix(`/api`)"
+      - "traefik.http.services.deepreefmap-bff.loadbalancer.server.port=8000"
     volumes:
-      - ../astroriver-bff/app:/app/app
+      - ../deepreefmap-bff/app:/app/app
     entrypoint: ["uvicorn", "--host=0.0.0.0",
               "--timeout-keep-alive=0", "app.main:app", "--reload"]
 
-  astroriver-ui:
+  deepreefmap-ui:
     build:
       context: .
       dockerfile: Dockerfile.dev  # Uses the dockerfile containing yarn dev
     labels:
-      - "traefik.http.routers.astroriver-ui.rule=Host(`river`)"
-      - "traefik.http.services.astroriver-ui.loadbalancer.server.port=5173"
+      - "traefik.http.routers.deepreefmap-ui.rule=Host(`eceo`)"
+      - "traefik.http.services.deepreefmap-ui.loadbalancer.server.port=5173"
     volumes:
-      - ../astroriver-ui:/app
+      - ../deepreefmap-ui:/app
 
-  astroriver-db:
+  deepreefmap-db:
     image: postgis/postgis:16-master
     environment:
       - POSTGRES_USER=postgres
@@ -68,7 +68,7 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - astroriver-db-data:/var/lib/postgresql/data
+      - deepreefmap-db-data:/var/lib/postgresql/data
 
 volumes:
-  astroriver-db-data:
+  deepreefmap-db-data:

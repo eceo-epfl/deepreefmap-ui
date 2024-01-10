@@ -3,11 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
     Admin,
     Resource,
-    CustomRoutes,
     AuthProvider,
     DataProvider,
-    AppBar,
-    TitlePortal,
 } from 'react-admin';
 import { Route } from 'react-router-dom';
 import simpleRestProvider from 'ra-data-simple-rest';
@@ -18,14 +15,12 @@ import Keycloak, {
 } from 'keycloak-js';
 import { httpClient } from 'ra-keycloak';
 import { keycloakAuthProvider } from './authProvider';
-import i18nProvider from './i18nProvider';
 import Layout from './Layout';
 import users from './users';
-import sensors from './sensors';
-import data from "./data";
+import submissions from './submissions';
 import axios from 'axios';
 import addUploadCapabilities from './addUploadFeature'
-import SensorDataShow from './sensors/SensorDataShow';
+
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -76,7 +71,6 @@ const App = () => {
         fetchData();
     }, []);
 
-
     // hide the admin until the dataProvider and authProvider are ready
     if (!keycloak & loading) return <p>Loading...</p>;
 
@@ -84,16 +78,12 @@ const App = () => {
         <Admin
             authProvider={authProvider.current}
             dataProvider={dataProvider.current}
-            i18nProvider={i18nProvider}
             title="AstroRiver"
             layout={Layout}
         >
             {permissions => (
                 <>
-                    <Resource name="sensors" {...sensors.sensor} />
-                    <Resource name="sensorparameters" {...sensors.parameters} />
-                    <Resource name="data" {...data} />
-                    <Resource name="astrocast" {...sensors.astrocast} />
+                    <Resource name="submissions" {...submissions} />
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (

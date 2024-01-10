@@ -21,7 +21,7 @@ import { Card, CardContent } from '@mui/material';
 import MailIcon from '@mui/icons-material/MailOutline';
 import CategoryIcon from '@mui/icons-material/LocalOffer';
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
-const SensorListActions = () => {
+const SubmissionListActions = () => {
     const { permissions } = usePermissions();
     return (
         <TopToolbar>
@@ -31,7 +31,7 @@ const SensorListActions = () => {
     );
 }
 
-const SensorList = () => {
+const SubmissionList = () => {
     const { permissions } = usePermissions();
 
     // Set to green icon
@@ -41,7 +41,7 @@ const SensorList = () => {
 
     return (
         <List disableSyncWithLocation
-            actions={<SensorListActions />}
+            actions={<SubmissionListActions />}
             perPage={25}
         >
             <Datagrid
@@ -50,21 +50,21 @@ const SensorList = () => {
             >
                 <TextField source="name" />
                 <TextField source="description" />
-                <BooleanField source="healthy" label="Health" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
-                <NumberField source="temperature_1" />
-                <NumberField source="temperature_2" />
-                <TextField
-                    label="Records"
-                    source="data.qty_records"
+                <BooleanField source="processing_finished" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
+                <BooleanField source="processing_successful" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
+                <NumberField
+                    label="Duration (s)"
+                    source="duration_seconds"
                     sortable={false}
                 />
                 <NumberField
-                    source="battery_voltage"
+                    label="Data size (MB)"
+                    source="data_size_mb"
                     sortable={false}
                 />
                 <DateField
-                    label="Data end"
-                    source="last_data_utc"
+                    label="Submitted at"
+                    source="submitted_at_utc"
                     sortable={false}
                     showTime={true}
                 />
@@ -74,4 +74,4 @@ const SensorList = () => {
     )
 };
 
-export default SensorList;
+export default SubmissionList;
