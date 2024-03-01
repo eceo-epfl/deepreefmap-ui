@@ -48,7 +48,7 @@ const SubmissionList = () => {
                 bulkActionButtons={permissions === 'admin' ? true : false}
                 rowClick="show"
             >
-                <TextField source="name" />
+                <TextField source="id" />
                 <TextField source="description" />
                 <BooleanField source="processing_finished" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
                 <BooleanField source="processing_successful" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
