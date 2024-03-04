@@ -17,7 +17,7 @@ const SubmissionCreate = () => {
                 Upload the collected video:
                 <FileInput
                     label="Video data"
-                    source="video"
+                    source="files"
                     multiple={true}>
                     <FileField source="src" title="title" />
                 </FileInput>

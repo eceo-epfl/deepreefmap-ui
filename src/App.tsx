@@ -7,7 +7,8 @@ import {
     DataProvider,
 } from 'react-admin';
 import { Route } from 'react-router-dom';
-import simpleRestProvider from 'ra-data-simple-rest';
+import simpleRestProvider from './dataProvider/index'
+
 import Keycloak, {
     KeycloakConfig,
     KeycloakTokenParsed,
@@ -19,7 +20,6 @@ import Layout from './Layout';
 import users from './users';
 import submissions from './submissions';
 import axios from 'axios';
-import addUploadCapabilities from './addUploadFeature'
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
@@ -33,8 +33,8 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
     return false;
 };
 
-
-const apiUrl = '/api/config/keycloak';
+const apiKeycloakConfigUrl = '/api/config/keycloak';
+export const apiUrl = '/api';
 
 const App = () => {
     const [keycloak, setKeycloak] = useState();
@@ -45,7 +45,7 @@ const App = () => {
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get(apiUrl);
+                const response = await axios.get(apiKeycloakConfigUrl);
                 const keycloakConfig = response.data;
 
                 // Initialize Keycloak here, once you have the configuration
@@ -54,11 +54,9 @@ const App = () => {
                 authProvider.current = keycloakAuthProvider(keycloakClient, {
                     onPermissions: getPermissions,
                 });
-                dataProvider.current = addUploadCapabilities(
-                    simpleRestProvider(
-                        '/api',
-                        httpClient(keycloakClient)
-                    )
+                dataProvider.current = simpleRestProvider(
+                    apiUrl,
+                    httpClient(keycloakClient)
                 );
                 setKeycloak(keycloakClient);
                 setLoading(false);
