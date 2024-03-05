@@ -15,7 +15,8 @@ import {
     FilterLiveSearch,
     FilterList,
     FilterListItem,
-    BooleanField
+    BooleanField,
+    Count
 } from "react-admin";
 import { Card, CardContent } from '@mui/material';
 import MailIcon from '@mui/icons-material/MailOutline';
@@ -43,6 +44,8 @@ const SubmissionList = () => {
         <List disableSyncWithLocation
             actions={<SubmissionListActions />}
             perPage={25}
+            sort={{ field: 'time_added_utc', order: 'DESC' }}
+
         >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
@@ -50,27 +53,26 @@ const SubmissionList = () => {
             >
                 <TextField source="id" />
                 <TextField source="description" />
-                <BooleanField source="processing_finished" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
-                <BooleanField source="processing_successful" TrueIcon={TrueIcon} FalseIcon={FalseIcon} />
-                <NumberField
-                    label="Duration (s)"
-                    source="duration_seconds"
-                    sortable={false}
+                <Count source='inputs' label="Uploaded files" />
+                <BooleanField
+                    source="processing_completed_successfully"
+                    label="Processing completed"
+                    TrueIcon={TrueIcon}
+                    FalseIcon={FalseIcon}
                 />
-                <NumberField
-                    label="Data size (MB)"
-                    source="data_size_mb"
-                    sortable={false}
+                <BooleanField
+                    source="processing_has_started"
+                    label="Processing running"
+                    TrueIcon={TrueIcon}
+                    FalseIcon={FalseIcon}
                 />
                 <DateField
                     label="Submitted at"
-                    source="submitted_at_utc"
-                    sortable={false}
+                    source="time_added_utc"
                     showTime={true}
                 />
             </Datagrid>
         </List >
-
     )
 };
 

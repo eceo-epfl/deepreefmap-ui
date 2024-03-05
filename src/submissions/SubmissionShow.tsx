@@ -29,20 +29,18 @@ const SubmissionShow = (props) => (
             <TextField source="id" />
             <TextField source="name" />
             <TextField source="description" />
-            <BooleanField source="processing_finished" label="Processing Finished" />
-            <BooleanField source="processing_successful" label="Processing Successful" />
             <DateField
                 label="Submitted at"
-                source="submitted_at_utc"
+                source="time_added_utc"
                 sortable={false}
                 showTime={true}
             />
-            <TextField source="comment" />
-
-            <ArrayField source="inputs">
+            <ArrayField source="inputs" label="File Inputs">
                 <Datagrid bulkActionButtons={false}>
-                    <TextField source="Key" />
-                    <NumberField source="Size" label="Size (bytes)" />
+                    <TextField source="filename" />
+                    <NumberField source="size_bytes" label="Size (bytes)" />
+                    <DateField source="last_updated" showTime={true} />
+                    <TextField source="hash_md5sum" label="MD5 Hash" />
                 </Datagrid>
             </ArrayField>
         </SimpleShowLayout>
