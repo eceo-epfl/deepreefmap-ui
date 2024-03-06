@@ -1,6 +1,7 @@
 import { AuthProvider } from 'react-admin';
 import Keycloak, { KeycloakTokenParsed } from 'keycloak-js';
 import jwt_decode from 'jwt-decode';
+import { getKeycloakHeaders } from 'ra-keycloak';
 
 export type PermissionsFunction = (decoded: KeycloakTokenParsed) => any;
 
@@ -105,4 +106,7 @@ export const keycloakAuthProvider = (
         }
         return Promise.reject('Failed to get identity.');
     },
+    getToken() {
+        return client.token;
+    }
 });

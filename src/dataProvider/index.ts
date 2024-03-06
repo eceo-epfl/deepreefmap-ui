@@ -199,4 +199,13 @@ export default (
         ).then(responses => ({
             data: responses.map(({ json }) => json.id),
         })),
+
+    uploadVideo: (resource, params) => {
+        const formData = new FormData();
+        formData.append('files', params.data.files[0].rawFile);
+        return httpClient(`${apiUrl}/${resource}`, {
+            method: 'POST',
+            body: formData,
+        }).then(({ json }) => ({ data: json }));
+    }
 });
