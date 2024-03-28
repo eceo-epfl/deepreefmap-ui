@@ -7,10 +7,12 @@ import {
     useDataProvider,
     Toolbar,
     SaveButton,
+    useRedirect,
 } from 'react-admin';
 import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from 'react-dropzone-uploader'
 import { useState } from 'react';
+import { useEffect } from 'react';
 
 const MySaveToolbar = () => (
     <Toolbar>
@@ -18,7 +20,8 @@ const MySaveToolbar = () => (
     </Toolbar>
 );
 const SubmissionCreate = () => {
-    const [create, { isLoading, error }] = useCreate();
+    const [create, { data, isLoading, error }] = useCreate();
+    const redirect = useRedirect();
     const MyUploader = () => {
         const auth = useAuthProvider();
         const dataProvider = useDataProvider();
@@ -30,7 +33,7 @@ const SubmissionCreate = () => {
         // specify upload params and url for your files
         const getUploadParams = ({ file, meta }) => {
             const body = new FormData()
-            body.append('files', file)
+            body.append('file', file)
             return {
                 url: '/api/objects',
                 headers: { Authorization: `Bearer ${token}` },
@@ -68,14 +71,16 @@ const SubmissionCreate = () => {
                 console.log("UPLOADED FILES", uploadedFiles);
             }
         }
+        useEffect(() => {
+            // Check if data object has ID after submission and then perform
+            // a redirect to the show page
+            if (data && data.id) {
+                redirect('show', 'submissions', data.id);
+            }
+        }, [data]);
 
         // receives array of files that are done uploading when submit button is clicked
         const handleSubmit = (files, allFiles) => {
-
-            console.log("files", files);
-            console.log("allFiles", allFiles);
-            console.log("uploadedFiles", uploadedFiles);
-            // const data = ;
             create('submissions', { data: { inputs: uploadedFiles } });
         }
 
@@ -88,11 +93,11 @@ const SubmissionCreate = () => {
             />
         )
     }
+
     return (
         <Create redirect="list">
-            <SimpleForm toolbar={false}>
+            <SimpleForm toolbar={false} >
                 Upload the collected video:
-
                 <MyUploader />
             </SimpleForm>
         </Create>

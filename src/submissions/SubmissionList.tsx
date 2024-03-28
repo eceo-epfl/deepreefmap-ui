@@ -28,8 +28,7 @@ import CategoryIcon from '@mui/icons-material/LocalOffer';
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
 
 // Define some icons for status
-const TrueIcon = () => <Brightness1TwoToneIcon color="success" />;
-const FalseIcon = () => <Brightness1TwoToneIcon color="error" />;
+
 
 export const RunnerStatus = ({ records, resource }) => {
     const dataProvider = useDataProvider();
@@ -50,7 +49,7 @@ export const RunnerStatus = ({ records, resource }) => {
     return (
         <Card>
             <b>RCP</b><br />
-            Status: {systemStatus ? <TrueIcon /> : <FalseIcon />}<br />
+            Status: {systemStatus.toString()}<br />
             Jobs: {jobCount}
         </Card >
     );
@@ -69,7 +68,8 @@ const SubmissionListActions = () => {
 
 const SubmissionList = () => {
     const { permissions } = usePermissions();
-
+    const TrueIcon = () => <Brightness1TwoToneIcon color="success" />;
+    const FalseIcon = () => <Brightness1TwoToneIcon color="error" />;
 
 
     return (
@@ -80,33 +80,34 @@ const SubmissionList = () => {
                 actions={<SubmissionListActions />}
                 perPage={25}
                 sort={{ field: 'time_added_utc', order: 'DESC' }}
-
             >
-                <Datagrid
-                    bulkActionButtons={permissions === 'admin' ? true : false}
-                    rowClick="show"
-                >
-                    <TextField source="id" />
-                    <TextField source="description" />
-                    <FunctionField render={record => `${record?.inputs?.length ?? ""}`} label="Uploaded files" />
-                    <BooleanField
-                        source="processing_completed_successfully"
-                        label="Processing completed"
-                        TrueIcon={TrueIcon}
-                        FalseIcon={FalseIcon}
-                    />
-                    <BooleanField
-                        source="processing_has_started"
-                        label="Processing running"
-                        TrueIcon={TrueIcon}
-                        FalseIcon={FalseIcon}
-                    />
-                    <DateField
-                        label="Submitted at"
-                        source="time_added_utc"
-                        showTime={true}
-                    />
-                </Datagrid>
+                <>
+                    <Datagrid
+                        bulkActionButtons={permissions === 'admin' ? true : false}
+                        rowClick="show"
+                    >
+                        <TextField source="id" />
+                        <TextField source="description" />
+                        <FunctionField render={record => `${record?.inputs?.length ?? ""}`} label="Uploaded files" />
+                        <BooleanField
+                            source="processing_completed_successfully"
+                            label="Processing completed"
+                            TrueIcon={TrueIcon}
+                            FalseIcon={FalseIcon}
+                        />
+                        <BooleanField
+                            source="processing_has_started"
+                            label="Processing running"
+                            TrueIcon={TrueIcon}
+                            FalseIcon={FalseIcon}
+                        />
+                        <DateField
+                            label="Submitted at"
+                            source="time_added_utc"
+                            showTime={true}
+                        />
+                    </Datagrid>
+                </>
             </List >
 
         </Stack >

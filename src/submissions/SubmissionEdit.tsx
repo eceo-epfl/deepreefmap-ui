@@ -23,20 +23,9 @@ const SubmissionEdit = () => {
     return (
         <Edit>
             <SimpleForm>
-                <TextField source="id" />
-                <TextInput source="name" validate={[required()]} />
+                <TextInput source="id" disabled />
+                <TextInput source="name" />
                 <TextInput source="description" />
-                <NumberInput source="latitude" validate={[required()]} />
-                <NumberInput source="longitude" validate={[required()]} />
-                <ReferenceInput source="area_id" reference="areas" >
-                    <SelectInput
-                        label="Area"
-                        source="area_id"
-                        optionText="name" />
-                </ReferenceInput>
-                <FileInput label="Instrument data" source="instrumentdata" multiple={true}>
-                    <FileField />
-                </FileInput>
             </SimpleForm>
         </Edit>
     )
