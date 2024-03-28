@@ -58,8 +58,7 @@ const SubmissionShow = (props) => (
             <ArrayField source="run_status" label="Job run status">
                 <Datagrid bulkActionButtons={false}>
                     <DateField source="time_started" showTime={true} />
-                    <TextField source="submission_id" />
-
+                    <TextField source="submission_id" label="Submission ID" />
                     <TextField source="status" />
                 </Datagrid>
             </ArrayField>
