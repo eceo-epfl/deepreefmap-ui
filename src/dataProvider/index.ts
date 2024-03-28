@@ -192,4 +192,9 @@ export default (
         // Return the promise with the JSON array
         return httpClient(url).then(({ json }) => ({ data: json }));
     },
+    executeKubernetesJob: (id) => {
+        const url = `${apiUrl}/submissions/${id}/execute`;
+        // Return the promise with the JSON array
+        return httpClient(url, {method: "POST"}).then(({ json }) => ({ data: json }));
+    }
 });

@@ -26,31 +26,53 @@ import { Card, CardContent, Stack } from '@mui/material';
 import MailIcon from '@mui/icons-material/MailOutline';
 import CategoryIcon from '@mui/icons-material/LocalOffer';
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
-
+import { useEffect, useState } from "react";
 // Define some icons for status
 
 
 export const RunnerStatus = ({ records, resource }) => {
     const dataProvider = useDataProvider();
-    var systemStatus = null;
-    var jobCount = null;
 
-    try {
+    const [systemStatus, setSystemStatus] = useState("Offline");
+    const [jobs, setJobs] = useState([]);
+    const [runningJobCount, setRunningJobCount] = useState(null);
+    const [jobCount, setJobCount] = useState(null);
+    useEffect(() => {
+        const fetchData = async () => {
+            const jobsData = await dataProvider.getKubernetesJobs();
+            setJobs(jobsData);
+            setSystemStatus("Online");
+        };
 
-        const jobs = dataProvider.getKubernetesJobs();
-        jobCount = jobs.data?.length ?? 0;
-        systemStatus = true;
+        fetchData();
 
-    } catch (error) {
-        console.log("Error fetching jobs", error);
-        systemStatus = false;
-    }
+    }, [dataProvider]);
+
+    useEffect(() => {
+        // Check jobs.data array for amount that have status.phase "Running"
+        // and count them
+        var runningJobs = 0;
+        var allJobCount = 0;
+        jobs.data?.map((job) => {
+            if (job.status.phase === "Pending"
+                || job.status.phase === "Running"
+                || job.status.phase === "ContainerCreating"
+                || job.status.phase === "Succeeded"
+                || job.status.phase === "Running"
+            ) {
+                runningJobs++;
+            }
+        });
+        setRunningJobCount(runningJobs);
+        setJobCount(jobs.data?.length ?? 0);
+    }, [jobs]);
+
 
     return (
         <Card>
             <b>RCP</b><br />
-            Status: {systemStatus.toString()}<br />
-            Jobs: {jobCount}
+            Status: {systemStatus}<br />
+            Running jobs: {runningJobCount} ({jobCount} total)
         </Card >
     );
 };

@@ -54,27 +54,14 @@ const SubmissionList = () => {
             actions={<SubmissionListActions />}
             perPage={25}
             sort={{ field: 'time_added_utc', order: 'DESC' }}
-
         >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
                 rowClick="show"
             >
                 <TextField source="id" />
-                <TextField source="description" />
-                <FunctionField render={record => `${record?.inputs?.length ?? ""}`} label="Uploaded files" />
-                <BooleanField
-                    source="processing_completed_successfully"
-                    label="Processing completed"
-                    TrueIcon={TrueIcon}
-                    FalseIcon={FalseIcon}
-                />
-                <BooleanField
-                    source="processing_has_started"
-                    label="Processing running"
-                    TrueIcon={TrueIcon}
-                    FalseIcon={FalseIcon}
-                />
+                <TextField source="filename" />
+                <NumberField source="size_bytes" />
                 <DateField
                     label="Submitted at"
                     source="time_added_utc"

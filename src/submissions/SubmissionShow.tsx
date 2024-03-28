@@ -12,14 +12,26 @@ import {
     BooleanField,
     ArrayField,
     Datagrid,
+    Button,
+    useRecordContext,
+    useDataProvider,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
-
+import { apiUrl } from "../App";
 
 const SubmissionShowActions = () => {
     const { permissions } = usePermissions();
+    const record = useRecordContext();
+    const dataProvider = useDataProvider();
+    // Create a function callback for onClick that calls a PUT request to the API
+    const executeJob = () => {
+        dataProvider.executeKubernetesJob(record.id);
+    }
     return (
         <TopToolbar>
-            {permissions === 'admin' && <><EditButton /><DeleteButton /></>}
+            {permissions === 'admin' && <>
+                <Button color="primary" onClick={executeJob}>Execute Job</Button>
+                <EditButton />
+                <DeleteButton /></>}
         </TopToolbar>
     );
 }
@@ -41,6 +53,14 @@ const SubmissionShow = (props) => (
                     <NumberField source="size_bytes" label="Size (bytes)" />
                     <DateField source="last_updated" showTime={true} />
                     <TextField source="hash_md5sum" label="MD5 Hash" />
+                </Datagrid>
+            </ArrayField>
+            <ArrayField source="run_status" label="Job run status">
+                <Datagrid bulkActionButtons={false}>
+                    <DateField source="time_started" showTime={true} />
+                    <TextField source="submission_id" />
+
+                    <TextField source="status" />
                 </Datagrid>
             </ArrayField>
         </SimpleShowLayout>
