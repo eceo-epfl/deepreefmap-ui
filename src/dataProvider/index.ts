@@ -156,21 +156,7 @@ export default (
         ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
 
     create: (resource, params) => {
-        if (resource === "submissions") {
-            /// Accept multipart form data to be sent to the server on create
-
-            // For each object in array params.data.files, append to formData
-            const formData = new FormData();
-            params.data.files.forEach(file => {
-                formData.append("files", file.rawFile);
-            });
-
-            return httpClient(`${apiUrl}/${resource}`, {
-                method: "POST",
-                body: formData,
-            }).then(({ json }) => ({ data: json }));
-        };
-
+        console.log("PARAMS", params);
         return httpClient(`${apiUrl}/${resource}`, {
             method: 'POST',
             body: JSON.stringify(params.data),
@@ -200,12 +186,10 @@ export default (
             data: responses.map(({ json }) => json.id),
         })),
 
-    uploadVideo: (resource, params) => {
-        const formData = new FormData();
-        formData.append('files', params.data.files[0].rawFile);
-        return httpClient(`${apiUrl}/${resource}`, {
-            method: 'POST',
-            body: formData,
-        }).then(({ json }) => ({ data: json }));
-    }
+
+    getKubernetesJobs: (resource, params) => {
+        const url = `${apiUrl}/submissions/kubernetes/jobs`;
+        // Return the promise with the JSON array
+        return httpClient(url).then(({ json }) => ({ data: json }));
+    },
 });

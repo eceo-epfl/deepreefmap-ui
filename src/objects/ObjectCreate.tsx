@@ -5,78 +5,63 @@ import {
     useAuthProvider,
     useCreate,
     useDataProvider,
-    Toolbar,
-    SaveButton,
 } from 'react-admin';
 import 'react-dropzone-uploader/dist/styles.css'
 import Dropzone from 'react-dropzone-uploader'
-import { useState } from 'react';
+// import { useFormContext, useFormState, useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 
-const MySaveToolbar = () => (
-    <Toolbar>
-        <SaveButton alwaysEnable={true} />
-    </Toolbar>
-);
+
 const SubmissionCreate = () => {
-    const [create, { isLoading, error }] = useCreate();
+    // Track IDs of those that have uploaded
+    let uploadedFiles = [];
+
+
     const MyUploader = () => {
+        const [create, { isLoading, error }] = useCreate();
         const auth = useAuthProvider();
-        const dataProvider = useDataProvider();
+        const dataProvider = useDataProvider;
         const token = auth.getToken();
-
-        // Track IDs of those that have uploaded
-        const [uploadedFiles, setUploadedFiles] = useState([]);
-
+        // console.log("TOKEN", token);
         // specify upload params and url for your files
         const getUploadParams = ({ file, meta }) => {
             const body = new FormData()
             body.append('files', file)
             return {
-                url: '/api/objects',
+                url: '/api/submissions',
                 headers: { Authorization: `Bearer ${token}` },
                 body: body
             }
         }
-
-        const handleChangeStatus = ({ meta, file, xhr }, status) => {
-            // called every time a files status changes
+        // called every time a file's `status` changes
+        // const handleChangeStatus = ({ meta, file }, status) => { console.log(status, meta, file) }
+        const handleChangeStatus = ({ meta, file, xhr }, status) => { // called every time a files status changes
             console.log("handleStatus", status, meta, file)
             if (status == "done") {
                 const json = JSON.parse(xhr.response)
                 console.log("json", json);
 
                 // Append ID to store
-                const oldArray = uploadedFiles;
-                oldArray.push(json.id);
-                setUploadedFiles(oldArray);
-
+                // setUploadedFiles([...uploadedFiles, json.id]);
+                uploadedFiles.push(json.id);
                 console.log("UPLOADED FILES", uploadedFiles);
+                // register({ name: 'cheese', value: "test" });
             }
 
             if (status == "removed") {
                 // Remove ID from store
                 const json = JSON.parse(xhr.response)
+                dataProvider.delete('submissions', { id: json.id });
 
-                dataProvider.delete('objects', { id: json.id });
-
-                // Remove the ID from the array, filtering on its value
-                const newUploadedFiles = uploadedFiles.filter(
-                    (value) => value !== json.id
-                );
-
-                setUploadedFiles(newUploadedFiles);
+                // Remove the ID from the array
+                uploadedFiles = uploadedFiles.filter(v => v != json.id);
                 console.log("UPLOADED FILES", uploadedFiles);
             }
         }
 
         // receives array of files that are done uploading when submit button is clicked
         const handleSubmit = (files, allFiles) => {
-
-            console.log("files", files);
-            console.log("allFiles", allFiles);
-            console.log("uploadedFiles", uploadedFiles);
-            // const data = ;
-            create('submissions', { data: { inputs: uploadedFiles } });
+            useCreate('submissions', { data: { files: uploadedFiles } });
         }
 
         return (
@@ -88,12 +73,25 @@ const SubmissionCreate = () => {
             />
         )
     }
+
     return (
         <Create redirect="list">
-            <SimpleForm toolbar={false}>
+            <SimpleForm >
                 Upload the collected video:
 
                 <MyUploader />
+                {/* <FileInput
+                    label="Video data"
+                    source="files"
+                    multiple={true}>
+                    <FileField source="src" title="title" />
+                </FileInput> */}
+                {/* <TextInput source="cheese" helperText={false} />
+                <ArrayInput source="files" label="File Inputs">
+                    <SimpleFormIterator inline >
+                        <TextInput source="name" helperText={false} />
+                    </SimpleFormIterator>
+                </ArrayInput> */}
             </SimpleForm>
         </Create>
     )

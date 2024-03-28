@@ -19,6 +19,7 @@ import { keycloakAuthProvider } from './authProvider';
 import Layout from './Layout';
 import users from './users';
 import submissions from './submissions';
+import objects from './objects';
 import axios from 'axios';
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
@@ -82,6 +83,7 @@ const App = () => {
             {permissions => (
                 <>
                     <Resource name="submissions" {...submissions} />
+                    <Resource name="objects" {...objects} />
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (

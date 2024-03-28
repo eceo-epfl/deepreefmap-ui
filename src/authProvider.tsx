@@ -53,7 +53,7 @@ export const keycloakAuthProvider = (
                 return Promise.resolve();
             } else {
                 // Token is expired or needs refreshing, initiate token refresh
-                await this.refreshToken();
+                this.refreshToken();
 
                 // Token refreshed successfully, proceed with the request
                 return Promise.resolve();
@@ -82,11 +82,10 @@ export const keycloakAuthProvider = (
             return false; // Consider the token invalid in case of decoding errors
         }
     },
-    async refreshToken() {
+    refreshToken() {
         console.log("Token expired, refreshing...")
-        // Implement logic to refresh the token, typically using Keycloak's refresh token
         // Update the Keycloak client with the new token
-        await client.updateToken();
+        client.updateToken();
     },
     async getPermissions() {
         if (!client.token) {
