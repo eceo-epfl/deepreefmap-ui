@@ -17,6 +17,12 @@ import {
     FileField,
     ReferenceInput,
     SelectInput,
+    ArrayField,
+    DateInput,
+    NumberField,
+    DateField,
+    ArrayInput,
+    SimpleFormIterator,
 } from 'react-admin';
 
 const SubmissionEdit = () => {
@@ -26,6 +32,12 @@ const SubmissionEdit = () => {
                 <TextInput source="id" disabled />
                 <TextInput source="name" />
                 <TextInput source="description" />
+                <ArrayInput source="input_associations" label="File Inputs">
+                    <SimpleFormIterator inline>
+                        <TextInput source="input_object.filename" label="Filename" disabled />
+                        <NumberInput source="processing_order" />
+                    </SimpleFormIterator>
+                </ArrayInput>
             </SimpleForm>
         </Edit>
     )

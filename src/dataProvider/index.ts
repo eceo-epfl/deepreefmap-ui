@@ -1,6 +1,6 @@
 import { stringify } from 'query-string';
 import { fetchUtils, DataProvider } from 'ra-core';
-
+import { useAuthProvider, AuthProvider } from 'react-admin';
 /**
  * Maps react-admin queries to a simple REST API
  *
@@ -33,7 +33,7 @@ import { fetchUtils, DataProvider } from 'ra-core';
  *
  * export default App;
  */
-export default (
+const dataProvider = (
     apiUrl: string,
     httpClient = fetchUtils.fetchJson,
     countHeader: string = 'Content-Range'
@@ -54,11 +54,11 @@ export default (
         const options =
             countHeader === 'Content-Range'
                 ? {
-                      // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                      headers: new Headers({
-                          Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                      }),
-                  }
+                    // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+                    headers: new Headers({
+                        Range: `${resource}=${rangeStart}-${rangeEnd}`,
+                    }),
+                }
                 : {};
 
         return httpClient(url, options).then(({ headers, json }) => {
@@ -72,9 +72,9 @@ export default (
                 total:
                     countHeader === 'Content-Range'
                         ? parseInt(
-                              headers.get('content-range').split('/').pop(),
-                              10
-                          )
+                            headers.get('content-range').split('/').pop(),
+                            10
+                        )
                         : parseInt(headers.get(countHeader.toLowerCase())),
             };
         });
@@ -112,11 +112,11 @@ export default (
         const options =
             countHeader === 'Content-Range'
                 ? {
-                      // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                      headers: new Headers({
-                          Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                      }),
-                  }
+                    // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
+                    headers: new Headers({
+                        Range: `${resource}=${rangeStart}-${rangeEnd}`,
+                    }),
+                }
                 : {};
 
         return httpClient(url, options).then(({ headers, json }) => {
@@ -130,9 +130,9 @@ export default (
                 total:
                     countHeader === 'Content-Range'
                         ? parseInt(
-                              headers.get('content-range').split('/').pop(),
-                              10
-                          )
+                            headers.get('content-range').split('/').pop(),
+                            10
+                        )
                         : parseInt(headers.get(countHeader.toLowerCase())),
             };
         });
@@ -195,6 +195,18 @@ export default (
     executeKubernetesJob: (id) => {
         const url = `${apiUrl}/submissions/${id}/execute`;
         // Return the promise with the JSON array
-        return httpClient(url, {method: "POST"}).then(({ json }) => ({ data: json }));
+        return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
+    },
+    downloadFile: (url) => {
+        // Get the auth token from url, then forward new URL back to browser
+        return httpClient(url)
+            .then(({ json }) => ({ data: json }))
+            .then(function (signed) {
+            window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
+        });
     }
 });
+
+
+
+export default dataProvider;

@@ -31,10 +31,14 @@ services:
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - S3_PREFIX=${S3_PREFIX}
+      - KUBERNETES_SERVICE_HOST=caas-test.rcp.epfl.ch
+      - KUBERNETES_SERVICE_PORT=443
+      - KUBECONFIG=/root/.kube/config.yaml
     depends_on:
         - deepreefmap-db
     volumes:
       - ../deepreefmap-api/app:/app/app
+      - ../deepreefmap-api/config.yaml:/root/.kube/config.yaml
     ports:
       - 5001:8000
 
@@ -48,6 +52,7 @@ services:
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_URL=${KEYCLOAK_URL}
       - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
+      - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
     labels:
       - "traefik.http.routers.deepreefmap-bff.rule=Host(`deepreefmap`) && PathPrefix(`/api`)"
       - "traefik.http.services.deepreefmap-bff.loadbalancer.server.port=8000"

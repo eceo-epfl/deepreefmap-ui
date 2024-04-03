@@ -1,7 +1,8 @@
 import { AuthProvider } from 'react-admin';
 import Keycloak, { KeycloakTokenParsed } from 'keycloak-js';
 import jwt_decode from 'jwt-decode';
-import { getKeycloakHeaders } from 'ra-keycloak';
+// import { getKeycloakHeaders } from 'ra-keycloak';
+
 
 export type PermissionsFunction = (decoded: KeycloakTokenParsed) => any;
 
@@ -54,7 +55,7 @@ export const keycloakAuthProvider = (
             } else {
                 // Token is expired or needs refreshing, initiate token refresh
                 await this.refreshToken();
-
+                console.log("Token refreshed")
                 // Token refreshed successfully, proceed with the request
                 return Promise.resolve();
             }
@@ -62,7 +63,7 @@ export const keycloakAuthProvider = (
             return Promise.reject(error);
         }
     },
-    async isTokenValid(token) {
+    isTokenValid(token) {
         try {
             const decodedToken = jwt_decode(token);
 
@@ -72,20 +73,27 @@ export const keycloakAuthProvider = (
             }
 
             // Convert expiration time to milliseconds and compare with the current time
-            const expirationTime = decodedToken.exp * 1000; // Convert seconds to milliseconds
-            const currentTime = Date.now();
+            const expirationTime = new Date(decodedToken.exp * 1000); // Convert seconds to milliseconds
+            const currentTime = new Date(Date.now());
 
-            // Token is considered valid if the current time is before the expiration time
-            return currentTime < expirationTime;
+            return (currentTime < expirationTime);
         } catch (error) {
             console.error('Error decoding token:', error);
             return false; // Consider the token invalid in case of decoding errors
         }
     },
     async refreshToken() {
-        console.log("Token expired, refreshing...")
         // Update the Keycloak client with the new token
-        await client.updateToken(360);
+        try {
+            const refreshed = await client.updateToken();
+            if (refreshed) {
+                console.log('Token was successfully refreshed');
+            } else {
+                console.log('Token is still valid');
+            }
+        } catch (error) {
+            console.log('Failed to refresh the token, or the session has expired', error);
+        }
     },
     async getPermissions() {
         if (!client.token) {

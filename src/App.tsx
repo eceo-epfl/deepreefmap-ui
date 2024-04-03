@@ -8,7 +8,6 @@ import {
 } from 'react-admin';
 import { Route } from 'react-router-dom';
 import simpleRestProvider from './dataProvider/index'
-
 import Keycloak, {
     KeycloakConfig,
     KeycloakTokenParsed,
@@ -21,7 +20,7 @@ import users from './users';
 import submissions from './submissions';
 import objects from './objects';
 import axios from 'axios';
-
+import SubmissionJobLogsShow from './submissions/SubmissionJobLogsShow';
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -52,13 +51,16 @@ const App = () => {
                 // Initialize Keycloak here, once you have the configuration
                 const keycloakClient = new Keycloak(keycloakConfig);
                 await keycloakClient.init(initOptions);
+
                 authProvider.current = keycloakAuthProvider(keycloakClient, {
                     onPermissions: getPermissions,
                 });
+
                 dataProvider.current = simpleRestProvider(
                     apiUrl,
                     httpClient(keycloakClient)
                 );
+
                 setKeycloak(keycloakClient);
                 setLoading(false);
             } catch (error) {
@@ -83,6 +85,7 @@ const App = () => {
             {permissions => (
                 <>
                     <Resource name="submissions" {...submissions} />
+                    <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
                     <Resource name="objects" {...objects} />
                     {permissions ? (
                         <>

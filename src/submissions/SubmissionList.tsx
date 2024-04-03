@@ -57,7 +57,6 @@ export const RunnerStatus = ({ records, resource }) => {
             if (job.status.phase === "Pending"
                 || job.status.phase === "Running"
                 || job.status.phase === "ContainerCreating"
-                || job.status.phase === "Succeeded"
                 || job.status.phase === "Running"
             ) {
                 runningJobs++;
