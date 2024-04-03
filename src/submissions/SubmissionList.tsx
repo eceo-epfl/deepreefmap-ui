@@ -107,7 +107,12 @@ const SubmissionList = () => {
                         bulkActionButtons={permissions === 'admin' ? true : false}
                         rowClick="show"
                     >
-                        <TextField source="id" />
+                        <FunctionField render={(record) => {
+                            if (record.name === null) {
+                                return record.id
+                            }
+                            return `${record.name}`
+                        }} label="Name" />
                         <TextField source="description" />
                         <FunctionField render={record => `${record?.inputs?.length ?? ""}`} label="Uploaded files" />
                         <BooleanField
