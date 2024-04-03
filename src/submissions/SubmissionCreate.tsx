@@ -90,6 +90,7 @@ const SubmissionCreate = () => {
                 onChangeStatus={handleChangeStatus}
                 onSubmit={handleSubmit}
                 accept="image/*,audio/*,video/*"
+                timeout={7200000}  // Two hours
             />
         )
     }

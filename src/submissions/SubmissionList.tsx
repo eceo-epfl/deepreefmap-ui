@@ -114,7 +114,7 @@ const SubmissionList = () => {
                             return `${record.name}`
                         }} label="Name" />
                         <TextField source="description" />
-                        <FunctionField render={record => `${record?.inputs?.length ?? ""}`} label="Uploaded files" />
+                        <FunctionField render={record => `${record?.input_associations?.length ?? ""}`} label="Uploaded files" />
                         <BooleanField
                             source="processing_completed_successfully"
                             label="Processing completed"
