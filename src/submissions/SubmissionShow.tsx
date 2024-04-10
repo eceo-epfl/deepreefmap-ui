@@ -18,8 +18,44 @@ import {
     useRedirect,
     TabbedShowLayout,
     FileField,
+    FunctionField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
-import { apiUrl } from "../App";
+
+
+const readinessStatusMessageGenerator = (record) => {
+    // Add a list of possible statuses here. Append each if statement to the list
+    var statusList = [];
+
+    if (record.fps === null) {
+        statusList.push('FPS not set');
+    }
+
+    if (record.time_seconds_start === null) {
+        statusList.push('Start time not set');
+    }
+
+    if (record.time_seconds_end === null) {
+        statusList.push('End time not set');
+    }
+    if (record.input_associations.length === 0) {
+        statusList.push('No input files');
+    }
+
+    return statusList;
+}
+
+
+const readinessStatusMessage = (record) => {
+    const statusList = readinessStatusMessageGenerator(record);
+
+    // Return the text in green if ready, red if not
+    if (statusList.length === 0) {
+        return 'Ready. Click "Execute Job" to run.';
+    }
+
+    return statusList.join(', ');
+}
+
 
 const SubmissionShowActions = () => {
     const { permissions } = usePermissions();
@@ -29,10 +65,15 @@ const SubmissionShowActions = () => {
     const executeJob = () => {
         dataProvider.executeKubernetesJob(record.id);
     }
+    const readyToSubmit = readinessStatusMessageGenerator(record).length !== 0;
+
     return (
         <TopToolbar>
             {permissions === 'admin' && <>
-                <Button color="primary" onClick={executeJob}>Execute Job</Button>
+                <Button
+                    color="primary"
+                    disabled={readyToSubmit}
+                    onClick={executeJob}>Execute Job</Button>
                 <EditButton />
                 <DeleteButton /></>}
         </TopToolbar>
@@ -57,10 +98,10 @@ const SubmissionShow = (props) => {
     };
 
 
+
     return (
         <Show actions={<SubmissionShowActions />} {...props}>
             <SimpleShowLayout>
-                <TextField source="id" />
                 <TextField source="name" />
                 <TextField source="description" />
                 <DateField
@@ -69,7 +110,14 @@ const SubmissionShow = (props) => {
                     sortable={false}
                     showTime={true}
                 />
-
+                <NumberField source="fps" label="FPS" />
+                <NumberField source="time_seconds_start" />
+                <NumberField source="time_seconds_end" />
+                <FunctionField
+                    label="Readiness status"
+                    render={readinessStatusMessage}
+                    colour="red"
+                />
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="File inputs">
                         <ArrayField source="input_associations" label="File Inputs">

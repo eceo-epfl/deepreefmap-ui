@@ -1,26 +1,8 @@
-/* eslint react/jsx-key: off */
-import * as React from 'react';
-import { useParams } from 'react-router';
 import {
     Edit,
     SimpleForm,
-    TextField,
     TextInput,
-    required,
-    List,
-    Datagrid,
-    ResourceContextProvider,
-    EditButton,
-    TranslatableInputs,
     NumberInput,
-    FileInput,
-    FileField,
-    ReferenceInput,
-    SelectInput,
-    ArrayField,
-    DateInput,
-    NumberField,
-    DateField,
     ArrayInput,
     SimpleFormIterator,
 } from 'react-admin';
@@ -32,8 +14,11 @@ const SubmissionEdit = () => {
                 <TextInput source="id" disabled />
                 <TextInput source="name" />
                 <TextInput source="description" />
+                <NumberInput source="fps" label="FPS" />
+                <NumberInput source="time_seconds_start" />
+                <NumberInput source="time_seconds_end" />
                 <ArrayInput source="input_associations" label="File Inputs">
-                    <SimpleFormIterator inline>
+                    <SimpleFormIterator inline disableAdd disableRemove>
                         <TextInput source="input_object.filename" label="Filename" disabled />
                         <NumberInput source="processing_order" />
                     </SimpleFormIterator>
