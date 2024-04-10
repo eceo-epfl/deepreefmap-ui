@@ -19,6 +19,7 @@ import {
     TabbedShowLayout,
     FileField,
     FunctionField,
+    useRefresh,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 
 
@@ -58,12 +59,18 @@ const readinessStatusMessage = (record) => {
 
 
 const SubmissionShowActions = () => {
+    function timeout(delay: number) {
+        return new Promise(res => setTimeout(res, delay));
+    }
     const { permissions } = usePermissions();
     const record = useRecordContext();
     const dataProvider = useDataProvider();
+    const refresh = useRefresh();
+
     // Create a function callback for onClick that calls a PUT request to the API
     const executeJob = () => {
-        dataProvider.executeKubernetesJob(record.id);
+        // Wait for return of the promise before refreshing the page
+        dataProvider.executeKubernetesJob(record.id).then(() => timeout(1000)).then(() => refresh());
     }
     const readyToSubmit = readinessStatusMessageGenerator(record).length !== 0;
 
@@ -100,7 +107,7 @@ const SubmissionShow = (props) => {
 
 
     return (
-        <Show actions={<SubmissionShowActions />} {...props}>
+        <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 10000 }}>
             <SimpleShowLayout>
                 <TextField source="name" />
                 <TextField source="description" />
@@ -119,17 +126,6 @@ const SubmissionShow = (props) => {
                     colour="red"
                 />
                 <TabbedShowLayout>
-                    <TabbedShowLayout.Tab label="File inputs">
-                        <ArrayField source="input_associations" label="File Inputs">
-                            <Datagrid bulkActionButtons={false}>
-                                <TextField source="input_object.filename" label="Filename" />
-                                <NumberField source="input_object.size_bytes" label="Size (bytes)" />
-                                <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
-                                <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
-                                <NumberField source="processing_order" />
-                            </Datagrid>
-                        </ArrayField>
-                    </TabbedShowLayout.Tab>
                     <TabbedShowLayout.Tab label="Run status">
                         <ArrayField source="run_status" label="Job run status">
                             <Datagrid
@@ -139,6 +135,17 @@ const SubmissionShow = (props) => {
                                 <DateField source="time_started" showTime={true} sortable={false} />
                                 <TextField source="submission_id" label="Submission ID" sortable={false} />
                                 <TextField source="status" sortable={false} />
+                            </Datagrid>
+                        </ArrayField>
+                    </TabbedShowLayout.Tab>
+                    <TabbedShowLayout.Tab label="File inputs">
+                        <ArrayField source="input_associations" label="File Inputs">
+                            <Datagrid bulkActionButtons={false}>
+                                <TextField source="input_object.filename" label="Filename" />
+                                <NumberField source="input_object.size_bytes" label="Size (bytes)" />
+                                <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
+                                <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
+                                <NumberField source="processing_order" />
                             </Datagrid>
                         </ArrayField>
                     </TabbedShowLayout.Tab>

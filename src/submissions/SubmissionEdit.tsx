@@ -9,14 +9,14 @@ import {
 
 const SubmissionEdit = () => {
     return (
-        <Edit>
+        <Edit redirect="show">
             <SimpleForm>
                 <TextInput source="id" disabled />
                 <TextInput source="name" />
                 <TextInput source="description" />
-                <NumberInput source="fps" label="FPS" />
-                <NumberInput source="time_seconds_start" />
-                <NumberInput source="time_seconds_end" />
+                <NumberInput source="fps" label="FPS" step={1} />
+                <NumberInput source="time_seconds_start" step={1} />
+                <NumberInput source="time_seconds_end" step={1} />
                 <ArrayInput source="input_associations" label="File Inputs">
                     <SimpleFormIterator inline disableAdd disableRemove>
                         <TextInput source="input_object.filename" label="Filename" disabled />
