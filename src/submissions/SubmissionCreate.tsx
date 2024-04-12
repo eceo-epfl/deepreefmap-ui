@@ -10,6 +10,8 @@ import {
     useRedirect,
 } from 'react-admin';
 import 'react-dropzone-uploader/dist/styles.css'
+import { FilePond, registerPlugin } from 'react-filepond';
+import 'filepond/dist/filepond.min.css';
 import Dropzone from 'react-dropzone-uploader'
 import { useState } from 'react';
 import { useEffect } from 'react';
@@ -19,6 +21,8 @@ const MySaveToolbar = () => (
         <SaveButton alwaysEnable={true} />
     </Toolbar>
 );
+
+
 const SubmissionCreate = () => {
     const [create, { data, isLoading, error }] = useCreate();
     const redirect = useRedirect();
@@ -95,12 +99,38 @@ const SubmissionCreate = () => {
         )
     }
 
+    const FilePondUploader = () => {
+        const auth = useAuthProvider();
+        const dataProvider = useDataProvider();
+        const token = auth.getToken();
+
+        return (
+            <FilePond
+                chunkUploads={true}
+                allowMultiple={true}
+                maxFiles={3}
+                credits={false}
+                chunkSize={50000000}
+                timeout={200}
+                // server="/api/objects"
+                server={{
+                    url: '/api/objects/upload',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+
+                }
+                }
+            />)
+    }
+
+
     return (
         <Create redirect="list">
-            <SimpleForm toolbar={false} >
-                Upload the collected video:
-                <MyUploader />
-            </SimpleForm>
+            {/* <SimpleForm toolbar={false} > */}
+            Upload the collected video:
+            <FilePondUploader />
+            {/* </SimpleForm> */}
         </Create>
     )
 };

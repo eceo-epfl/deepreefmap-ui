@@ -123,8 +123,12 @@ const SubmissionShow = (props) => {
                 <FunctionField
                     label="Readiness status"
                     render={readinessStatusMessage}
-                    colour="red"
                 />
+                <FunctionField
+                    label="Last job status"
+                    render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
+                />
+
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="Run status">
                         <ArrayField source="run_status" label="Job run status">
