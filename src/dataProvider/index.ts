@@ -204,6 +204,10 @@ const dataProvider = (
             .then(function (signed) {
             window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
         });
+    },
+    regenerateVideoStatistics: (id) => {
+        const url = `${apiUrl}/objects/${id}`;
+        return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
     }
 });
 

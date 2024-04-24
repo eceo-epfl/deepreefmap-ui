@@ -23,70 +23,74 @@ import {
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 
 
-const readinessStatusMessageGenerator = (record) => {
-    // Add a list of possible statuses here. Append each if statement to the list
-    var statusList = [];
 
-    if (record.fps === null) {
-        statusList.push('FPS not set');
-    }
-
-    if (record.time_seconds_start === null) {
-        statusList.push('Start time not set');
-    }
-
-    if (record.time_seconds_end === null) {
-        statusList.push('End time not set');
-    }
-    if (record.input_associations.length === 0) {
-        statusList.push('No input files');
-    }
-
-    return statusList;
-}
-
-
-const readinessStatusMessage = (record) => {
-    const statusList = readinessStatusMessageGenerator(record);
-
-    // Return the text in green if ready, red if not
-    if (statusList.length === 0) {
-        return 'Ready. Click "Execute Job" to run.';
-    }
-
-    return statusList.join(', ');
-}
-
-
-const SubmissionShowActions = () => {
-    function timeout(delay: number) {
-        return new Promise(res => setTimeout(res, delay));
-    }
-    const { permissions } = usePermissions();
-    const record = useRecordContext();
-    const dataProvider = useDataProvider();
-    const refresh = useRefresh();
-
-    // Create a function callback for onClick that calls a PUT request to the API
-    const executeJob = () => {
-        // Wait for return of the promise before refreshing the page
-        dataProvider.executeKubernetesJob(record.id).then(() => timeout(1000)).then(() => refresh());
-    }
-    const readyToSubmit = readinessStatusMessageGenerator(record).length !== 0;
-
-    return (
-        <TopToolbar>
-            {permissions === 'admin' && <>
-                <Button
-                    color="primary"
-                    disabled={readyToSubmit}
-                    onClick={executeJob}>Execute Job</Button>
-                <EditButton />
-                <DeleteButton /></>}
-        </TopToolbar>
-    );
-}
 const SubmissionShow = (props) => {
+
+    const readinessStatusMessageGenerator = (record) => {
+        // Add a list of possible statuses here. Append each if statement to the list
+        var statusList = [];
+
+        if (record.fps === null) {
+            statusList.push('FPS not set');
+        }
+
+        if (record.time_seconds_start === null) {
+            statusList.push('Start time not set');
+        }
+
+        if (record.time_seconds_end === null) {
+            statusList.push('End time not set');
+        }
+        if (record.input_associations.length === 0) {
+            statusList.push('No input files');
+        }
+
+        return statusList;
+    }
+
+    const readinessStatusMessage = (record) => {
+        const statusList = readinessStatusMessageGenerator(record);
+
+        // Return the text in green if ready, red if not
+        if (statusList.length === 0) {
+            return 'Ready. Click "Execute Job" to run.';
+        }
+
+        return statusList.join(', ');
+    }
+
+
+
+    const SubmissionShowActions = () => {
+        function timeout(delay: number) {
+            return new Promise(res => setTimeout(res, delay));
+        }
+        const { permissions } = usePermissions();
+        const dataProvider = useDataProvider();
+        const record = useRecordContext();
+        if (!record) return null;
+        const refresh = useRefresh();
+
+        // Create a function callback for onClick that calls a PUT request to the API
+        const executeJob = () => {
+            // Wait for return of the promise before refreshing the page
+            dataProvider.executeKubernetesJob(record.id).then(() => timeout(1000)).then(() => refresh());
+        }
+        const readyToSubmit = readinessStatusMessageGenerator(record).length !== 0;
+
+        return (
+            <TopToolbar>
+                {permissions === 'admin' && <>
+                    <Button
+                        color="primary"
+                        disabled={readyToSubmit}
+                        onClick={executeJob}>Execute Job</Button>
+                    <EditButton />
+                    <DeleteButton /></>}
+            </TopToolbar>
+        );
+    }
+
     const redirect = useRedirect();
 
     const dataProvider = useDataProvider();
@@ -128,6 +132,18 @@ const SubmissionShow = (props) => {
                     label="Last job status"
                     render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
                 />
+                <ArrayField source="input_associations" label="File Inputs">
+                    <Datagrid bulkActionButtons={false}>
+                        <TextField source="input_object.filename" label="Filename" />
+                        <NumberField source="input_object.size_bytes" label="Size (bytes)" />
+                        <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
+                        <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
+                        <NumberField source="processing_order" />
+                        <NumberField source="input_object.fps" label="FPS" />
+                        <NumberField source="input_object.time_seconds" label="Duration (s)" />
+                        <NumberField source="input_object.frame_count" label="Frames" />
+                    </Datagrid>
+                </ArrayField>
 
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="Run status">
@@ -142,17 +158,7 @@ const SubmissionShow = (props) => {
                             </Datagrid>
                         </ArrayField>
                     </TabbedShowLayout.Tab>
-                    <TabbedShowLayout.Tab label="File inputs">
-                        <ArrayField source="input_associations" label="File Inputs">
-                            <Datagrid bulkActionButtons={false}>
-                                <TextField source="input_object.filename" label="Filename" />
-                                <NumberField source="input_object.size_bytes" label="Size (bytes)" />
-                                <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
-                                <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
-                                <NumberField source="processing_order" />
-                            </Datagrid>
-                        </ArrayField>
-                    </TabbedShowLayout.Tab>
+
                     <TabbedShowLayout.Tab label="File outputs">
                         <ArrayField source="file_outputs" label="File Outputs">
                             <Datagrid bulkActionButtons={false} rowClick={downloadFile}>

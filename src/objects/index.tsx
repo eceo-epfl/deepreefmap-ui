@@ -11,6 +11,6 @@ export default {
     show: ObjectShow,
     icon: VideocamIcon,
     options: {
-        label: 'Objects',
+        label: 'Videos',
     },
 };

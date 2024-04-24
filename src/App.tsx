@@ -21,6 +21,8 @@ import submissions from './submissions';
 import objects from './objects';
 import axios from 'axios';
 import SubmissionJobLogsShow from './submissions/SubmissionJobLogsShow';
+import Dashboard from './Dashboard';
+import status from './status';
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -80,6 +82,7 @@ const App = () => {
             authProvider={authProvider.current}
             dataProvider={dataProvider.current}
             title="AstroRiver"
+            dashboard={Dashboard}
             layout={Layout}
         >
             {permissions => (
@@ -90,7 +93,8 @@ const App = () => {
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (
-                                <Resource name="users" {...users} />
+                                <><Resource name="users" {...users} />
+                                    <Resource name="status" {...status} /></>
                             ) : null}
                         </>
                     ) : null}

@@ -2,35 +2,15 @@ import {
     List,
     Datagrid,
     TextField,
-    ReferenceField,
     usePermissions,
     TopToolbar,
     CreateButton,
     ExportButton,
     NumberField,
     DateField,
-    ReferenceManyCount,
-    ArrayField,
-    SavedQueriesList,
-    FilterLiveSearch,
-    FilterList,
-    FilterListItem,
-    FunctionField,
     BooleanField,
-    Count,
-    fetchUtils,
-    useDataProvider,
 } from "react-admin";
-import { apiUrl } from "../App";
-import { Card, CardContent, Stack } from '@mui/material';
-import MailIcon from '@mui/icons-material/MailOutline';
-import CategoryIcon from '@mui/icons-material/LocalOffer';
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
-
-// Define some icons for status
-const TrueIcon = () => <Brightness1TwoToneIcon color="success" />;
-const FalseIcon = () => <Brightness1TwoToneIcon color="error" />;
-
 
 const SubmissionListActions = () => {
     const { permissions } = usePermissions();
@@ -46,27 +26,30 @@ const SubmissionListActions = () => {
 const SubmissionList = () => {
     const { permissions } = usePermissions();
 
-
-
     return (
 
         <List disableSyncWithLocation
             actions={<SubmissionListActions />}
-            perPage={25}
+            perPage={10}
             sort={{ field: 'time_added_utc', order: 'DESC' }}
         >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
                 rowClick="show"
             >
-                <TextField source="id" />
-                <TextField source="filename" />
-                <NumberField source="size_bytes" />
                 <DateField
                     label="Submitted at"
                     source="time_added_utc"
                     showTime={true}
                 />
+                <TextField source="filename" />
+                <NumberField source="size_bytes" />
+                <NumberField source="time_seconds" />
+                <NumberField source="fps" />
+                <TextField source="processing_message" />
+                <BooleanField label="Upload complete" source="all_parts_received" />
+                <BooleanField label="Processing started" source="processing_has_started" />
+                <BooleanField label="Processing successful" source="processing_completed_successfully" />
             </Datagrid>
         </List >
     )
