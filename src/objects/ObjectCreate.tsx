@@ -23,7 +23,7 @@ const ObjectCreate = () => {
                 // onprocessfilestart={() => setFilesProcessed(false)}
                 allowMultiple={true}
                 credits={false}
-                chunkSize={20000000}
+                chunkSize={50000000}
                 timeout={200}
                 maxParallelUploads={10}
                 allowRevert={false}
