@@ -1,3 +1,4 @@
+import dataProvider from '../../../.history/deepreefmap-ui/src/dataProvider/index_20240424173931';
 import {
     Show,
     SimpleShowLayout,
@@ -108,7 +109,22 @@ const SubmissionShow = (props) => {
         dataProvider.downloadFile(record.url);
     };
 
-
+    const DeleteKubernetesJobButton = () => {
+        const record = useRecordContext();
+        return <Button
+            type="button"
+            variant="outlined"
+            color="error"
+            label="Delete"
+            // Disabled when pending or completed
+            disabled={record.status === 'Pending' || record.status === 'Completed'}
+            onClick={(event) => {
+                dataProvider.deleteKubernetesJob(record.submission_id);
+                event.stopPropagation();
+            }
+            }
+        />;
+    };
 
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 10000 }}>
@@ -144,7 +160,6 @@ const SubmissionShow = (props) => {
                         <NumberField source="input_object.frame_count" label="Frames" />
                     </Datagrid>
                 </ArrayField>
-
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="Run status">
                         <ArrayField source="run_status" label="Job run status">
@@ -155,6 +170,8 @@ const SubmissionShow = (props) => {
                                 <DateField source="time_started" showTime={true} sortable={false} />
                                 <TextField source="submission_id" label="Submission ID" sortable={false} />
                                 <TextField source="status" sortable={false} />
+                                <DeleteKubernetesJobButton />
+
                             </Datagrid>
                         </ArrayField>
                     </TabbedShowLayout.Tab>

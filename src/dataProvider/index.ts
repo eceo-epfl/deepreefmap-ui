@@ -208,6 +208,10 @@ const dataProvider = (
     regenerateVideoStatistics: (id) => {
         const url = `${apiUrl}/objects/${id}`;
         return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
+    },
+    deleteKubernetesJob: (id) => {
+        const url = `${apiUrl}/submissions/kubernetes/jobs/${id}`;
+        return httpClient(url, { method: "DELETE" }).then(({ json }) => ({ data: json }));
     }
 });
 
