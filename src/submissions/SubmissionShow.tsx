@@ -127,7 +127,7 @@ const SubmissionShow = (props) => {
     };
 
     return (
-        <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 10000 }}>
+        <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
                 <TextField source="name" />
                 <TextField source="description" />

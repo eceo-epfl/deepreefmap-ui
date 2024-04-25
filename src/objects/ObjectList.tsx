@@ -12,7 +12,7 @@ import {
 } from "react-admin";
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
 
-const SubmissionListActions = () => {
+const ObjectListActions = () => {
     const { permissions } = usePermissions();
     return (
 
@@ -23,15 +23,16 @@ const SubmissionListActions = () => {
     );
 }
 
-const SubmissionList = () => {
+const ObjectList = () => {
     const { permissions } = usePermissions();
 
     return (
 
         <List disableSyncWithLocation
-            actions={<SubmissionListActions />}
+            actions={<ObjectListActions />}
             perPage={10}
             sort={{ field: 'time_added_utc', order: 'DESC' }}
+            queryOptions={{ refetchInterval: 10000 }}
         >
             <Datagrid
                 bulkActionButtons={permissions === 'admin' ? true : false}
@@ -55,4 +56,4 @@ const SubmissionList = () => {
     )
 };
 
-export default SubmissionList;
+export default ObjectList;

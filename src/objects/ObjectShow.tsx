@@ -15,7 +15,7 @@ import {
     useRefresh,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 
-const SubmissionShowActions = () => {
+const ObjectShowActions = () => {
     const { permissions } = usePermissions();
     const dataProvider = useDataProvider();
     const record = useRecordContext();
@@ -39,8 +39,12 @@ const SubmissionShowActions = () => {
         </TopToolbar >
     );
 }
-const SubmissionShow = (props) => (
-    <Show actions={<SubmissionShowActions />} {...props}>
+const ObjectShow = (props) => (
+    <Show
+        actions={<ObjectShowActions />}
+        {...props}
+        queryOptions={{ refetchInterval: 5000 }}
+    >
         <SimpleShowLayout>
             <TextField source="id" />
             <TextField source="filename" />
@@ -61,4 +65,4 @@ const SubmissionShow = (props) => (
     </Show>
 );
 
-export default SubmissionShow;
+export default ObjectShow;
