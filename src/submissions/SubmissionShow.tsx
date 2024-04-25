@@ -24,7 +24,6 @@ import {
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 
 
-
 const SubmissionShow = (props) => {
 
     const readinessStatusMessageGenerator = (record) => {
@@ -115,8 +114,7 @@ const SubmissionShow = (props) => {
             type="button"
             variant="outlined"
             color="error"
-            label="Delete"
-            // Disabled when pending or completed
+            label="Request Deletion"
             disabled={record.status === 'Pending' || record.status === 'Completed'}
             onClick={(event) => {
                 dataProvider.deleteKubernetesJob(record.submission_id);
@@ -162,7 +160,7 @@ const SubmissionShow = (props) => {
                 </ArrayField>
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="Run status">
-                        <ArrayField source="run_status" label="Job run status">
+                        <ArrayField source="run_status" label="Logs and deletion available after job passes 'Pending' status. Deletion is a request and may not be possible depending on the stage of execution.">
                             <Datagrid
                                 bulkActionButtons={false}
                                 rowClick={redirectToJobLogs}
