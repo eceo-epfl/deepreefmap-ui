@@ -49,8 +49,8 @@ const SubmissionCreate = () => {
                             helperText="Select the order that this file should be processed in"
                             validate={[required()]}
                             choices={[
-                                { id: '1', name: '1' },
-                                { id: '2', name: '2' },
+                                { id: 1, name: 1 },
+                                { id: 2, name: 2 },
                             ]}
                             defaultValue={
                                 1

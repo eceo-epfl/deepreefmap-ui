@@ -5,6 +5,8 @@ import {
     NumberInput,
     ArrayInput,
     SimpleFormIterator,
+    SelectInput,
+    required,
 } from 'react-admin';
 
 const SubmissionEdit = () => {
@@ -20,7 +22,18 @@ const SubmissionEdit = () => {
                 <ArrayInput source="input_associations" label="File Inputs">
                     <SimpleFormIterator inline disableAdd disableRemove>
                         <TextInput source="input_object.filename" label="Filename" disabled />
-                        <NumberInput source="processing_order" />
+                        <SelectInput
+                            source="processing_order"
+                            helperText="Select the order that this file should be processed in"
+                            validate={[required()]}
+                            choices={[
+                                { id: 1, name: 1 },
+                                { id: 2, name: 2 },
+                            ]}
+                            defaultValue={
+                                1
+                            }
+                        />
                     </SimpleFormIterator>
                 </ArrayInput>
             </SimpleForm>
