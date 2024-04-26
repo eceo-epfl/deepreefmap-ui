@@ -25,7 +25,6 @@ import Dropzone from 'react-dropzone-uploader'
 import { useState, useEffect, useRef } from 'react';
 
 
-
 const SubmissionCreate = () => {
 
     return (
@@ -34,10 +33,10 @@ const SubmissionCreate = () => {
                 <TextField source="id" />
                 <TextInput source="name" helperText="Name your submission" validate={[required()]} />
                 <TextInput source="description" />
-                <ArrayInput source="inputs" validate={[required()]}>
+                <ArrayInput source="input_associations" validate={[required()]}>
                     <SimpleFormIterator inline >
                         <ReferenceInput
-                            source="object_id"
+                            source="input_object_id"
                             reference="objects"
                             sort={{ field: 'time_added_utc', order: 'DESC' }}
                         >

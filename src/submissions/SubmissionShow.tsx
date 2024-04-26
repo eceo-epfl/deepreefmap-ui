@@ -102,6 +102,9 @@ const SubmissionShow = (props) => {
         }
         redirect('show', 'submission_job_logs', record.submission_id);
     };
+    const redirectToObject = (id, basePath, record) => {
+        redirect('show', 'objects', record.input_object.id);
+    };
 
     const downloadFile = (id, basePath, record) => {
         console.log("Download file", basePath, id, record);
@@ -115,7 +118,7 @@ const SubmissionShow = (props) => {
             variant="outlined"
             color="error"
             label="Request Deletion"
-            disabled={record.status === 'Pending' || record.status === 'Completed'}
+            disabled={record.time_started === null}
             onClick={(event) => {
                 dataProvider.deleteKubernetesJob(record.submission_id);
                 event.stopPropagation();
@@ -147,7 +150,7 @@ const SubmissionShow = (props) => {
                     render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
                 />
                 <ArrayField source="input_associations" label="File Inputs">
-                    <Datagrid bulkActionButtons={false}>
+                    <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
                         <TextField source="input_object.filename" label="Filename" />
                         <NumberField source="input_object.size_bytes" label="Size (bytes)" />
                         <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
@@ -175,8 +178,9 @@ const SubmissionShow = (props) => {
                     </TabbedShowLayout.Tab>
 
                     <TabbedShowLayout.Tab label="File outputs">
-                        <ArrayField source="file_outputs" label="File Outputs">
-                            <Datagrid bulkActionButtons={false} rowClick={downloadFile}>
+                        <ArrayField source="file_outputs" label="File Outputs" >
+                            <Datagrid bulkActionButtons={false} rowClick={downloadFile}
+                            >
                                 <TextField source="filename" label="Filename" />
                                 <NumberField source="size_bytes" label="Size (bytes)" />
                                 <DateField source="last_modified" showTime={true} sortable={false} />
