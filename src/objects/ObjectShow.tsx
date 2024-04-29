@@ -1,3 +1,6 @@
+import { useEffect, useState } from 'react';
+import dataProvider from '../../../.history/deepreefmap-ui/src/dataProvider/index_20240424113643';
+import { Typography } from '@mui/material';
 import {
     Show,
     SimpleShowLayout,
@@ -19,6 +22,8 @@ import {
     ReferenceField,
     ReferenceArrayField,
     ReferenceManyField,
+    useCreate,
+    FunctionField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 
 const ObjectShowActions = () => {
@@ -30,26 +35,57 @@ const ObjectShowActions = () => {
     const RegenerateStatisticsButton = () => {
         return <Button
             type="button"
-            // disabled={!filesProcessed}
             variant="contained"
             color="primary"
             label="Regenerate Video Statistics"
-            // Refresh after 3 seconds
+            disabled={record.all_parts_received === false}
             onClick={() => dataProvider.regenerateVideoStatistics(record.id).then(() => timeout(3000)).then(() => refresh())}
         />;
     };
 
+    const CreateSubmissionButton = () => {
+        const record = useRecordContext();
+        const redirect = useRedirect();
+        const [create, { data, loading, loaded, error }] = useCreate();
+        useEffect(() => {
+            if (!data) return;
+            if (data.id) {
+                redirect('edit', 'submissions', data.id);
+            }
+        }, [data]);
+        const handleClick = () => {
+            create('submissions',
+                {
+                    data: {
+                        input_associations: [
+                            {
+                                input_object_id: record.id,
+                                processing_order: 1
+                            }]
+                    }
+                })
+        }
+        return <Button
+            type="button"
+            variant="contained"
+            color="success"
+            label="Create Submission from this video"
+            disabled={record.all_parts_received === false}
+            onClick={handleClick}
+        />;
+    };
     return (
         <TopToolbar>
-            {permissions === 'admin' && <><RegenerateStatisticsButton /><EditButton /><DeleteButton /></>}
+            {permissions === 'admin' && <><CreateSubmissionButton /><RegenerateStatisticsButton /><EditButton /><DeleteButton /></>}
         </TopToolbar >
     );
 }
 const ObjectShow = (props) => {
     const redirect = useRedirect();
     const redirectToSubmission = (id, basePath, record) => {
-        redirect('show', 'submissions', record.submission_id);
+        redirect('edit', 'submissions', record.submission_id);
     };
+
     return (
 
         <Show
@@ -58,7 +94,12 @@ const ObjectShow = (props) => {
             queryOptions={{ refetchInterval: 5000 }}
         >
             <SimpleShowLayout>
-                <TextField source="id" />
+                <FunctionField render={(record) => {
+                    if (record.all_parts_received === false) {
+                        return <Typography variant="h5" color='error' gutterBottom >Video upload incomplete</Typography>
+                    }
+                }} />
+                < TextField source="id" />
                 <TextField source="filename" />
                 <NumberField source="size_bytes" />
                 <DateField
@@ -73,7 +114,7 @@ const ObjectShow = (props) => {
                 <TextField source="processing_message" />
                 <BooleanField source="processing_completed_successfully" />
                 <BooleanField source="processing_has_started" />
-                <ArrayField source="input_associations" label="File Inputs">
+                <ArrayField source="input_associations" label="Associated submissions">
                     <Datagrid bulkActionButtons={false} rowClick={redirectToSubmission}>
                         <TextField source="submission_id" label="Submission ID" />
                         <ReferenceField source="submission_id" reference="submissions" label="Name" link={false}>
@@ -86,7 +127,7 @@ const ObjectShow = (props) => {
 
                 </ArrayField>
             </SimpleShowLayout>
-        </Show>
+        </Show >
     )
 };
 

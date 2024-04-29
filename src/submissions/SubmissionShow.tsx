@@ -1,16 +1,13 @@
-import dataProvider from '../../../.history/deepreefmap-ui/src/dataProvider/index_20240424173931';
 import {
     Show,
     SimpleShowLayout,
     TextField,
     NumberField,
-    ReferenceField,
     EditButton,
     TopToolbar,
     DeleteButton,
     usePermissions,
     DateField,
-    BooleanField,
     Labeled,
     ArrayField,
     Datagrid,
@@ -19,7 +16,6 @@ import {
     useDataProvider,
     useRedirect,
     TabbedShowLayout,
-    FileField,
     FunctionField,
     useRefresh,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
@@ -61,8 +57,6 @@ const SubmissionShow = (props) => {
         return statusList.join(', ');
     }
 
-
-
     const SubmissionShowActions = () => {
         function timeout(delay: number) {
             return new Promise(res => setTimeout(res, delay));
@@ -84,7 +78,8 @@ const SubmissionShow = (props) => {
             <TopToolbar>
                 {permissions === 'admin' && <>
                     <Button
-                        color="primary"
+                        variant="contained"
+                        color="success"
                         disabled={readyToSubmit}
                         onClick={executeJob}>Execute Job</Button>
                     <EditButton />
@@ -200,12 +195,20 @@ const SubmissionShow = (props) => {
                                 showTime={true}
                             />
                         </Labeled><br /><Labeled>
-                            <NumberField source="fps" label="FPS" />
+                            <FunctionField
+                                label="FPS"
+                                render={record => record.fps === null ? <Typography variant="body" color='red' >Required</Typography> : record.fps} />
                         </Labeled><br /><Labeled>
-                            <NumberField source="time_seconds_start" />
+                            <FunctionField
+                                label="Start time (s)"
+                                render={record => record.time_seconds_start === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_start} />
                         </Labeled><br /><Labeled>
-                            <NumberField source="time_seconds_end" />
-                        </Labeled><br /><Labeled>
+                            <FunctionField
+                                label="End time (s)"
+                                render={record => record.time_seconds_end === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_end} />
+                        </Labeled><br />
+
+                        <Labeled>
                             <FunctionField
                                 label="Readiness status"
                                 render={readinessStatusMessage}
