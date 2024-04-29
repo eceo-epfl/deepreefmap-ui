@@ -11,6 +11,7 @@ import {
     usePermissions,
     DateField,
     BooleanField,
+    Labeled,
     ArrayField,
     Datagrid,
     Button,
@@ -22,7 +23,8 @@ import {
     FunctionField,
     useRefresh,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
-
+import { Box, Typography } from '@mui/material';
+import Plot from 'react-plotly.js';
 
 const SubmissionShow = (props) => {
 
@@ -127,28 +129,98 @@ const SubmissionShow = (props) => {
         />;
     };
 
+    const ClassPieChart = () => {
+        const record = useRecordContext();
+        const data = record.percentage_covers;
+        const rgbToString = (rgbArray) => `rgb(${rgbArray.join(', ')})`;
+        // If no data is available, return a message
+        if (data.length === 0) {
+            return <>
+                <br /><br /><br /><br /><br />
+                <Typography variant="h6" align='center'>
+                    No class data available
+                </Typography>
+            </>;
+        }
+        const labels = data.map((item) => item.class);
+        const colors = data.map((item) => rgbToString(item.color)); // Convert RGB array to CSS rgb string
+        // Set labels to capitalise the first letter
+        labels.forEach((label, index) => {
+            labels[index] = label.charAt(0).toUpperCase() + label.slice(1);
+        });
+
+        const values = data.map((item) => item.percentage_cover);
+        const pieData = [{
+            values: values,
+            labels: labels,
+            type: 'pie',
+            hoverinfo: 'label+percent',
+            textinfo: 'label+percent',
+            textposition: 'inside',
+            insidetextorientation: 'radial',
+            marker: {
+                colors: colors, // Assign the custom colors to the pie chart
+            },
+        }];
+        return (<>
+            <Typography variant="h6" align='center'>Classes</Typography>
+            <Plot
+                data={pieData}
+                layout={{
+                    width: 800,
+                    height: 600,
+                    autosize: true,
+                    margin: {
+                        l: 0,  // Left margin
+                        r: 0,  // Right margin
+                        t: 0,  // Top margin
+                        b: 0,  // Bottom margin
+                    },
+                    font: {
+                        size: 16,
+                    }
+                }}
+            /></>
+        );
+    };
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
-                <TextField source="name" />
-                <TextField source="description" />
-                <DateField
-                    label="Submitted at"
-                    source="time_added_utc"
-                    sortable={false}
-                    showTime={true}
-                />
-                <NumberField source="fps" label="FPS" />
-                <NumberField source="time_seconds_start" />
-                <NumberField source="time_seconds_end" />
-                <FunctionField
-                    label="Readiness status"
-                    render={readinessStatusMessage}
-                />
-                <FunctionField
-                    label="Last job status"
-                    render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
-                />
+                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Box sx={{ flex: 1 }}>
+                        <Labeled>
+                            <TextField source="name" />
+                        </Labeled><br /><Labeled>
+                            <TextField source="description" />
+                        </Labeled><br /><Labeled>
+                            <DateField
+                                label="Submitted at"
+                                source="time_added_utc"
+                                sortable={false}
+                                showTime={true}
+                            />
+                        </Labeled><br /><Labeled>
+                            <NumberField source="fps" label="FPS" />
+                        </Labeled><br /><Labeled>
+                            <NumberField source="time_seconds_start" />
+                        </Labeled><br /><Labeled>
+                            <NumberField source="time_seconds_end" />
+                        </Labeled><br /><Labeled>
+                            <FunctionField
+                                label="Readiness status"
+                                render={readinessStatusMessage}
+                            />
+                        </Labeled><br /><Labeled>
+                            <FunctionField
+                                label="Last job status"
+                                render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
+                            />
+                        </Labeled>
+                    </Box>
+                    <Box sx={{ flex: 3 }}>
+                        <ClassPieChart />
+                    </Box>
+                </Box>
                 <ArrayField source="input_associations" label="File Inputs">
                     <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
                         <TextField source="input_object.filename" label="Filename" />

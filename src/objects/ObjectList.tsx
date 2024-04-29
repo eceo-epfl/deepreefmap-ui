@@ -9,8 +9,8 @@ import {
     NumberField,
     DateField,
     BooleanField,
+    FunctionField,
 } from "react-admin";
-import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
 
 const ObjectListActions = () => {
     const { permissions } = usePermissions();
@@ -25,9 +25,7 @@ const ObjectListActions = () => {
 
 const ObjectList = () => {
     const { permissions } = usePermissions();
-
     return (
-
         <List disableSyncWithLocation
             actions={<ObjectListActions />}
             perPage={10}
@@ -51,6 +49,10 @@ const ObjectList = () => {
                 <BooleanField label="Upload complete" source="all_parts_received" />
                 <BooleanField label="Processing started" source="processing_has_started" />
                 <BooleanField label="Processing successful" source="processing_completed_successfully" />
+                <FunctionField
+                    label="Associated submissions"
+                    render={record => record.input_associations.length}
+                />
             </Datagrid>
         </List >
     )

@@ -17,6 +17,7 @@
     "leaflet-draw": "^1.0.4",
     "leaflet-tilelayer-swiss": "^2.3.0",
     "ol": "^8.1.0",
+    "plotly.js": "^2.32.0",
     "ra-data-fakerest": "^4.14.0",
     "ra-data-simple-rest": "^4.15.2",
     "ra-input-rich-text": "^4.15.1",
@@ -30,6 +31,7 @@
     "react-filepond": "^7.1.2",
     "react-leaflet": "^4.2.1",
     "react-leaflet-draw": "^0.20.4",
+    "react-plotly.js": "^2.6.0",
     "recharts": "^2.9.1"
   },
   "devDependencies": {
