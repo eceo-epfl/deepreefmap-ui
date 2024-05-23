@@ -45,10 +45,10 @@ const TransectList = () => {
                         <TextField source="name" />
                         <TextField source="description" />
                         <FunctionField label="Associated submissions" render={(record) => {
-                            return record.submissions?.length;
+                            return record.submissions?.length ? record.submissions.length : 0;
                         }} />
                         <FunctionField label="Associated files" render={(record) => {
-                            return record.inputs?.length;
+                            return record.inputs?.length ? record.inputs.length : 0;
                         }} />
                     </Datagrid>
                 </>

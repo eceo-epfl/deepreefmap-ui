@@ -28,15 +28,24 @@ export const TransectMapAll = () => {
         'transects', {}
     );
 
-    if (isLoading) {
+    if (isLoading || !data) {
         return <Loading />;
     }
 
-    // Set bounds to the first transect (CHANGE THIS)
+    if (data.length === 0 || data === undefined) {
+        return;
+    }
+
     const bounds = L.latLngBounds(
-        [[data[0].latitude_start, data[0].longitude_start],
-        [data[0].latitude_end, data[0].longitude_end]]
+        data.map(
+            (transect) => (
+                [[transect.latitude_start, transect.longitude_start],
+                [transect.latitude_end, transect.longitude_end]]
+            )
+        )
     ).pad(1);
+
+
 
     return (
         <MapContainer
