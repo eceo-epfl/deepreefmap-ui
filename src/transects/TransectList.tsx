@@ -50,6 +50,7 @@ const TransectList = () => {
                         <FunctionField label="Associated files" render={(record) => {
                             return record.inputs?.length ? record.inputs.length : 0;
                         }} />
+                        {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
                     </Datagrid>
                 </>
             </List ></>

@@ -87,15 +87,20 @@ const ObjectShowActions = () => {
 const TransectNameField = () => {
     const record = useRecordContext();
     const createPath = useCreatePath();
-    const path = createPath({
-        resource: 'transects',
-        type: 'show',
-        id: record.transect.id,
-    });
-    console.log("Create Path: ", path);
+    if (!record) return <Loading />;
+    let path = null;
+
+    if (record.transect) {
+        path = createPath({
+            resource: 'transects',
+            type: 'show',
+            id: record.transect.id,
+        });
+    }
+
     return (
         <Link to={path} onClick={stopPropagation}>
-            <TextField source="transect.name" label="Area" />
+            <TextField source="transect.name" label="Area" emptyText='No associated transect' />
         </Link>
     );
 }
@@ -107,6 +112,7 @@ const ObjectShow = (props) => {
     const redirectToSubmission = (id, basePath, record) => {
         redirect('edit', 'submissions', record.submission_id);
     };
+    const { permissions } = usePermissions();
 
     return (
 
@@ -121,7 +127,8 @@ const ObjectShow = (props) => {
                         return <Typography variant="h5" color='error' gutterBottom >Video upload incomplete</Typography>
                     }
                 }} />
-                < TextField source="id" />
+                <TextField source="id" />
+                {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
                 <TextField source="filename" />
                 <NumberField source="size_bytes" />
                 <DateField
@@ -147,7 +154,6 @@ const ObjectShow = (props) => {
                         </ReferenceField>
                     </Datagrid>
                 </ArrayField>
-                {/* <TextField source="transect.name" label="Associated transect" /> */}
                 <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
             </SimpleShowLayout>
         </Show >

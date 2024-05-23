@@ -33,6 +33,16 @@ const SubmissionCreate = () => {
                 <TextField source="id" />
                 <TextInput source="name" helperText="Name your submission" validate={[required()]} />
                 <TextInput source="description" />
+                <ReferenceInput
+                    source="transect_id"
+                    reference="transects"
+                >
+                    <SelectInput
+                        optionText={
+                            (record) => `${record.name} (${record.latitude_start}°, ${record.longitude_start}°) - (${record.latitude_end}°, ${record.longitude_end}°)`
+                        }
+                    />
+                </ReferenceInput>
                 <ArrayInput source="input_associations" validate={[required()]}>
                     <SimpleFormIterator inline disableReordering disableAdd disableRemove >
                         <ReferenceInput

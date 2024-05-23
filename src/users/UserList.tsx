@@ -59,6 +59,7 @@ const UserList = () => {
                 rowClick={handleRowClick}
                 optimized
             >
+                <TextField source="id" />
                 <TextField source="username" />
                 <TextField source="firstName" />
                 <TextField source="lastName" />

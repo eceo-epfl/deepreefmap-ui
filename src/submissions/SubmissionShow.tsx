@@ -89,7 +89,7 @@ const SubmissionShow = (props) => {
     }
 
     const redirect = useRedirect();
-
+    const { permissions } = usePermissions();
     const dataProvider = useDataProvider();
 
     const redirectToJobLogs = (id, basePath, record) => {
@@ -185,6 +185,8 @@ const SubmissionShow = (props) => {
                     <Box sx={{ flex: 1 }}>
                         <Labeled>
                             <TextField source="name" />
+                        </Labeled><br /><Labeled>
+                            {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
                         </Labeled><br /><Labeled>
                             <TextField source="description" />
                         </Labeled><br /><Labeled>

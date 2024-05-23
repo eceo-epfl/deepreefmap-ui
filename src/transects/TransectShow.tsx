@@ -16,6 +16,7 @@ import {
     TabbedShowLayout,
     useRecordContext,
     Loading,
+    DateField,
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
@@ -23,7 +24,7 @@ import { TransectMapOne } from '../maps/Transects';
 
 const TransectTabs = () => {
     const record = useRecordContext();
-
+    const redirect = useRedirect();
     if (!record) return <Loading />;
     return (
         <TabbedShowLayout>
@@ -33,13 +34,11 @@ const TransectTabs = () => {
                 </Typography>
                 <ArrayField source="submissions">
                     <Datagrid rowClick={(id, basePath, record) => {
-                        redirect('show', 'objects', record.id);
+                        redirect('show', 'submissions', record.id);
                     }}>
-                        <TextField source="filename" />
-                        <TextField source="time_seconds" label="Time (s)" />
-                        <FunctionField label="Size (MB)" render={(record) => {
-                            return (record.size_bytes / 1000000).toFixed(2);
-                        }} />
+                        <DateField source="time_added_utc" label="Added (UTC)" />
+                        <TextField source="id" />
+                        <TextField source="name" />
                     </Datagrid>
                 </ArrayField>
             </TabbedShowLayout.Tab>
@@ -63,6 +62,7 @@ const TransectTabs = () => {
 
 const TransectShow = (props) => {
     const redirect = useRedirect();
+    const { permissions } = usePermissions();
 
     const TransectShowActions = () => {
         const { permissions } = usePermissions();
@@ -80,7 +80,7 @@ const TransectShow = (props) => {
             <SimpleShowLayout>
                 <TextField source="name" />
                 <TextField source="description" />
-
+                {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
                 <FunctionField label="Coordinates" render={(record) => {
                     return (
                         <Link

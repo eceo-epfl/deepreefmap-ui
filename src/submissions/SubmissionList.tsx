@@ -57,6 +57,8 @@ const SubmissionList = () => {
                         source="time_added_utc"
                         showTime={true}
                     />
+                    {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+
                 </Datagrid>
             </>
         </List >
