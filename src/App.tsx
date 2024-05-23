@@ -16,13 +16,16 @@ import Keycloak, {
 import { httpClient } from 'ra-keycloak';
 import { keycloakAuthProvider } from './authProvider';
 import Layout from './Layout';
-import users from './users';
-import submissions from './submissions';
-import objects from './objects';
 import axios from 'axios';
 import SubmissionJobLogsShow from './submissions/SubmissionJobLogsShow';
 import Dashboard from './Dashboard';
+
+import users from './users';
+import submissions from './submissions';
+import objects from './objects';
 import status from './status';
+import transects from './transects';
+
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
 const getPermissions = (decoded: KeycloakTokenParsed) => {
@@ -87,6 +90,7 @@ const App = () => {
         >
             {permissions => (
                 <>
+                    <Resource name="transects" {...transects} />
                     <Resource name="submissions" {...submissions} />
                     <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
                     <Resource name="objects" {...objects} />

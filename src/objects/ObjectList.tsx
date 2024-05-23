@@ -129,6 +129,7 @@ const ObjectList = () => {
                 perPage={10}
                 sort={{ field: 'time_added_utc', order: 'DESC' }}
                 queryOptions={{ refetchInterval: 10000 }}
+                empty={false}
             >
                 <FilePondUploader />
                 <Datagrid

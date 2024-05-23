@@ -34,7 +34,7 @@ const SubmissionCreate = () => {
                 <TextInput source="name" helperText="Name your submission" validate={[required()]} />
                 <TextInput source="description" />
                 <ArrayInput source="input_associations" validate={[required()]}>
-                    <SimpleFormIterator inline >
+                    <SimpleFormIterator inline disableReordering disableAdd disableRemove >
                         <ReferenceInput
                             source="input_object_id"
                             reference="objects"

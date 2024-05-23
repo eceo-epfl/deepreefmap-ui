@@ -24,7 +24,10 @@ import {
     ReferenceManyField,
     useCreate,
     FunctionField,
+    useCreatePath,
+    Link,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
+import { stopPropagation } from 'ol/events/Event';
 
 const ObjectShowActions = () => {
     const { permissions } = usePermissions();
@@ -80,7 +83,26 @@ const ObjectShowActions = () => {
         </TopToolbar >
     );
 }
+
+const TransectNameField = () => {
+    const record = useRecordContext();
+    const createPath = useCreatePath();
+    const path = createPath({
+        resource: 'transects',
+        type: 'show',
+        id: record.transect.id,
+    });
+    console.log("Create Path: ", path);
+    return (
+        <Link to={path} onClick={stopPropagation}>
+            <TextField source="transect.name" label="Area" />
+        </Link>
+    );
+}
+
+
 const ObjectShow = (props) => {
+    const FieldWrapper = ({ children, label }) => children;
     const redirect = useRedirect();
     const redirectToSubmission = (id, basePath, record) => {
         redirect('edit', 'submissions', record.submission_id);
@@ -124,8 +146,9 @@ const ObjectShow = (props) => {
                             <TextField source="run_status[0].status" emptyText='No jobs submitted' />
                         </ReferenceField>
                     </Datagrid>
-
                 </ArrayField>
+                {/* <TextField source="transect.name" label="Associated transect" /> */}
+                <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
             </SimpleShowLayout>
         </Show >
     )

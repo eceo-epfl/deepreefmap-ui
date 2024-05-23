@@ -78,7 +78,7 @@ services:
       - ../deepreefmap-ui:/app
 
   deepreefmap-db:
-    image: postgres:16.1
+    image: postgis/postgis:16-master
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=psql

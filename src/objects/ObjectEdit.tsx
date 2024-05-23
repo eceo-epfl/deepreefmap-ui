@@ -23,8 +23,19 @@ const SubmissionEdit = () => {
     return (
         <Edit redirect="show">
             <SimpleForm>
-                <TextField source="id" />
+                <TextInput source="id" disabled />
                 <TextInput source="notes" multiline />
+
+                <ReferenceInput
+                    source="transect_id"
+                    reference="transects"
+                >
+                    <SelectInput
+                        optionText={
+                            (record) => `${record.name} (${record.latitude_start}°, ${record.longitude_start}°) - (${record.latitude_end}°, ${record.longitude_end}°)`
+                        }
+                    />
+                </ReferenceInput>
             </SimpleForm>
         </Edit>
     )

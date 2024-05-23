@@ -10,7 +10,7 @@ import {
     SelectInput,
 } from 'react-admin';
 
-const SubmissionEdit = () => {
+const TransectEdit = () => {
     return (
         <Edit redirect="show">
             <SimpleForm>
@@ -45,4 +45,4 @@ const SubmissionEdit = () => {
     )
 };
 
-export default SubmissionEdit;
+export default TransectEdit;
