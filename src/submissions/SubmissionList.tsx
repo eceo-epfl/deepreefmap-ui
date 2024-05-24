@@ -10,8 +10,12 @@ import {
     FunctionField,
 
     useDataProvider,
+    useRecordContext,
+    useCreatePath,
+    Link,
 } from "react-admin";
 import { useEffect, useState } from "react";
+import { stopPropagation } from "ol/events/Event";
 
 
 
@@ -25,8 +29,28 @@ const SubmissionListActions = () => {
         </TopToolbar>
     );
 }
+const TransectNameField = () => {
+    const record = useRecordContext();
+    const createPath = useCreatePath();
+    if (!record) return <Loading />;
+    let path = null;
 
+    if (record.transect) {
+        path = createPath({
+            resource: 'transects',
+            type: 'show',
+            id: record.transect.id,
+        });
+    }
+
+    return (
+        <Link to={path} onClick={stopPropagation}>
+            <TextField source="transect.name" label="Area" emptyText='No associated transect' />
+        </Link>
+    );
+}
 const SubmissionList = () => {
+    const FieldWrapper = ({ children, label }) => children;
     const { permissions } = usePermissions();
     return (
         <List disableSyncWithLocation
@@ -57,6 +81,7 @@ const SubmissionList = () => {
                         source="time_added_utc"
                         showTime={true}
                     />
+                    <FieldWrapper label="Transect"><TransectNameField /></FieldWrapper>
                     {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
 
                 </Datagrid>

@@ -1,7 +1,7 @@
 /* eslint react/jsx-key: off */
 import PeopleIcon from '@mui/icons-material/People';
 import memoize from 'lodash/memoize';
-import { useMediaQuery, Theme } from '@mui/material';
+import { useMediaQuery, Theme, Typography } from '@mui/material';
 import * as React from 'react';
 import {
     BulkDeleteWithConfirmButton,
@@ -16,6 +16,10 @@ import {
     useRefresh,
     useDataProvider,
     useNotify,
+    List,
+    EditButton,
+    Button,
+    useRecordContext,
 } from 'react-admin';
 
 import Aside from './Aside';
@@ -29,6 +33,30 @@ const UserList = () => {
     const dataProvider = useDataProvider();
 
     const { permissions } = usePermissions();
+    const AdminButton = () => {
+        const record = useRecordContext();
+        // A button that switches from normal user to admin depending on user status
+
+        if (record.admin === true) {
+            return <Button
+                type="button"
+                variant="contained"
+                color="secondary"
+                label="Revoke Admin"
+                onClick={() => dataProvider.update('users', { id: record.id, data: { admin: false } }).then(() => timeout(3000)).then(() => refresh())}
+            />;
+        } else {
+            return <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                label="Make Admin"
+                disabled={record.admin === true}
+                onClick={() => dataProvider.update('users', { id: record.id, data: { admin: true } }).then(() => timeout(3000)).then(() => refresh())}
+            />;
+        }
+    };
+
     const handleRowClick = (id, basePath, record) => {
         // Custom logic for handling row click
         console.log(`Row with ID ${id} clicked`);
@@ -48,26 +76,25 @@ const UserList = () => {
             });
     };
     return (
-        <InfiniteList
-            disableSyncWithLocation
-            filterDefaultValues={{ admin: true }}
-            aside={<Aside />}
+        <List disableSyncWithLocation
+            perPage={25}
+            filter={{ admin: true }}
         >
-            <h2>Admin users</h2>
-            <Datagrid
-                bulkActionButtons={false}
-                rowClick={handleRowClick}
-                optimized
-            >
-                <TextField source="id" />
-                <TextField source="username" />
-                <TextField source="firstName" />
-                <TextField source="lastName" />
-                <TextField source="email" />
-                <BooleanField source="admin" />
-            </Datagrid>
-
-        </InfiniteList>
+            <>
+                <Datagrid
+                    bulkActionButtons={permissions === 'admin' ? true : false}
+                    rowClick="show"
+                >
+                    <TextField source="firstName" />
+                    <TextField source="lastName" />
+                    <TextField source="username" />
+                    <TextField source="email" />
+                    <TextField source="loginMethod" />
+                    <BooleanField source="admin" />
+                    <AdminButton />
+                </Datagrid>
+            </>
+        </List >
     );
 };
 

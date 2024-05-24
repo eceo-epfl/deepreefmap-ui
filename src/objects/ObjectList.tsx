@@ -32,6 +32,7 @@ import { Card, CardContent, Typography } from '@mui/material';
 import MailIcon from '@mui/icons-material/MailOutline';
 import CategoryIcon from '@mui/icons-material/LocalOffer';
 import { stopPropagation } from "ol/events/Event";
+import { FilePondUploaderList } from '../uploader/FilePond';
 
 const CreateSubmissionButton = () => {
     const listContext = useListContext();
@@ -41,7 +42,7 @@ const CreateSubmissionButton = () => {
     useEffect(() => {
         if (!data) return;
         if (data.id) {
-            redirect('edit', 'submissions', data.id);
+            redirect('show', 'submissions', data.id);
         }
     }, [data]);
 
@@ -121,30 +122,7 @@ const TransectNameField = () => {
 const ObjectList = () => {
     const FieldWrapper = ({ children, label }) => children;
     const { permissions } = usePermissions();
-    const FilePondUploader = () => {
-        const auth = useAuthProvider();
-        const token = auth.getToken();
-        const refresh = useRefresh();
 
-        return (
-            <FilePond
-                chunkUploads={true}
-                onprocessfiles={refresh}
-                allowMultiple={true}
-                credits={false}
-                chunkSize={50000000}
-                timeout={200}
-                maxParallelUploads={10}
-                allowRevert={false}
-                allowRemove={false}
-                server={{
-                    url: '/api/objects',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    }
-                }}
-            />)
-    }
     return (
         <>
             <List disableSyncWithLocation
@@ -154,7 +132,7 @@ const ObjectList = () => {
                 queryOptions={{ refetchInterval: 10000 }}
                 empty={false}
             >
-                <FilePondUploader />
+                <FilePondUploaderList />
                 <Datagrid
                     bulkActionButtons={permissions === 'admin' ? <CreateSubmissionButton /> : false}
                     rowClick="show"

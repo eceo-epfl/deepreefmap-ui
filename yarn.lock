@@ -2752,6 +2752,11 @@ file-selector@^0.6.0:
   dependencies:
     tslib "^2.4.0"
 
+filepond-plugin-file-validate-type@^1.2.9:
+  version "1.2.9"
+  resolved "https://registry.yarnpkg.com/filepond-plugin-file-validate-type/-/filepond-plugin-file-validate-type-1.2.9.tgz#84787c027354a459d91382e77adc9463ceb0182d"
+  integrity sha512-Tzv07aNdZvjUXDRA3XL16QMEvh6llDrXlcZ6W0eTHQ+taHaVg/JKJTFs/AViO+6ZcpPCcQStbhYEL2HoS+vldw==
+
 filepond@^4.30.6:
   version "4.30.6"
   resolved "https://registry.yarnpkg.com/filepond/-/filepond-4.30.6.tgz#59ef22196f810be169c77f3f1fc1439931844a3a"

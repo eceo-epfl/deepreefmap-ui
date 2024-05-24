@@ -7,5 +7,6 @@ import UserShow from './UserShow';
 export default {
     list: UserList,
     create: UserCreate,
+    show: UserShow,
     icon: PeopleIcon,
 };

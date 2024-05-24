@@ -18,11 +18,36 @@ import {
     TabbedShowLayout,
     FunctionField,
     useRefresh,
+    useCreatePath,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
+import { stopPropagation } from 'ol/events/Event';
+import { Link } from 'react-router-dom';
+
+const TransectNameField = () => {
+    const record = useRecordContext();
+    const createPath = useCreatePath();
+    if (!record) return <Loading />;
+    let path = null;
+
+    if (record.transect) {
+        path = createPath({
+            resource: 'transects',
+            type: 'show',
+            id: record.transect.id,
+        });
+    }
+
+    return (
+        <Link to={path} onClick={stopPropagation}>
+            <TextField source="transect.name" label="Area" emptyText='No associated transect' />
+        </Link>
+    );
+}
 
 const SubmissionShow = (props) => {
+    const FieldWrapper = ({ children, label }) => children;
 
     const readinessStatusMessageGenerator = (record) => {
         // Add a list of possible statuses here. Append each if statement to the list
@@ -126,6 +151,7 @@ const SubmissionShow = (props) => {
 
     const ClassPieChart = () => {
         const record = useRecordContext();
+
         const data = record.percentage_covers;
         const rgbToString = (rgbArray) => `rgb(${rgbArray.join(', ')})`;
         // If no data is available, return a message
@@ -185,6 +211,8 @@ const SubmissionShow = (props) => {
                     <Box sx={{ flex: 1 }}>
                         <Labeled>
                             <TextField source="name" />
+                        </Labeled><br /><Labeled>
+                            <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
                         </Labeled><br /><Labeled>
                             {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
                         </Labeled><br /><Labeled>

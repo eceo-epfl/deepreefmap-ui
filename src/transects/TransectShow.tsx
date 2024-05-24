@@ -6,57 +6,141 @@ import {
     TopToolbar,
     DeleteButton,
     usePermissions,
-    Labeled,
     Link,
     FunctionField,
     ArrayField,
     Datagrid,
-    useCreatePath,
     useRedirect,
     TabbedShowLayout,
     useRecordContext,
     Loading,
     DateField,
+    NumberField,
+    BooleanField,
+    useCreate,
+    useListContext,
+    Button,
+    RecordContext,
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
+import { FilePondUploaderTransect } from '../uploader/FilePond';
+import { useEffect } from "react";
 
+export const CreateSubmissionButton = () => {
+    const {
+        data: listContext,
+        isLoading: listContextLoading
+    } = useListContext();
+    const redirect = useRedirect();
+    const record = useRecordContext();
+    const [create, { data, loading, loaded, error }] = useCreate();
+
+    useEffect(() => {
+        if (!data) return;
+        if (data.id) {
+            redirect('show', 'submissions', data.id);
+        }
+    }, [data]);
+
+    if (!record || listContextLoading || !listContext) {
+        return <Loading />;
+    }
+
+    // Create a list of input_association objects from the selected video ids
+    const input_associations = listContext?.selectedIds?.map((id, index) => {
+        return {
+            input_object_id: id,
+            processing_order: index + 1
+        }
+    });
+
+    const handleClick = () => {
+        create('submissions', {
+            data: {
+                input_associations: input_associations,
+                transect_id: record.id,
+            }
+        })
+    }
+    // Create a list of selected videos that have not completed uploading to
+    // disable the button if any of the selected videos are incomplete
+    const selectedIncompleteData = listContext?.selectedIds?.some(id => {
+        const record = listContext.data?.find(data => data.id === id);
+        return record.all_parts_received === false;
+    });
+    if (selectedIncompleteData) {
+        return <Button
+            variant="contained"
+            color="error"
+            disabled={selectedIncompleteData}
+        >Deselect incomplete data</Button>
+    }
+
+    if (listContext.selectedIds?.length > 2) {
+        return <Button
+            variant="contained"
+            color="error"
+            disabled={true}
+        >Maximum 2 videos can be selected</Button>
+    }
+    return <Button
+        variant="contained"
+        color="success"
+        disabled={selectedIncompleteData}
+        onClick={handleClick}>{
+            listContext.selectedIds?.length === 1 ?
+                'Create submission from selected video' : 'Create submission from selected videos'
+        }</Button>
+};
 
 const TransectTabs = () => {
     const record = useRecordContext();
+    const { permissions } = usePermissions();
     const redirect = useRedirect();
     if (!record) return <Loading />;
     return (
-        <TabbedShowLayout>
-            <TabbedShowLayout.Tab label={`Submissions (${record.submissions?.length ? record.submissions.length : 0})`}>
-                <Typography variant="h6" gutterBottom>
-                    Results
-                </Typography>
-                <ArrayField source="submissions">
-                    <Datagrid rowClick={(id, basePath, record) => {
-                        redirect('show', 'submissions', record.id);
-                    }}>
-                        <DateField source="time_added_utc" label="Added (UTC)" />
-                        <TextField source="id" />
-                        <TextField source="name" />
-                    </Datagrid>
-                </ArrayField>
-            </TabbedShowLayout.Tab>
-            <TabbedShowLayout.Tab label={`Files (${record.inputs?.length ? record.inputs.length : 0})`}>
-                <ArrayField source="inputs">
-                    <Datagrid rowClick={(id, basePath, record) => {
-                        redirect('show', 'objects', record.id);
-                    }}>
-                        <TextField source="filename" />
-                        <TextField source="time_seconds" label="Time (s)" />
-                        <FunctionField label="Size (MB)" render={(record) => {
-                            return (record.size_bytes / 1000000).toFixed(2);
-                        }} />
-                    </Datagrid>
-                </ArrayField>
-            </TabbedShowLayout.Tab>
-
-        </TabbedShowLayout>
+        <><Typography variant="h6" gutterBottom>Associations</Typography>
+            <TabbedShowLayout>
+                <TabbedShowLayout.Tab label={`Files (${record.inputs?.length ? record.inputs.length : 0})`}>
+                    <ArrayField source="inputs">
+                        <FilePondUploaderTransect />
+                        <Datagrid
+                            bulkActionButtons={<CreateSubmissionButton />}
+                            rowClick={(id, basePath, object_record) => {
+                                redirect('show', 'objects', object_record.id);
+                            }}
+                        >
+                            <DateField
+                                label="Submitted at"
+                                source="time_added_utc"
+                            />
+                            <TextField source="filename" />
+                            <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(2); }} />
+                            <NumberField source="time_seconds" label="Duration (s)" />
+                            <TextField source="processing_message" />
+                            <BooleanField label="Upload complete" source="all_parts_received" />
+                            <BooleanField label="Processing started" source="processing_has_started" />
+                            <BooleanField label="Processing successful" source="processing_completed_successfully" />
+                        </Datagrid>
+                    </ArrayField>
+                </TabbedShowLayout.Tab>
+                <TabbedShowLayout.Tab label={`Submissions (${record.submissions?.length ? record.submissions.length : 0})`}>
+                    <Typography variant="h6" gutterBottom>
+                        Results
+                    </Typography>
+                    <ArrayField source="submissions">
+                        <Datagrid rowClick={(id, basePath, record) => {
+                            redirect('show', 'submissions', record.id);
+                        }}>
+                            <DateField source="time_added_utc" label="Added (UTC)" />
+                            <TextField source="id" />
+                            <TextField source="name" />
+                        </Datagrid>
+                    </ArrayField>
+                </TabbedShowLayout.Tab>
+            </TabbedShowLayout>
+        </>
     )
 }
 

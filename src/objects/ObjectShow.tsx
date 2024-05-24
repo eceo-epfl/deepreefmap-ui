@@ -26,6 +26,7 @@ import {
     FunctionField,
     useCreatePath,
     Link,
+    Loading,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { stopPropagation } from 'ol/events/Event';
 
@@ -35,6 +36,7 @@ const ObjectShowActions = () => {
     const record = useRecordContext();
     const refresh = useRefresh();
     const timeout = ms => new Promise(res => setTimeout(res, ms));
+    if (!record) return <Loading />;
     const RegenerateStatisticsButton = () => {
         return <Button
             type="button"
@@ -68,6 +70,7 @@ const ObjectShowActions = () => {
                     }
                 })
         }
+        if (!record) return <Loading />;
         return <Button
             type="button"
             variant="contained"
