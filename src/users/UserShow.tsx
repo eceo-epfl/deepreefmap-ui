@@ -22,12 +22,8 @@ const UserShow = () => {
                 <TextField source="username" />
                 <TextField source="email" />
                 <TextField source="loginMethod" />
+                <BooleanField source="approved_user" />
                 <BooleanField source="admin" />
-                <ArrayField source="roles">
-                    <SingleFieldList linkType={false}>
-                        <ChipField source="name" />
-                    </SingleFieldList>
-                </ArrayField>
             </SimpleShowLayout>
         </Show >
     )

@@ -17,14 +17,11 @@ import {
 import { useEffect, useState } from "react";
 import { stopPropagation } from "ol/events/Event";
 
-
-
 const SubmissionListActions = () => {
-    const { permissions } = usePermissions();
     return (
 
         <TopToolbar >
-            {permissions === 'admin' && <><CreateButton /></>}
+            <><CreateButton /></>
             <ExportButton />
         </TopToolbar>
     );

@@ -101,14 +101,14 @@ const SubmissionShow = (props) => {
 
         return (
             <TopToolbar>
-                {permissions === 'admin' && <>
+                <>
                     <Button
                         variant="contained"
                         color="success"
                         disabled={readyToSubmit}
                         onClick={executeJob}>Execute Job</Button>
                     <EditButton />
-                    <DeleteButton /></>}
+                    <DeleteButton /></>
             </TopToolbar>
         );
     }
@@ -129,7 +129,6 @@ const SubmissionShow = (props) => {
     };
 
     const downloadFile = (id, basePath, record) => {
-        console.log("Download file", basePath, id, record);
         dataProvider.downloadFile(record.url);
     };
 
@@ -213,9 +212,9 @@ const SubmissionShow = (props) => {
                             <TextField source="name" />
                         </Labeled><br /><Labeled>
                             <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
-                        </Labeled><br /><Labeled>
-                            {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
-                        </Labeled><br /><Labeled>
+                        </Labeled><br />
+                        {permissions === 'admin' ? <><Labeled><TextField source="owner" emptyText="Not defined" /></Labeled><br /></> : null}
+                        <Labeled>
                             <TextField source="description" />
                         </Labeled><br /><Labeled>
                             <DateField

@@ -29,9 +29,9 @@ import {
     Loading,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { stopPropagation } from 'ol/events/Event';
+import { TransectMapOne } from '../maps/Transects';
 
 const ObjectShowActions = () => {
-    const { permissions } = usePermissions();
     const dataProvider = useDataProvider();
     const record = useRecordContext();
     const refresh = useRefresh();
@@ -82,7 +82,7 @@ const ObjectShowActions = () => {
     };
     return (
         <TopToolbar>
-            {permissions === 'admin' && <><CreateSubmissionButton /><RegenerateStatisticsButton /><EditButton /><DeleteButton /></>}
+            <><CreateSubmissionButton /><RegenerateStatisticsButton /><EditButton /><DeleteButton /></>
         </TopToolbar >
     );
 }
@@ -102,9 +102,11 @@ const TransectNameField = () => {
     }
 
     return (
-        <Link to={path} onClick={stopPropagation}>
+        <><Link to={path} onClick={stopPropagation}>
             <TextField source="transect.name" label="Area" emptyText='No associated transect' />
         </Link>
+            <TransectMapOne record={record.transect} />
+        </>
     );
 }
 
@@ -113,7 +115,7 @@ const ObjectShow = (props) => {
     const FieldWrapper = ({ children, label }) => children;
     const redirect = useRedirect();
     const redirectToSubmission = (id, basePath, record) => {
-        redirect('edit', 'submissions', record.submission_id);
+        redirect('show', 'submissions', record.submission_id);
     };
     const { permissions } = usePermissions();
 
@@ -157,7 +159,9 @@ const ObjectShow = (props) => {
                         </ReferenceField>
                     </Datagrid>
                 </ArrayField>
-                <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
+                <FieldWrapper label="Associated transect">
+                    <TransectNameField />
+                </FieldWrapper>
             </SimpleShowLayout>
         </Show >
     )

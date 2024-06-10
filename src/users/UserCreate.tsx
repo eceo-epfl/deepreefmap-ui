@@ -23,6 +23,7 @@ import {
 } from 'react-admin';
 
 import Aside from './Aside';
+import { Typography } from '@mui/material';
 
 
 const UserCreate = () => {
@@ -36,7 +37,7 @@ const UserCreate = () => {
         console.log(`Row with ID ${id} clicked`);
 
         dataProvider
-            .update('users', { id, data: { admin: true } })
+            .update('users', { id, data: { role: "user" } })
             .then(() => {
                 notify('User updated successfully');
                 refresh();
@@ -49,22 +50,30 @@ const UserCreate = () => {
 
 
     const postFilters = [
-        <SearchInput source="username" placeholder="EPFL Username" alwaysOn />
+        <SearchInput source="username" placeholder="Username" alwaysOn />
     ];
     return (
         <Create aside={< Aside />} redirect="show" >
-            <h2>Add admin user</h2>
+            <Typography variant="h3">Approve user</Typography>
+            <Typography variant="caption">
+                Click the row to provide permission to a user, they will be added as a standard user. Elevation to admin status if necessary, can be provided in the user list afterwards.<br />
+                External users must login first (via Github, etc.) to show up in this list.
+            </Typography>
+
             <List
                 filters={postFilters}
                 actions={null}
                 pagination={null}
                 disableSyncWithLocation
             >
+                <Typography variant="caption">The username is the EPFL Gaspar, or the external provider (Github) username</Typography>
                 <Datagrid bulkActionButtons={false} rowClick={handleRowClick}>
                     <TextField source="username" />
                     <TextField source="firstName" />
                     <TextField source="lastName" />
                     <TextField source="email" />
+                    <TextField source="loginMethod" />
+                    <BooleanField source="approved_user" />
                     <BooleanField source="admin" />
                 </Datagrid>
             </List>

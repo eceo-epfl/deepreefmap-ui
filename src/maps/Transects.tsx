@@ -28,7 +28,7 @@ export const TransectMapAll = () => {
         'transects', {}
     );
 
-    if (isLoading || !data) {
+    if (isLoading) {
         return <Loading />;
     }
 
@@ -44,8 +44,6 @@ export const TransectMapAll = () => {
             )
         )
     ).pad(1);
-
-
 
     return (
         <MapContainer
@@ -87,13 +85,10 @@ export const TransectMapAll = () => {
     );
 };
 
-export const TransectMapOne = () => {
-    const record = useRecordContext();
-
-    if (!record) {
-        return <Loading />;
+export const TransectMapOne = ({ record }) => {
+    if (record === null) {
+        return
     }
-
     // Set bounds to the first transect (CHANGE THIS)
     const bounds = L.latLngBounds(
         [[record.latitude_start, record.longitude_start],

@@ -144,8 +144,15 @@ const TransectTabs = () => {
     )
 }
 
+const TransectMap = () => {
+    const record = useRecordContext();
+    if (!record) return <Loading />;
+    return (
+        <TransectMapOne record={record} />
+    )
+}
+
 const TransectShow = (props) => {
-    const redirect = useRedirect();
     const { permissions } = usePermissions();
 
     const TransectShowActions = () => {
@@ -174,7 +181,7 @@ const TransectShow = (props) => {
                     )
                 }
                 } />
-                <TransectMapOne />
+                <TransectMap />
                 <TransectTabs />
             </SimpleShowLayout>
         </Show >

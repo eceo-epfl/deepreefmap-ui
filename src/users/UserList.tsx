@@ -20,15 +20,23 @@ import {
     EditButton,
     Button,
     useRecordContext,
+    TopToolbar,
+    CreateButton,
+    ExportButton,
 } from 'react-admin';
-
-import Aside from './Aside';
-import UserEditEmbedded from './UserEditEmbedded';
 export const UserIcon = PeopleIcon;
 
+const UserListActions = () => {
+    return (
+
+        <TopToolbar>
+            <><CreateButton label="Approve user" /></>
+            <ExportButton />
+        </TopToolbar>
+    );
+}
 
 const UserList = () => {
-    const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useDataProvider();
 
@@ -43,7 +51,12 @@ const UserList = () => {
                 variant="contained"
                 color="secondary"
                 label="Revoke Admin"
-                onClick={() => dataProvider.update('users', { id: record.id, data: { admin: false } }).then(() => timeout(3000)).then(() => refresh())}
+                onClick={(event) => {
+                    dataProvider.update(
+                        'users',
+                        { id: record.id, data: { role: "user" } }).then(() => refresh())
+                    event.stopPropagation();
+                }}
             />;
         } else {
             return <Button
@@ -51,50 +64,43 @@ const UserList = () => {
                 variant="contained"
                 color="primary"
                 label="Make Admin"
-                disabled={record.admin === true}
-                onClick={() => dataProvider.update('users', { id: record.id, data: { admin: true } }).then(() => timeout(3000)).then(() => refresh())}
+                // disabled={record.admin === true}
+                onClick={(event) => {
+                    dataProvider.update(
+                        'users',
+                        { id: record.id, data: { role: "admin" } }).then(() => refresh())
+                    event.stopPropagation();
+                }}
             />;
         }
     };
 
-    const handleRowClick = (id, basePath, record) => {
-        // Custom logic for handling row click
-        console.log(`Row with ID ${id} clicked`);
-
-        // Example: Navigate to a custom route
-        // Update the user-id with an updated value
-        //
-        dataProvider
-            .update('users', { id, data: { admin: false } })
-            .then(() => {
-                notify('User updated successfully');
-                refresh();
-            })
-            .catch((error) => {
-                console.error('Error updating user:', error);
-                notify('Error updating user', 'error');
-            });
-    };
     return (
-        <List disableSyncWithLocation
-            perPage={25}
-            filter={{ admin: true }}
-        >
-            <>
-                <Datagrid
-                    bulkActionButtons={permissions === 'admin' ? true : false}
-                    rowClick="show"
-                >
-                    <TextField source="firstName" />
-                    <TextField source="lastName" />
-                    <TextField source="username" />
-                    <TextField source="email" />
-                    <TextField source="loginMethod" />
-                    <BooleanField source="admin" />
-                    <AdminButton />
-                </Datagrid>
-            </>
-        </List >
+        <>
+
+            <List
+                actions={<UserListActions />}
+                disableSyncWithLocation
+                perPage={50}
+                filter={{ users_only: true }}
+            >
+                <Typography variant="h4">Approved users</Typography>
+                <>
+                    <Datagrid
+                        bulkActionButtons={permissions === 'admin' ? true : false}
+                        rowClick="show"
+                    >
+                        <TextField source="firstName" />
+                        <TextField source="lastName" />
+                        <TextField source="username" />
+                        <TextField source="email" />
+                        <TextField source="loginMethod" />
+                        <BooleanField source="admin" />
+                        <AdminButton />
+                    </Datagrid>
+                </>
+            </List >
+        </>
     );
 };
 
