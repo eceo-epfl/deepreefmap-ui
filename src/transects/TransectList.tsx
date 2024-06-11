@@ -17,12 +17,10 @@ import { TransectMapAll } from "../maps/Transects";
 
 
 const TransectListActions = () => {
-    const { permissions } = usePermissions();
-
     return (
 
         <TopToolbar >
-            {permissions === 'admin' && <><CreateButton /></>}
+            <CreateButton />
             <ExportButton />
         </TopToolbar>
     );

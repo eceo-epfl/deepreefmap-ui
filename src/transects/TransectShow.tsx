@@ -27,13 +27,11 @@ import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
 
-export const CreateSubmissionButton = () => {
-    const {
-        data: listContext,
-        isLoading: listContextLoading
-    } = useListContext();
-    const redirect = useRedirect();
+
+const CreateSubmissionButton = () => {
     const record = useRecordContext();
+    const listContext = useListContext();
+    const redirect = useRedirect();
     const [create, { data, loading, loaded, error }] = useCreate();
 
     useEffect(() => {
@@ -43,32 +41,35 @@ export const CreateSubmissionButton = () => {
         }
     }, [data]);
 
-    if (!record || listContextLoading || !listContext) {
-        return <Loading />;
-    }
-
     // Create a list of input_association objects from the selected video ids
-    const input_associations = listContext?.selectedIds?.map((id, index) => {
+    const input_associations = listContext.selectedIds.map((id, index) => {
         return {
             input_object_id: id,
             processing_order: index + 1
         }
     });
 
+    // Create a list of selected videos that have not completed uploading to
+    // disable the button if any of the selected videos are incomplete
+    const selectedIncompleteData = listContext.selectedIds.some(id => {
+        const record = listContext.data.find(data => data.id === id);
+        return record.all_parts_received === false;
+    });
     const handleClick = () => {
         create('submissions', {
             data: {
-                input_associations: input_associations,
                 transect_id: record.id,
+                input_associations: input_associations
             }
         })
     }
-    // Create a list of selected videos that have not completed uploading to
-    // disable the button if any of the selected videos are incomplete
-    const selectedIncompleteData = listContext?.selectedIds?.some(id => {
-        const record = listContext.data?.find(data => data.id === id);
-        return record.all_parts_received === false;
-    });
+    if (listContext.selectedIds.length > 2) {
+        return <Button
+            variant="contained"
+            color="error"
+            disabled={true}
+        >Maximum 2 videos can be selected</Button>
+    }
     if (selectedIncompleteData) {
         return <Button
             variant="contained"
@@ -76,23 +77,17 @@ export const CreateSubmissionButton = () => {
             disabled={selectedIncompleteData}
         >Deselect incomplete data</Button>
     }
-
-    if (listContext.selectedIds?.length > 2) {
-        return <Button
-            variant="contained"
-            color="error"
-            disabled={true}
-        >Maximum 2 videos can be selected</Button>
-    }
     return <Button
         variant="contained"
         color="success"
         disabled={selectedIncompleteData}
         onClick={handleClick}>{
-            listContext.selectedIds?.length === 1 ?
+            listContext.selectedIds.length === 1 ?
                 'Create submission from selected video' : 'Create submission from selected videos'
         }</Button>
 };
+
+
 
 const TransectTabs = () => {
     const record = useRecordContext();
@@ -136,6 +131,8 @@ const TransectTabs = () => {
                             <DateField source="time_added_utc" label="Added (UTC)" />
                             <TextField source="id" />
                             <TextField source="name" />
+                            <BooleanField source="processing_has_started" label="Processing started" />
+                            <BooleanField source="processing_completed_successfully" label="Processing successful" />
                         </Datagrid>
                     </ArrayField>
                 </TabbedShowLayout.Tab>

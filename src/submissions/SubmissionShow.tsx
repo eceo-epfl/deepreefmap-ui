@@ -24,6 +24,7 @@ import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
 import { Link } from 'react-router-dom';
+import { TransectMapOne } from '../maps/Transects';
 
 const TransectNameField = () => {
     const record = useRecordContext();
@@ -40,11 +41,14 @@ const TransectNameField = () => {
     }
 
     return (
-        <Link to={path} onClick={stopPropagation}>
+        <><Link to={path} onClick={stopPropagation}>
             <TextField source="transect.name" label="Area" emptyText='No associated transect' />
         </Link>
+            <TransectMapOne record={record.transect} />
+        </>
     );
 }
+
 
 const SubmissionShow = (props) => {
     const FieldWrapper = ({ children, label }) => children;
@@ -147,7 +151,9 @@ const SubmissionShow = (props) => {
             }
         />;
     };
-
+    const jobStatus = (record) => {
+        return record.run_status[0]?.status ?? 'No status';
+    }
     const ClassPieChart = () => {
         const record = useRecordContext();
 
@@ -210,8 +216,6 @@ const SubmissionShow = (props) => {
                     <Box sx={{ flex: 1 }}>
                         <Labeled>
                             <TextField source="name" />
-                        </Labeled><br /><Labeled>
-                            <FieldWrapper label="Associated transect"><TransectNameField /></FieldWrapper>
                         </Labeled><br />
                         {permissions === 'admin' ? <><Labeled><TextField source="owner" emptyText="Not defined" /></Labeled><br /></> : null}
                         <Labeled>
@@ -245,7 +249,7 @@ const SubmissionShow = (props) => {
                         </Labeled><br /><Labeled>
                             <FunctionField
                                 label="Last job status"
-                                render={record => `${record?.run_status[0]?.status ?? 'No status'}`}
+                                render={jobStatus}
                             />
                         </Labeled>
                     </Box>
@@ -290,6 +294,9 @@ const SubmissionShow = (props) => {
                                 <DateField source="last_modified" showTime={true} sortable={false} />
                             </Datagrid>
                         </ArrayField>
+                    </TabbedShowLayout.Tab>
+                    <TabbedShowLayout.Tab label="Transect">
+                        <TransectNameField />
                     </TabbedShowLayout.Tab>
                 </TabbedShowLayout>
 

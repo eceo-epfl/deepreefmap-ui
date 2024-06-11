@@ -89,12 +89,10 @@ const CreateSubmissionButton = () => {
 
 
 const ObjectListActions = () => {
-    const { permissions } = usePermissions();
     return (
 
         <TopToolbar >
-            {permissions === 'admin' && <>
-            </>}
+
             <ExportButton />
         </TopToolbar>
     );
@@ -134,7 +132,7 @@ const ObjectList = () => {
             >
                 <FilePondUploaderList />
                 <Datagrid
-                    bulkActionButtons={permissions === 'admin' ? <CreateSubmissionButton /> : false}
+                    bulkActionButtons={<CreateSubmissionButton />}
                     rowClick="show"
                 >
                     <DateField
