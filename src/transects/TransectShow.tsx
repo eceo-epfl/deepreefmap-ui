@@ -21,6 +21,7 @@ import {
     useListContext,
     Button,
     RecordContext,
+    ReferenceField,
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
@@ -131,8 +132,6 @@ const TransectTabs = () => {
                             <DateField source="time_added_utc" label="Added (UTC)" />
                             <TextField source="id" />
                             <TextField source="name" />
-                            <BooleanField source="processing_has_started" label="Processing started" />
-                            <BooleanField source="processing_completed_successfully" label="Processing successful" />
                         </Datagrid>
                     </ArrayField>
                 </TabbedShowLayout.Tab>

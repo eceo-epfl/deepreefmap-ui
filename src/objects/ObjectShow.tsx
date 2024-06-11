@@ -20,8 +20,6 @@ import {
     Datagrid,
     useRedirect,
     ReferenceField,
-    ReferenceArrayField,
-    ReferenceManyField,
     useCreate,
     FunctionField,
     useCreatePath,
