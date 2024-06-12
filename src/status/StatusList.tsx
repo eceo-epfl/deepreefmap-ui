@@ -1,30 +1,22 @@
 import {
-    List,
-    Datagrid,
-    TextField,
-    usePermissions,
-    TopToolbar,
-    CreateButton,
-    ExportButton,
-    DateField,
-    FunctionField,
-    BooleanField,
     useDataProvider,
+    Loading,
 } from "react-admin";
-import { Card, Stack } from '@mui/material';
 import { useEffect, useState } from "react";
+import { Card, Stack, Typography } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 
-export const RunnerStatus = ({ records, resource }) => {
+export const RunnerStatus = () => {
     const dataProvider = useDataProvider();
-
     const [systemStatus, setSystemStatus] = useState("Offline");
-    const [jobs, setJobs] = useState([]);
-    const [runningJobCount, setRunningJobCount] = useState(null);
+    const [status, setStatus] = useState([]);
+    const [runningJobCount, setRunningJobCount] = useState(0);
     const [jobCount, setJobCount] = useState(null);
+
     useEffect(() => {
         const fetchData = async () => {
-            const jobsData = await dataProvider.getKubernetesJobs();
-            setJobs(jobsData);
+            const statusData = await dataProvider.getStatus();
+            setStatus(statusData.data);
             setSystemStatus("Online");
         };
 
@@ -35,27 +27,85 @@ export const RunnerStatus = ({ records, resource }) => {
     useEffect(() => {
         // Check jobs.data array for amount that have status.phase "Running"
         // and count them
-        var runningJobs = 0;
+        if (!status) {
+            return (<Loading />);
+        }
+        console.log(status);
         var allJobCount = 0;
-        jobs.data?.map((job) => {
-            if (job.status.phase === "Pending"
-                || job.status.phase === "Running"
-                || job.status.phase === "ContainerCreating"
-                || job.status.phase === "Running"
-            ) {
-                runningJobs++;
-            }
-        });
-        setRunningJobCount(runningJobs);
-        setJobCount(jobs.data?.length ?? 0);
-    }, [jobs]);
+        const getRunningJobs = () => {
+            var runningJobs = 0;
+            status?.kubernetes?.map((job) => {
+                if (job.status.phase === "Pending"
+                    || job.status.phase === "Running"
+                    || job.status.phase === "ContainerCreating"
+                    || job.status.phase === "Running"
+                ) {
+                    runningJobs++;
+                }
+            })
+            return runningJobs;
+        };
+        setRunningJobCount(getRunningJobs);
+        setJobCount(status?.kubernetes?.length ?? 0);
+    }, []);
 
+
+
+
+    // ...
 
     return (
         <Card>
-            <b>RCP</b><br />
-            Status: {systemStatus}<br />
-            Running jobs: {runningJobCount} ({jobCount} total)
+            <Typography variant="h5">Status</Typography>
+            <Typography variant="caption">These status items relate to properties throughout dev/stage/prod deployments</Typography><br />
+            <br />
+            <Typography variant="h6">RCP</Typography>
+            Status: {systemStatus}<br /><br />
+            <Typography variant="h6">Jobs</Typography>
+            Running: {runningJobCount}<br />
+            Finished: {jobCount}
+            <br /><br />
+            <Typography variant="h6">S3 Bucket</Typography>
+            <TableContainer>
+                <Table size="small"> {/* Add size="small" to shrink the table */}
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Property</TableCell>
+                            <TableCell>Value</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {status?.s3_local && (
+                            <>
+                                <TableRow>
+                                    <TableCell>Total Object Count</TableCell>
+                                    <TableCell>{status.s3_local.total_object_count}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Input Object Size (GB)</TableCell>
+                                    <TableCell>{(status.s3_local.input_size / 1024 / 1024 / 1024).toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Input Object Count</TableCell>
+                                    <TableCell>{status.s3_local.input_object_count}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Output Object Size (GB)</TableCell>
+                                    <TableCell>{(status.s3_local.output_size / 1024 / 1024 / 1024).toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Output Object Count</TableCell>
+                                    <TableCell>{status.s3_local.output_object_count}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Total Size (GB)</TableCell>
+                                    <TableCell>{(status.s3_local.total_size / 1024 / 1024 / 1024).toFixed(2)}</TableCell>
+                                </TableRow>
+                            </>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </Card >
     );
 };

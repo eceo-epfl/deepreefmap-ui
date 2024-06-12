@@ -186,8 +186,8 @@ const dataProvider = (
         })),
 
 
-    getKubernetesJobs: (resource, params) => {
-        const url = `${apiUrl}/submissions/kubernetes/jobs`;
+    getStatus: (resource, params) => {
+        const url = `${apiUrl}/status`;
         // Return the promise with the JSON array
         return httpClient(url).then(({ json }) => ({ data: json }));
     },
