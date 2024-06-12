@@ -2,19 +2,28 @@ import {
     Show,
     SimpleShowLayout,
     TextField,
-    NumberField,
-    DateField,
     BooleanField,
-    ArrayField,
-    Datagrid,
-    ReferenceField,
-    ChipField,
-    SingleFieldList,
+    DeleteButton,
+    TopToolbar,
 } from 'react-admin';
+
+const UserShowActions = () => {
+
+    return (
+        <TopToolbar>
+            <>
+                <DeleteButton /></>
+        </TopToolbar>
+    );
+}
 
 const UserShow = () => {
     return (
-        <Show>
+        <Show
+            actions={<UserShowActions />}
+            redirect="list"
+            title="User Details"
+        >
             <SimpleShowLayout>
                 <TextField source="id" />
                 <TextField source="firstName" />

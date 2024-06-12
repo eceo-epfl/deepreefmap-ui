@@ -1,15 +1,28 @@
-import React from 'react';
-// import './DeepReefMap.css'; // Make sure to include any necessary styles
-// import 'bulma/css/bulma.min.css'; // Example of including CSS frameworks
 import './css/css.css'
 import './css/academicons.min.css'
 import './css/fontawesome.all.min.css'
 import './css/bulma.min.css'
 import './css/bulma-carousel.min.css'
 import './css/bulma-slider.min.css'
+import { usePermissions } from 'react-admin';
+import { Typography } from '@mui/material';
+
 const Dashboard = () => {
+    const { permissions } = usePermissions();
+
     return (
-        <>
+        <>{
+            (permissions === 'admin' || permissions === 'user') ? null : (
+                <>
+                    <Typography
+                        variant="body"
+                        color="error"
+                        align='center'
+                        gutterBottom>
+                        To access the DeepReefMap portal, please contact the administrator to request access.
+                    </Typography>
+                </>
+            )}
             <section className="hero">
                 <div className="hero-body">
                     <div className="container is-max-desktop">

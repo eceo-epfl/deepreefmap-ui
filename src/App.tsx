@@ -90,10 +90,15 @@ const App = () => {
         >
             {permissions => (
                 <>
-                    <Resource name="transects" {...transects} />
-                    <Resource name="submissions" {...submissions} />
-                    <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
-                    <Resource name="objects" {...objects} />
+                    { // only show the resources if the user has been approved; ie. is either 'user' or 'admin' role
+                        (permissions === 'admin' || permissions === 'user') ? (
+                            <>
+                                <Resource name="transects" {...transects} />
+                                <Resource name="submissions" {...submissions} />
+                                <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
+                                <Resource name="objects" {...objects} />
+                            </>
+                        ) : null}
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (
