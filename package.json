@@ -10,8 +10,12 @@
     "format": "prettier --write ./src"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-brands-svg-icons": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "axios": "^1.6.0",
-    "filepond": "^4.30.6",
+    "filepond": "^4.31.2",
     "filepond-plugin-file-validate-type": "^1.2.9",
     "keycloak-js": "^22.0.4",
     "leaflet": "^1.9.4",
@@ -25,7 +29,7 @@
     "ra-keycloak": "^1.0.1",
     "ra-language-french": "^4.15.1",
     "react": "^18.2.0",
-    "react-admin": "^4.14.0",
+    "react-admin": "^5.1.2",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-dropzone-uploader": "^2.11.0",

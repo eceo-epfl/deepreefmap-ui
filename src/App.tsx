@@ -15,7 +15,7 @@ import Keycloak, {
 } from 'keycloak-js';
 import { httpClient } from 'ra-keycloak';
 import { keycloakAuthProvider } from './authProvider';
-import Layout from './Layout';
+import MyLayout from './Layout';
 import axios from 'axios';
 import SubmissionJobLogsShow from './submissions/SubmissionJobLogsShow';
 import Dashboard from './Dashboard';
@@ -86,7 +86,7 @@ const App = () => {
             dataProvider={dataProvider.current}
             title="AstroRiver"
             dashboard={Dashboard}
-            layout={Layout}
+            layout={MyLayout}
         >
             {permissions => (
                 <>
