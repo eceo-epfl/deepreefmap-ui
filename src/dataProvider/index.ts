@@ -189,11 +189,7 @@ const dataProvider = (
     getStatus: (resource, params) => {
         const url = `${apiUrl}/status`;
         // Return the promise with the JSON array
-        return httpClient(url).then(({ json }) => ({ data: json })).catch((error) => {
-            console.log(error);
-            return { data: false };
-        }
-        );
+        return httpClient(url).then(({ json }) => ({ data: json }));
     },
     executeKubernetesJob: (id) => {
         const url = `${apiUrl}/submissions/${id}/execute`;

@@ -2,11 +2,10 @@ import * as React from 'react';
 import { Layout, AppBar, TitlePortal, useDataProvider } from 'react-admin';
 import { CssBaseline } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { Typography } from '@mui/material';
-import { Box } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
 
-const GPUStatus = ({ isOnline }) => {
+const StatusIcon = ({ gpu, storage }) => {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box
@@ -14,25 +13,50 @@ const GPUStatus = ({ isOnline }) => {
                     width: 12,
                     height: 12,
                     borderRadius: '50%',
-                    bgcolor: isOnline ? 'green' : 'red',
+                    bgcolor: gpu ? 'green' : 'red',
                     marginRight: 1,
                 }}
             />
-            <Typography variant="body1" color={isOnline ? 'textPrimary' : 'textSecondary'}>
-                {isOnline ? 'GPU Online' : 'GPU Offline'}
+            <Typography variant="body1" color={gpu ? 'textPrimary' : 'textSecondary'}>
+                GPU
+            </Typography>
+
+            {/* Add a vertical separator line */}
+            <Box
+                sx={{
+                    height: 24,
+                    width: 2,
+                    bgcolor: 'gray',
+                    marginX: 2,
+                }}
+            />
+
+            <Box
+                sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: storage ? 'green' : 'red',
+                    marginRight: 1,
+                }}
+            />
+            <Typography variant="body1" color={storage ? 'textPrimary' : 'textSecondary'}>
+                Storage
             </Typography>
         </Box>
     );
 };
 
+
 const MyAppBar = () => {
-    const [systemStatus, setSystemStatus] = useState(undefined);
+    const [systemStatus, setSystemStatus] = useState({});
     const dataProvider = useDataProvider();
 
     useEffect(() => {
         const fetchData = async () => {
-            const statusData = await dataProvider.getStatus(undefined);
+            const statusData = await dataProvider.getStatus();
             setSystemStatus(statusData.data);
+            console.log(systemStatus);
         };
 
         fetchData();
@@ -42,7 +66,12 @@ const MyAppBar = () => {
     return (
         <AppBar color="primary" >
             <TitlePortal />
-            <GPUStatus isOnline={systemStatus} />
+
+
+            <StatusIcon
+                gpu={systemStatus.kubernetes_status}
+                storage={systemStatus.s3_status}
+            />
         </AppBar>
     )
 };
