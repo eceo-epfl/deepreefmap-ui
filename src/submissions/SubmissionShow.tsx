@@ -117,7 +117,7 @@ const SubmissionShow = (props) => {
         );
     }
 
-    const redirect = useRedirect();
+    const createPath = useCreatePath();
     const { permissions } = usePermissions();
     const dataProvider = useDataProvider();
 
@@ -126,10 +126,19 @@ const SubmissionShow = (props) => {
             console.log('Job is pending, logs are not available yet');
             return;
         }
-        redirect('show', 'submission_job_logs', record.submission_id);
+        createPath({
+            resource: 'submission_job_logs',
+            type: 'show',
+            id: record.submission_id,
+        });
+
     };
     const redirectToObject = (id, basePath, record) => {
-        redirect('show', 'objects', record.input_object.id);
+        createPath({
+            resource: 'objects',
+            type: 'show',
+            id: record.input_object.id,
+        });
     };
 
     const downloadFile = (id, basePath, record) => {
