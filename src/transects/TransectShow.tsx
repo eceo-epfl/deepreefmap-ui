@@ -22,11 +22,13 @@ import {
     Button,
     RecordContext,
     ReferenceField,
+    useCreatePath,
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
+import { create } from 'domain';
 
 
 const CreateSubmissionButton = () => {
@@ -92,8 +94,10 @@ const CreateSubmissionButton = () => {
 
 const TransectTabs = () => {
     const record = useRecordContext();
-    const { permissions } = usePermissions();
-    const redirect = useRedirect();
+    const createPath = useCreatePath();
+
+    const objectClick = (id, resource, record) => (createPath({ resource: 'objects', type: 'show', id: record.id }));
+    const submissionClick = (id, resource, record) => (createPath({ resource: 'submissions', type: 'show', id: record.id }));
     if (!record) return <Loading />;
     return (
         <><Typography variant="h6" gutterBottom>Associations</Typography>
@@ -103,9 +107,7 @@ const TransectTabs = () => {
                         <FilePondUploaderTransect />
                         <Datagrid
                             bulkActionButtons={<CreateSubmissionButton />}
-                            rowClick={(id, basePath, object_record) => {
-                                redirect('show', 'objects', object_record.id);
-                            }}
+                            rowClick={objectClick}
                         >
                             <DateField
                                 label="Submitted at"
@@ -126,9 +128,7 @@ const TransectTabs = () => {
                         Results
                     </Typography>
                     <ArrayField source="submissions">
-                        <Datagrid rowClick={(id, basePath, record) => {
-                            redirect('show', 'submissions', record.id);
-                        }}>
+                        <Datagrid rowClick={submissionClick}>
                             <DateField source="time_added_utc" label="Added (UTC)" />
                             <TextField source="id" />
                             <TextField source="name" />
