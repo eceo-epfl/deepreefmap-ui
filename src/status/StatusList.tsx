@@ -47,9 +47,6 @@ export const RunnerStatus = () => {
             <Typography variant="h5" gutterBottom>
                 System Status
             </Typography>
-            <Typography variant="caption" display="block" gutterBottom>
-                These status items relate to properties throughout dev/stage/prod deployments
-            </Typography>
 
             <Grid container spacing={3} sx={{ marginTop: 2 }}>
                 <Grid item xs={12} sm={6}>

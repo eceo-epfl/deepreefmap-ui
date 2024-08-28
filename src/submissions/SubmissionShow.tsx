@@ -23,31 +23,19 @@ import {
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
-import { Link } from 'react-router-dom';
 import { TransectMapOne } from '../maps/Transects';
+import { Link } from 'react-router-dom';
 
 const TransectNameField = () => {
     const record = useRecordContext();
-    const createPath = useCreatePath();
-    if (!record) return <Loading />;
-    let path = null;
-
-    if (record.transect) {
-        path = createPath({
-            resource: 'transects',
-            type: 'show',
-            id: record.transect.id,
-        });
-    }
+    if (!record) return (<Typography>No associated transect" </Typography>);
 
     return (
-        <><Link to={path} onClick={stopPropagation}>
-            <TextField source="transect.name" label="Area" emptyText='No associated transect' />
-        </Link>
+        <>
             <TransectMapOne record={record.transect} />
         </>
     );
-}
+};
 
 
 const SubmissionShow = (props) => {
