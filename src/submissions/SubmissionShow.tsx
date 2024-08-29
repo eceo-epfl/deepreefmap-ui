@@ -19,6 +19,7 @@ import {
     FunctionField,
     useRefresh,
     useCreatePath,
+    useTheme,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
@@ -153,7 +154,8 @@ const SubmissionShow = (props) => {
     }
     const ClassPieChart = () => {
         const record = useRecordContext();
-
+        const [theme, setTheme] = useTheme();
+        console.log("THEME", theme);
         const data = record.percentage_covers;
         const rgbToString = (rgbArray) => `rgb(${rgbArray.join(', ')})`;
         // If no data is available, return a message
@@ -192,6 +194,7 @@ const SubmissionShow = (props) => {
                 layout={{
                     width: 800,
                     height: 600,
+                    paper_bgcolor: theme === 'dark' ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)',
                     autosize: true,
                     margin: {
                         l: 0,  // Left margin
@@ -200,6 +203,7 @@ const SubmissionShow = (props) => {
                         b: 0,  // Bottom margin
                     },
                     font: {
+                        color: theme === 'dark' ? 'white' : 'black',
                         size: 16,
                     }
                 }}
