@@ -1,17 +1,32 @@
 import { LayersControl, TileLayer } from 'react-leaflet';
+import { useTheme } from 'react-admin';
 
 export const BaseLayers = () => {
     const { BaseLayer, Overlay } = LayersControl;
+    const [theme, setTheme] = useTheme();
+    console.log("theme", theme);
+
     return (
         <LayersControl>
-            {/* <BaseLayer checked name="SwissTopo">
+            <BaseLayer
+                name="CARTO Dark"
+                checked={theme === 'dark'}
+            >
+                {/* {theme === 'dark' ? (
+                    ) : (
+                        )} */}
                 <TileLayer
-                    attribution='&copy; <a href="https://www.swisstopo.admin.ch/">SwissTopo</a>'
-                    url="https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg"
-                    opacity={0.5}
+                    url='https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    subdomains='abcd'
+                    maxZoom={20}
+                    zIndex={0}
                 />
-            </BaseLayer> */}
-            <BaseLayer checked name="OpenStreetMap">
+            </BaseLayer>
+            <BaseLayer
+                name="OpenStreetMap"
+                checked={theme !== 'dark'}
+            >
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     opacity={0.5}
