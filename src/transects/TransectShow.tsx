@@ -98,6 +98,7 @@ const TransectTabs = () => {
 
     const objectClick = (id, resource, record) => (createPath({ resource: 'objects', type: 'show', id: record.id }));
     const submissionClick = (id, resource, record) => (createPath({ resource: 'submissions', type: 'show', id: record.id }));
+
     if (!record) return <Loading />;
     return (
         <><Typography variant="h6" gutterBottom>Associations</Typography>

@@ -115,15 +115,14 @@ const SubmissionShow = (props) => {
             console.log('Job is pending, logs are not available yet');
             return;
         }
-        createPath({
+        return createPath({
             resource: 'submission_job_logs',
             type: 'show',
             id: record.submission_id,
         });
-
     };
     const redirectToObject = (id, basePath, record) => {
-        createPath({
+        return createPath({
             resource: 'objects',
             type: 'show',
             id: record.input_object.id,
@@ -155,7 +154,7 @@ const SubmissionShow = (props) => {
     const ClassPieChart = () => {
         const record = useRecordContext();
         const [theme, setTheme] = useTheme();
-        console.log("THEME", theme);
+
         const data = record.percentage_covers;
         const rgbToString = (rgbArray) => `rgb(${rgbArray.join(', ')})`;
         // If no data is available, return a message
@@ -258,19 +257,21 @@ const SubmissionShow = (props) => {
                         <ClassPieChart />
                     </Box>
                 </Box>
-                <ArrayField source="input_associations" label="File Inputs">
-                    <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
-                        <TextField source="input_object.filename" label="Filename" />
-                        <NumberField source="input_object.size_bytes" label="Size (bytes)" />
-                        <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
-                        <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
-                        <NumberField source="processing_order" />
-                        <NumberField source="input_object.fps" label="FPS" />
-                        <NumberField source="input_object.time_seconds" label="Duration (s)" />
-                        <NumberField source="input_object.frame_count" label="Frames" />
-                    </Datagrid>
-                </ArrayField>
                 <TabbedShowLayout>
+                    <TabbedShowLayout.Tab label="File inputs">
+                        <ArrayField source="input_associations" label="File Inputs">
+                            <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
+                                <TextField source="input_object.filename" label="Filename" />
+                                <NumberField source="input_object.size_bytes" label="Size (bytes)" />
+                                <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
+                                <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
+                                <NumberField source="processing_order" />
+                                <NumberField source="input_object.fps" label="FPS" />
+                                <NumberField source="input_object.time_seconds" label="Duration (s)" />
+                                <NumberField source="input_object.frame_count" label="Frames" />
+                            </Datagrid>
+                        </ArrayField>
+                    </TabbedShowLayout.Tab>
                     <TabbedShowLayout.Tab label="Run status">
                         <ArrayField source="run_status" label="Logs and deletion available after job passes 'Pending' status. Deletion is a request and may not be possible depending on the stage of execution.">
                             <Datagrid
