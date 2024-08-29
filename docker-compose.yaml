@@ -1,9 +1,3 @@
-# Development docker-compose. Assuming the folders of BBF/API are in the folders
-# relative to this repository, point /etc/hosts to deepreefmap 127.0.0.1 and
-# connect to http://deepreefmap:88
-
-version: '3.8'
-
 services:
   traefik:
     image: traefik:v2.9.6
@@ -40,6 +34,13 @@ services:
       - DEEPREEFMAP_IMAGE=${DEEPREEFMAP_IMAGE}
       - NAMESPACE=${NAMESPACE}
       - PROJECT=${PROJECT}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_API_ID=${KEYCLOAK_API_ID}
+      - KEYCLOAK_API_SECRET=${KEYCLOAK_API_SECRET}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
+      - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
     depends_on:
         - deepreefmap-db
     volumes:
@@ -47,25 +48,9 @@ services:
       - ../deepreefmap-api/config.yaml:/root/.kube/config.yaml
     ports:
       - 5001:8000
-
-  deepreefmap-bff:
-    build:
-      context: ../deepreefmap-bff
-    environment:
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_BFF_ID=${KEYCLOAK_BFF_ID}
-      - KEYCLOAK_BFF_SECRET=${KEYCLOAK_BFF_SECRET}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_URL=${KEYCLOAK_URL}
-      - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
-      - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
     labels:
       - "traefik.http.routers.deepreefmap-bff.rule=Host(`deepreefmap`) && PathPrefix(`/api`)"
       - "traefik.http.services.deepreefmap-bff.loadbalancer.server.port=8000"
-    volumes:
-      - ../deepreefmap-bff/app:/app/app
-    entrypoint: ["uvicorn", "--host=0.0.0.0",
-              "--timeout-keep-alive=0", "app.main:app", "--reload"]
 
   deepreefmap-ui:
     build:
@@ -120,8 +105,14 @@ services:
       - INCOMPLETE_OBJECT_TIMEOUT_SECONDS=${INCOMPLETE_OBJECT_TIMEOUT_SECONDS}
       - DEEPREEFMAP_IMAGE_TAG=${DEEPREEFMAP_IMAGE_TAG}
       - DEEPREEFMAP_IMAGE=${DEEPREEFMAP_IMAGE}
-      - NAMESPACE=${NAMESPACE}
-      - PROJECT=${PROJECT}
+      - NAMESPACE=test
+      - PROJECT=test
+      - KEYCLOAK_CLIENT_ID=test
+      - KEYCLOAK_API_ID=test
+      - KEYCLOAK_API_SECRET=test
+      - KEYCLOAK_REALM=test
+      - KEYCLOAK_URL=test
+      - SERIALIZER_SECRET_KEY=test
     depends_on:
         - deepreefmap-test-db
     volumes:
