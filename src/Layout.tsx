@@ -56,7 +56,6 @@ const MyAppBar = () => {
         const fetchData = async () => {
             const statusData = await dataProvider.getStatus();
             setSystemStatus(statusData.data);
-            console.log(systemStatus);
         };
 
         fetchData();

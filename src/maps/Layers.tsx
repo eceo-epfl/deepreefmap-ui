@@ -4,7 +4,6 @@ import { useTheme } from 'react-admin';
 export const BaseLayers = () => {
     const { BaseLayer, Overlay } = LayersControl;
     const [theme, setTheme] = useTheme();
-    console.log("theme", theme);
 
     return (
         <LayersControl>

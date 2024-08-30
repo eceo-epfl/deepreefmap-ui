@@ -34,7 +34,6 @@ const UserCreate = () => {
     const { permissions } = usePermissions();
     const handleRowClick = (id, basePath, record) => {
         // Custom logic for handling row click
-        console.log(`Row with ID ${id} clicked`);
 
         dataProvider
             .update('users', { id, data: { role: "user" } })
