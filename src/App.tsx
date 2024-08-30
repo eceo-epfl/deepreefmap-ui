@@ -5,6 +5,8 @@ import {
     Resource,
     AuthProvider,
     DataProvider,
+    defaultLightTheme,
+    defaultDarkTheme,
 } from 'react-admin';
 import { Route } from 'react-router-dom';
 import simpleRestProvider from './dataProvider/index'
@@ -25,6 +27,7 @@ import submissions from './submissions';
 import objects from './objects';
 import status from './status';
 import transects from './transects';
+import { deepmerge } from '@mui/utils';
 
 const initOptions: KeycloakInitOptions = { onLoad: 'login-required' };
 
@@ -77,9 +80,21 @@ const App = () => {
         fetchData();
     }, []);
 
-    // hide the admin until the dataProvider and authProvider are ready
-    if (!keycloak & loading) return <p>Loading...</p>;
 
+    const lightTheme = deepmerge(
+        defaultLightTheme, {
+        sidebar: {
+            width: 170,
+        },
+    });
+    const darkTheme = deepmerge(
+        defaultDarkTheme, {
+        sidebar: {
+            width: 170,
+        },
+    });
+
+    if (!keycloak & loading) return <p>Loading...</p>;
     return (
         <Admin
             authProvider={authProvider.current}
@@ -87,6 +102,8 @@ const App = () => {
             title="AstroRiver"
             dashboard={Dashboard}
             layout={MyLayout}
+            theme={lightTheme}
+            darkTheme={darkTheme}
         >
             {permissions => (
                 <>
@@ -109,7 +126,7 @@ const App = () => {
                     ) : null}
                 </>
             )}
-        </Admin>
+        </Admin >
     );
 };
 export default App;
