@@ -14,7 +14,6 @@ import {
     Button,
     useRecordContext,
     useDataProvider,
-    useRedirect,
     TabbedShowLayout,
     FunctionField,
     useRefresh,
@@ -25,7 +24,6 @@ import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
 import { TransectMapOne } from '../maps/Transects';
-import { Link } from 'react-router-dom';
 
 const TransectNameField = () => {
     const record = useRecordContext();
@@ -79,11 +77,10 @@ const SubmissionShow = (props) => {
         function timeout(delay: number) {
             return new Promise(res => setTimeout(res, delay));
         }
-        const { permissions } = usePermissions();
         const dataProvider = useDataProvider();
         const record = useRecordContext();
-        if (!record) return null;
         const refresh = useRefresh();
+        if (!record) return null;
 
         // Create a function callback for onClick that calls a PUT request to the API
         const executeJob = () => {
@@ -129,9 +126,11 @@ const SubmissionShow = (props) => {
         });
     };
 
-    const downloadFile = (id, basePath, record) => {
+    const downloadFile = (id, basePath, record, event) => {
         dataProvider.downloadFile(record.url);
+        event.stopPropagation();
     };
+
 
     const DeleteKubernetesJobButton = () => {
         const record = useRecordContext();
