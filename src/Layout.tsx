@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Layout, AppBar, TitlePortal, useDataProvider } from 'react-admin';
+import { Layout, AppBar, TitlePortal, useDataProvider, usePermissions } from 'react-admin';
 import { CssBaseline } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { Typography, Box } from '@mui/material';
@@ -51,7 +51,7 @@ const StatusIcon = ({ gpu, storage }) => {
 const MyAppBar = () => {
     const [systemStatus, setSystemStatus] = useState({});
     const dataProvider = useDataProvider();
-
+    const { isPending, permissions } = usePermissions();
     useEffect(() => {
         const fetchData = async () => {
             const statusData = await dataProvider.getStatus();
@@ -62,16 +62,17 @@ const MyAppBar = () => {
         fetchData();
 
     }, []);
+    if (isPending) return null;
 
     return (
         <AppBar color="primary" >
             <TitlePortal />
-
-
-            <StatusIcon
-                gpu={systemStatus.kubernetes_status}
-                storage={systemStatus.s3_status}
-            />
+            {(permissions === 'user' || permissions === 'admin') ? (
+                <StatusIcon
+                    gpu={systemStatus.kubernetes_status}
+                    storage={systemStatus.s3_status}
+                />
+            ) : null}
         </AppBar>
     )
 };
