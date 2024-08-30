@@ -16,11 +16,15 @@ import {
 import { stopPropagation } from "ol/events/Event";
 
 const SubmissionListActions = () => {
+    const { permissions } = usePermissions();
+
     return (
 
         <TopToolbar >
-            <><CreateButton /></>
-            <ExportButton />
+            <>
+                {permissions === 'admin' ? <CreateButton /> : null}
+                <ExportButton />
+            </>
         </TopToolbar>
     );
 }

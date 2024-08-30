@@ -102,12 +102,13 @@ const TransectTabs = () => {
     if (!record) return <Loading />;
     return (
         <><Typography variant="h6" gutterBottom>Associations</Typography>
+
             <TabbedShowLayout>
-                {/* <TabbedShowLayout.Tab label='Map'>
-                    <TransectMap />
-                </TabbedShowLayout.Tab> */}
                 <TabbedShowLayout.Tab label={`Files (${record.inputs?.length ? record.inputs.length : 0})`}>
                     <ArrayField source="inputs">
+                        <Typography variant="caption">
+                            Upload videos associated with this transect. To create a submission, select one or two files and click "Create submission from selected video".
+                        </Typography>
                         <FilePondUploaderTransect />
                         <Datagrid
                             bulkActionButtons={<CreateSubmissionButton />}
@@ -128,8 +129,8 @@ const TransectTabs = () => {
                     </ArrayField>
                 </TabbedShowLayout.Tab>
                 <TabbedShowLayout.Tab label={`Submissions (${record.submissions?.length ? record.submissions.length : 0})`}>
-                    <Typography variant="h6" gutterBottom>
-                        Results
+                    <Typography variant="caption">
+                        These are the related submissions to this transect. Click on them to view their details.
                     </Typography>
                     <ArrayField source="submissions">
                         <Datagrid rowClick={submissionClick}>

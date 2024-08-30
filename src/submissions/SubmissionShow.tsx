@@ -44,6 +44,10 @@ const TransectNameField = () => {
 
     return (
         <>
+            <Typography variant="caption">
+                This is the map of the transect that the submission is associated with.
+            </Typography>
+            <br />
             <Link to={path} onClick={stopPropagation}>
                 <TextField source="transect.name" label="Area" emptyText='N/A' variant='h5' />
             </Link>
@@ -108,6 +112,9 @@ const SubmissionShow = (props) => {
         return (
             <TopToolbar>
                 <>
+                    <Typography variant="caption" align='right'>
+                        To make modifications to the FPS, start and end times, click the 'Edit' button. <br />Once ready, click 'Execute Job' to run the submission.
+                    </Typography>
                     <Button
                         variant="contained"
                         color="success"
@@ -227,6 +234,7 @@ const SubmissionShow = (props) => {
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
+
                 <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Box sx={{ flex: 1 }}>
                         <Labeled>
@@ -275,7 +283,30 @@ const SubmissionShow = (props) => {
                     </Box>
                 </Box>
                 <TabbedShowLayout>
+                    <TabbedShowLayout.Tab label="Run status">
+                        <Typography variant="caption">
+                            This is a list of the jobs that have been submitted for this submission. Click on them to view their logs.<br />
+                            Logs become available after job enters the 'Pending' status. A request for deletion may not be possible depending on the stage of execution.
+                        </Typography>
+                        <ArrayField
+                            source="run_status"
+                        >
+                            <Datagrid
+                                bulkActionButtons={false}
+                                rowClick={redirectToJobLogs}
+                            >
+                                <DateField source="time_started" showTime={true} sortable={false} />
+                                <TextField source="submission_id" label="Submission ID" sortable={false} />
+                                <TextField source="status" sortable={false} />
+                                <DeleteKubernetesJobButton />
+
+                            </Datagrid>
+                        </ArrayField>
+                    </TabbedShowLayout.Tab>
                     <TabbedShowLayout.Tab label="File inputs">
+                        <Typography variant="caption">
+                            These are the input files which have been assigned to this submission. If these are incorrect, please delete the submission and resubmit one with the correct files.
+                        </Typography>
                         <ArrayField source="input_associations" label="File Inputs">
                             <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
                                 <TextField source="input_object.filename" label="Filename" />
@@ -289,22 +320,11 @@ const SubmissionShow = (props) => {
                             </Datagrid>
                         </ArrayField>
                     </TabbedShowLayout.Tab>
-                    <TabbedShowLayout.Tab label="Run status">
-                        <ArrayField source="run_status" label="Logs and deletion available after job passes 'Pending' status. Deletion is a request and may not be possible depending on the stage of execution.">
-                            <Datagrid
-                                bulkActionButtons={false}
-                                rowClick={redirectToJobLogs}
-                            >
-                                <DateField source="time_started" showTime={true} sortable={false} />
-                                <TextField source="submission_id" label="Submission ID" sortable={false} />
-                                <TextField source="status" sortable={false} />
-                                <DeleteKubernetesJobButton />
-
-                            </Datagrid>
-                        </ArrayField>
-                    </TabbedShowLayout.Tab>
 
                     <TabbedShowLayout.Tab label="File outputs">
+                        <Typography variant="caption">
+                            These are the files that have been produced by the submission. Click on each of them to download.
+                        </Typography>
                         <ArrayField source="file_outputs" label="File Outputs" >
                             <Datagrid bulkActionButtons={false} rowClick={downloadFile}
                             >
@@ -315,6 +335,7 @@ const SubmissionShow = (props) => {
                         </ArrayField>
                     </TabbedShowLayout.Tab>
                     <TabbedShowLayout.Tab label="Transect">
+
                         <TransectNameField />
                     </TabbedShowLayout.Tab>
                 </TabbedShowLayout>

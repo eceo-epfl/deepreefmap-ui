@@ -11,6 +11,7 @@ import {
 } from "react-admin";
 import { useEffect, useState } from "react";
 import { TransectMapAll } from "../maps/Transects";
+import { Typography } from "@mui/material";
 
 
 const TransectListActions = () => {
@@ -32,6 +33,9 @@ const TransectList = () => {
                 actions={<TransectListActions />}
                 perPage={25}        >
                 <>
+                    <Typography variant="caption">
+                        This is a list of all transects that have been created. Click on a transect to view more details or to create a new one select '+ Create'.
+                    </Typography>
                     <TransectMapAll />
                     <Datagrid
                         bulkActionButtons={permissions === 'admin' ? true : false}
