@@ -7,7 +7,7 @@ import './css/bulma-slider.min.css';
 import { usePermissions, useGetList, Link } from 'react-admin';
 import { Typography, Button, Container, Box, Divider } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilePdf, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { faFilePdf, faSheetPlastic } from '@fortawesome/free-solid-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const GettingStartedTooltip = () => {
@@ -94,7 +94,7 @@ const Dashboard = () => {
                             href="https://josauder.github.io/deepreefmap/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faGithub} />}
+                            startIcon={<FontAwesomeIcon icon={faSheetPlastic} />}
                         >
                             Project page
                         </Button>
