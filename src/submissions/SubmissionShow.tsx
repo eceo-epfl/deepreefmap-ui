@@ -19,18 +19,34 @@ import {
     useRefresh,
     useCreatePath,
     useTheme,
+    Link,
+    ReferenceField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
 import { TransectMapOne } from '../maps/Transects';
 
+
 const TransectNameField = () => {
+    const createPath = useCreatePath();
     const record = useRecordContext();
+    let path = null;
     if (!record) return (<Typography>No associated transect" </Typography>);
+
+    if (record.transect) {
+        path = createPath({
+            resource: 'transects',
+            type: 'show',
+            id: record.transect.id,
+        });
+    }
 
     return (
         <>
+            <Link to={path} onClick={stopPropagation}>
+                <TextField source="transect.name" label="Area" emptyText='N/A' variant='h5' />
+            </Link>
             <TransectMapOne record={record.transect} />
         </>
     );
@@ -216,7 +232,9 @@ const SubmissionShow = (props) => {
                         <Labeled>
                             <TextField source="name" />
                         </Labeled><br />
-                        {permissions === 'admin' ? <><Labeled><TextField source="owner" emptyText="Not defined" /></Labeled><br /></> : null}
+                        {permissions === 'admin' ? <><Labeled><ReferenceField source="owner" reference="users" link="show">
+                            <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                        </ReferenceField></Labeled><br /></> : null}
                         <Labeled>
                             <TextField source="description" />
                         </Labeled><br /><Labeled>

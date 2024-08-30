@@ -6,11 +6,8 @@ import {
     TopToolbar,
     CreateButton,
     ExportButton,
-    DateField,
     FunctionField,
-    // useGetList,
-    useDataProvider,
-    Loading,
+    ReferenceField,
 } from "react-admin";
 import { useEffect, useState } from "react";
 import { TransectMapAll } from "../maps/Transects";
@@ -48,7 +45,9 @@ const TransectList = () => {
                         <FunctionField label="Associated files" render={(record) => {
                             return record.inputs?.length ? record.inputs.length : 0;
                         }} />
-                        {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+                        {permissions === 'admin' ? (<ReferenceField source="owner" reference="users" link="show">
+                            <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                        </ReferenceField>) : null}
                     </Datagrid>
                 </>
             </List ></>

@@ -9,19 +9,14 @@ import {
     DateField,
     BooleanField,
     FunctionField,
-    useAuthProvider,
     useRedirect,
-    useRefresh,
     Button,
     useRecordContext,
     useListContext,
     useCreate,
-    SavedQueriesList,
-    FilterLiveSearch,
-    FilterList,
-    FilterListItem,
     useCreatePath,
-    Link
+    Link,
+    ReferenceField,
 } from "react-admin";
 import 'react-dropzone-uploader/dist/styles.css'
 import { FilePond } from 'react-filepond';
@@ -152,7 +147,9 @@ const ObjectList = () => {
                         label="Associated submissions"
                         render={record => record.input_associations.length}
                     />
-                    {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+                    {permissions === 'admin' ? (<ReferenceField source="owner" reference="users" link="show">
+                        <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                    </ReferenceField>) : null}
                 </Datagrid>
             </List >
         </>

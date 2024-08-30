@@ -19,12 +19,12 @@ import {
     ArrayField,
     Datagrid,
     useRedirect,
-    ReferenceField,
     useCreate,
     FunctionField,
     useCreatePath,
     Link,
     Loading,
+    ReferenceField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { stopPropagation } from 'ol/events/Event';
 import { TransectMapOne } from '../maps/Transects';
@@ -131,7 +131,9 @@ const ObjectShow = (props) => {
                     }
                 }} />
                 <TextField source="id" />
-                {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+                {permissions === 'admin' ? (<ReferenceField source="owner" reference="users" link="show">
+                    <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                </ReferenceField>) : null}
                 <TextField source="filename" />
                 <NumberField source="size_bytes" />
                 <DateField

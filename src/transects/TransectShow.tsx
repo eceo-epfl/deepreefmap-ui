@@ -168,7 +168,11 @@ const TransectShow = (props) => {
             <SimpleShowLayout>
                 <TextField source="name" />
                 <TextField source="description" />
-                {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+                {permissions === 'admin' ? (
+                    <ReferenceField source="owner" reference="users" link="show">
+                        <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                    </ReferenceField>
+                ) : null}
                 <FunctionField label="Coordinates" render={(record) => {
                     return (
                         <Link

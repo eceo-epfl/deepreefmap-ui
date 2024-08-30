@@ -8,13 +8,11 @@ import {
     ExportButton,
     DateField,
     FunctionField,
-
-    useDataProvider,
+    ReferenceField,
     useRecordContext,
     useCreatePath,
     Link,
 } from "react-admin";
-import { useEffect, useState } from "react";
 import { stopPropagation } from "ol/events/Event";
 
 const SubmissionListActions = () => {
@@ -30,8 +28,8 @@ const TransectNameField = () => {
     const record = useRecordContext();
     const createPath = useCreatePath();
     if (!record) return <Loading />;
-    let path = null;
 
+    let path = null;
     if (record.transect) {
         path = createPath({
             resource: 'transects',
@@ -40,12 +38,15 @@ const TransectNameField = () => {
         });
     }
 
-    return (
+    return path ? (
         <Link to={path} onClick={stopPropagation}>
-            <TextField source="transect.name" label="Area" emptyText='No associated transect' />
+            <TextField source="transect.name" label="Area" emptyText='N/A' />
         </Link>
+    ) : (
+        <TextField source="transect.name" label="Area" emptyText='N/A' />
     );
-}
+};
+
 const SubmissionList = () => {
     const FieldWrapper = ({ children, label }) => children;
     const { permissions } = usePermissions();
@@ -79,7 +80,11 @@ const SubmissionList = () => {
                         showTime={true}
                     />
                     <FieldWrapper label="Transect"><TransectNameField /></FieldWrapper>
-                    {permissions === 'admin' ? <TextField source="owner" emptyText="Not defined" /> : null}
+                    {permissions === 'admin' ? (
+                        <ReferenceField source="owner" reference="users" link="show">
+                            <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
+                        </ReferenceField>
+                    ) : null}
 
                 </Datagrid>
             </>
