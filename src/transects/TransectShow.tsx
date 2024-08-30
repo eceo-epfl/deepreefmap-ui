@@ -172,26 +172,26 @@ const TransectShow = (props) => {
         <Show actions={<TransectShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
                 <Grid container spacing={2}>
-                    <Grid item xs={3}>
+                    <Grid item xs={4}>
                         <Grid item xs={6}>
                             <Labeled label="Name">
                                 <TextField source="name" />
                             </Labeled>
                         </Grid>
-                        <Grid item xs={6} />
+                        <Grid />
                         <Grid item xs={6}>
                             <Labeled label="Description">
                                 <TextField source="description" />
                             </Labeled>
                         </Grid>
                         <Grid item xs={6}>
-                            <Labeled label="Start">
+                            <Labeled label="Start coordiantes">
                                 <FunctionField label="Coordinates" render={(record) => {
                                     return (
                                         <Link
                                             to={`https://www.google.com/maps?q=${record.latitude_start},${record.longitude_start}`}
                                             target="_blank"
-                                        >{`${record.latitude_start}°, ${record.longitude_start}°` + " to " + `${record.latitude_end}°, ${record.longitude_end}°`}</Link>
+                                        >{`${record.latitude_start}°, ${record.longitude_start}°`}</Link>
                                     )
                                 }
                                 } />
@@ -199,7 +199,7 @@ const TransectShow = (props) => {
                         </Grid>
                         <Grid item xs={6} />
                         <Grid item xs={6}>
-                            <Labeled label="End">
+                            <Labeled label="End coordinates">
                                 <FunctionField label="Coordinates" render={(record) => {
                                     return (
                                         <Link
@@ -212,7 +212,7 @@ const TransectShow = (props) => {
                             </Labeled>
                         </Grid>
                     </Grid>
-                    <Grid item xs={9}>
+                    <Grid item xs={8}>
                         <TransectMap />
                     </Grid>
                 </Grid>
