@@ -9,6 +9,7 @@ import {
     Link,
     FunctionField,
     ArrayField,
+    Labeled,
     Datagrid,
     useRedirect,
     TabbedShowLayout,
@@ -24,11 +25,10 @@ import {
     ReferenceField,
     useCreatePath,
 } from 'react-admin';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
-import { create } from 'domain';
 
 
 const CreateSubmissionButton = () => {
@@ -103,6 +103,9 @@ const TransectTabs = () => {
     return (
         <><Typography variant="h6" gutterBottom>Associations</Typography>
             <TabbedShowLayout>
+                {/* <TabbedShowLayout.Tab label='Map'>
+                    <TransectMap />
+                </TabbedShowLayout.Tab> */}
                 <TabbedShowLayout.Tab label={`Files (${record.inputs?.length ? record.inputs.length : 0})`}>
                     <ArrayField source="inputs">
                         <FilePondUploaderTransect />
@@ -149,6 +152,7 @@ const TransectMap = () => {
     )
 }
 
+
 const TransectShow = (props) => {
     const { permissions } = usePermissions();
 
@@ -166,23 +170,51 @@ const TransectShow = (props) => {
     return (
         <Show actions={<TransectShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
-                <TextField source="name" />
-                <TextField source="description" />
-                {permissions === 'admin' ? (
-                    <ReferenceField source="owner" reference="users" link="show">
-                        <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
-                    </ReferenceField>
-                ) : null}
-                <FunctionField label="Coordinates" render={(record) => {
-                    return (
-                        <Link
-                            to={`https://www.google.com/maps?q=${record.latitude_start},${record.longitude_start}`}
-                            target="_blank"
-                        >{`${record.latitude_start}°, ${record.longitude_start}°` + " to " + `${record.latitude_end}°, ${record.longitude_end}°`}</Link>
-                    )
-                }
-                } />
-                <TransectMap />
+                <Grid container spacing={2}>
+                    <Grid item xs={3}>
+                        <Grid item xs={6}>
+                            <Labeled label="Name">
+                                <TextField source="name" />
+                            </Labeled>
+                        </Grid>
+                        <Grid item xs={6} />
+                        <Grid item xs={6}>
+                            <Labeled label="Description">
+                                <TextField source="description" />
+                            </Labeled>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Labeled label="Start">
+                                <FunctionField label="Coordinates" render={(record) => {
+                                    return (
+                                        <Link
+                                            to={`https://www.google.com/maps?q=${record.latitude_start},${record.longitude_start}`}
+                                            target="_blank"
+                                        >{`${record.latitude_start}°, ${record.longitude_start}°` + " to " + `${record.latitude_end}°, ${record.longitude_end}°`}</Link>
+                                    )
+                                }
+                                } />
+                            </Labeled>
+                        </Grid>
+                        <Grid item xs={6} />
+                        <Grid item xs={6}>
+                            <Labeled label="End">
+                                <FunctionField label="Coordinates" render={(record) => {
+                                    return (
+                                        <Link
+                                            to={`https://www.google.com/maps?q=${record.latitude_end},${record.longitude_end}`}
+                                            target="_blank"
+                                        >{`${record.latitude_end}°, ${record.longitude_end}°`}</Link>
+                                    )
+                                }
+                                } />
+                            </Labeled>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={9}>
+                        <TransectMap />
+                    </Grid>
+                </Grid>
                 <TransectTabs />
             </SimpleShowLayout>
         </Show >

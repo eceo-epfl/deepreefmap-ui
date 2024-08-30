@@ -28,11 +28,11 @@ const TransectList = () => {
 
     return (
         <>
-            <TransectMapAll />
             <List disableSyncWithLocation
                 actions={<TransectListActions />}
                 perPage={25}        >
                 <>
+                    <TransectMapAll />
                     <Datagrid
                         bulkActionButtons={permissions === 'admin' ? true : false}
                         rowClick="show"

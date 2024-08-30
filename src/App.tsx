@@ -99,7 +99,7 @@ const App = () => {
         <Admin
             authProvider={authProvider.current}
             dataProvider={dataProvider.current}
-            title="AstroRiver"
+            title="DeepReefMap"
             dashboard={Dashboard}
             layout={MyLayout}
             theme={lightTheme}
@@ -113,13 +113,15 @@ const App = () => {
                                 <Resource name="transects" {...transects} />
                                 <Resource name="submissions" {...submissions} />
                                 <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
-                                <Resource name="objects" {...objects} />
+
                             </>
                         ) : null}
                     {permissions ? (
                         <>
                             {permissions === 'admin' ? (
-                                <><Resource name="users" {...users} />
+                                <>
+                                    <Resource name="objects" {...objects} />
+                                    <Resource name="users" {...users} />
                                     <Resource name="status" {...status} /></>
                             ) : null}
                         </>
