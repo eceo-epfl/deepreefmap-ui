@@ -55,7 +55,9 @@ const CreateSubmissionButton = () => {
     // Create a list of selected videos that have not completed uploading to
     // disable the button if any of the selected videos are incomplete
     const selectedIncompleteData = listContext.selectedIds.some(id => {
-        const record = listContext.data.find(data => data.id === id);
+        const record = listContext?.data?.find(data => data.id === id);
+        if (!record) return false;
+
         return record.all_parts_received === false;
     });
     const handleClick = () => {
