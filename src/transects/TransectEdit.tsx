@@ -17,8 +17,8 @@ const TransectEdit = () => {
                 <TextInput source="id" disabled />
                 <TextInput source="name" validate={[required()]} />
                 <TextInput source="description" />
-                <NumberInput source="length (m)" />
-                <NumberInput source="depth (m)" />
+                <NumberInput source="length" label="length (m)" />
+                <NumberInput source="depth" label="depth (m)" />
                 <NumberInput source="latitude_start" validate={[required()]} />
                 <NumberInput source="longitude_start" validate={[required()]} />
                 <NumberInput source="latitude_end" validate={[required()]} />
