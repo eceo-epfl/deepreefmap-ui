@@ -48,10 +48,24 @@ const StatusIcon = ({ gpu, storage }) => {
 };
 
 
-const MyAppBar = () => {
+const MyAppBar = (props) => {
     const [systemStatus, setSystemStatus] = useState({});
     const dataProvider = useDataProvider();
     const { isPending, permissions } = usePermissions();
+    const appBarText = () => {
+        if (props.deployment) {
+            if (props.deployment == 'local') {
+                return "⭐Local Development⭐"
+            }
+            if (props.deployment == 'dev') {
+                return "⭐Development⭐"
+            }
+            if (props.deployment == 'stage') {
+                return "⭐Staging⭐"
+            }
+        }
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             const statusData = await dataProvider.getStatus();
@@ -66,6 +80,16 @@ const MyAppBar = () => {
     return (
         <AppBar color="primary" >
             <TitlePortal />
+            <Typography
+                variant="h6"
+                color='#FF69B4'
+                id="react-admin-title"
+            >
+                {props.deployment ? appBarText() : ""}&nbsp;&nbsp;
+
+            </Typography>
+
+
             {(permissions === 'user' || permissions === 'admin') ? (
                 <StatusIcon
                     gpu={systemStatus.kubernetes_status}
@@ -76,12 +100,13 @@ const MyAppBar = () => {
     )
 };
 
-export const MyLayout = ({ children }) => (
+export const MyLayout = ({ children, deployment }) => (
     <>
         <CssBaseline />
-        <Layout appBar={MyAppBar}>
+        <Layout appBar={() => <MyAppBar deployment={deployment} />} >
             {children}
         </Layout>
+
     </>
 );
 

@@ -41,6 +41,7 @@ services:
       - KEYCLOAK_URL=${KEYCLOAK_URL}
       - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
       - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
+      - DEPLOYMENT=local
     depends_on:
         - deepreefmap-db
     volumes:

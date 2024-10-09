@@ -41,7 +41,7 @@ const getPermissions = (decoded: KeycloakTokenParsed) => {
     return false;
 };
 
-const apiKeycloakConfigUrl = '/api/config/keycloak';
+const apiKeycloakConfigUrl = '/api/config';
 export const apiUrl = '/api';
 
 const App = () => {
@@ -49,12 +49,16 @@ const App = () => {
     const [loading, setLoading] = useState(true);
     const authProvider = useRef<AuthProvider>();
     const dataProvider = useRef<DataProvider>();
+    const [deployment, setDeployment] = useState(undefined);
+
 
     useEffect(() => {
         async function fetchData() {
             try {
                 const response = await axios.get(apiKeycloakConfigUrl);
                 const keycloakConfig = response.data;
+                setDeployment(keycloakConfig.deployment);
+
 
                 // Initialize Keycloak here, once you have the configuration
                 const keycloakClient = new Keycloak(keycloakConfig);
@@ -101,7 +105,7 @@ const App = () => {
             dataProvider={dataProvider.current}
             title="DeepReefMap"
             dashboard={Dashboard}
-            layout={MyLayout}
+            layout={(props) => <MyLayout {...props} deployment={deployment} />}
             theme={lightTheme}
             darkTheme={darkTheme}
         >
