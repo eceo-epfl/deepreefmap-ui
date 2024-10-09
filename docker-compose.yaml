@@ -45,7 +45,7 @@ services:
         - deepreefmap-db
     volumes:
       - ../deepreefmap-api/app:/app/app
-      - ../deepreefmap-api/config.yaml:/root/.kube/config.yaml
+      - ../config.yaml:/root/.kube/config.yaml
     ports:
       - 5001:8000
     labels:

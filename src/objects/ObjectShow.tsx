@@ -64,7 +64,8 @@ const ObjectShowActions = () => {
                             {
                                 input_object_id: record.id,
                                 processing_order: 1
-                            }]
+                            }],
+                        transect_id: record.transect.id,
                     }
                 })
         }

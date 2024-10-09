@@ -21,6 +21,7 @@ import {
     useTheme,
     Link,
     ReferenceField,
+    useNotify,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
@@ -129,11 +130,12 @@ const SubmissionShow = (props) => {
     const createPath = useCreatePath();
     const { permissions } = usePermissions();
     const dataProvider = useDataProvider();
+    const notify = useNotify();
 
-    const redirectToJobLogs = (id, basePath, record) => {
+    const redirectToJobLogs = (id, basePath, record, event) => {
         if (record.status == 'Pending') {
-            console.log('Job is pending, logs are not available yet');
-            return;
+            notify('Job is pending, logs are not available yet');
+            return false;
         }
         return createPath({
             resource: 'submission_job_logs',
