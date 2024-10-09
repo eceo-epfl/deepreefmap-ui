@@ -71,13 +71,14 @@ export const TransectMapAll = () => {
                             permanent
                             interactive={true}
                         >
-                            <Typography variant="h6">{transect.name}</Typography>
-                            Length: {transect.length}<br />
-                            Depth: {transect.depth}<br />
-                            Coords: <br />&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
-                            <br />&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
-                            Files: {transect.inputs?.length ? transect.inputs.length : 0}<br />
-                            Submissions: {transect.submissions?.length ? transect.submissions.length : 0}<br />
+                            <Typography variant="subtitle1" >{transect.name}</Typography>
+                            <b>Length</b>: {transect.length ? transect.length : "N/A"} (m)<br />
+                            <b>Depth</b>: {transect.depth ? transect.depth : "N/A"} (m)<br />
+                            <b>Coordinates</b>:
+                            <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
+                            <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
+                            <b>Files</b>: {transect.inputs?.length ? transect.inputs.length : 0}<br />
+                            <b>Submissions</b>: {transect.submissions?.length ? transect.submissions.length : 0}<br />
                         </Tooltip>
                     </Polygon>
                 )
@@ -112,10 +113,12 @@ export const TransectMapOne = ({ record }) => {
                 <Tooltip
                     permanent
                 >
-                    <Typography variant="h6">{record.name}</Typography>
-                    Length: {record.length}<br />
-                    Depth: {record.depth}<br />
-                    Coords: {`${record.latitude_start}°, ${record.longitude_start}° -> ${record.latitude_end}°, ${record.longitude_end}°`}<br />
+                    <Typography variant="subtitle1">{record.name}</Typography>
+                    <b>Length</b>: {record.length ? record.length : "N/A"} (m)<br />
+                    <b>Depth</b>: {record.depth ? record.depth : "N/A"} (m)<br />
+                    <b>Coordinates</b>:
+                    <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${record.latitude_start}°, ${record.longitude_start}°`}
+                    <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`<${record.latitude_end}°, ${record.longitude_end}°`}<br />
                 </Tooltip>
             </Polygon>
         </MapContainer>
