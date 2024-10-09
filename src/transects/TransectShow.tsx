@@ -182,12 +182,12 @@ const TransectShow = (props) => {
 
                         <Grid item xs={6}>
                             <Labeled label="Length (m)">
-                                <TextField source="length" />
+                                <TextField source="length" label="Length (m)" />
                             </Labeled>
                         </Grid>
                         <Grid item xs={6}>
                             <Labeled label="Depth (m)">
-                                <TextField source="depth" />
+                                <TextField source="depth" label="Depth (m)" />
                             </Labeled>
                         </Grid>
                         <Grid item xs={6}>

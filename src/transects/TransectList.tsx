@@ -44,8 +44,8 @@ const TransectList = () => {
                     >
                         <TextField source="name" />
                         <DateField source="created_on" />
-                        <TextField source="length (m)" />
-                        <TextField source="depth (m)" />
+                        <TextField source="length" label="Length (m)" />
+                        <TextField source="depth" label="Depth (m)" />
                         <FunctionField label="Associated submissions" render={(record) => {
                             return record.submissions?.length ? record.submissions.length : 0;
                         }} />
