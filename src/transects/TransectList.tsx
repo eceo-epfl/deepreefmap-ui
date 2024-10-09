@@ -8,6 +8,7 @@ import {
     ExportButton,
     FunctionField,
     ReferenceField,
+    DateField,
 } from "react-admin";
 import { useEffect, useState } from "react";
 import { TransectMapAll } from "../maps/Transects";
@@ -42,7 +43,9 @@ const TransectList = () => {
                         rowClick="show"
                     >
                         <TextField source="name" />
-                        <TextField source="description" />
+                        <DateField source="created_on" />
+                        <TextField source="length (m)" />
+                        <TextField source="depth (m)" />
                         <FunctionField label="Associated submissions" render={(record) => {
                             return record.submissions?.length ? record.submissions.length : 0;
                         }} />

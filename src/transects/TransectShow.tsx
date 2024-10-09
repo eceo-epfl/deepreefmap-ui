@@ -179,6 +179,17 @@ const TransectShow = (props) => {
                             </Labeled>
                         </Grid>
                         <Grid />
+
+                        <Grid item xs={6}>
+                            <Labeled label="Length (m)">
+                                <TextField source="length" />
+                            </Labeled>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Labeled label="Depth (m)">
+                                <TextField source="depth" />
+                            </Labeled>
+                        </Grid>
                         <Grid item xs={6}>
                             <Labeled label="Description">
                                 <TextField source="description" />

@@ -37,6 +37,8 @@ const TransectCreate = () => {
                 <NumberInput source="longitude_start" />
                 <NumberInput source="latitude_end" />
                 <NumberInput source="longitude_end" />
+                <NumberInput source="length (m)" />
+                <NumberInput source="depth (m)" />
             </SimpleForm>
         </Create >
     )

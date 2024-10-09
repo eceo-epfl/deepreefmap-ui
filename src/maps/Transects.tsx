@@ -74,7 +74,8 @@ export const TransectMapAll = () => {
                             <Typography variant="h6">{transect.name}</Typography>
                             Length: {transect.length}<br />
                             Depth: {transect.depth}<br />
-                            Coords: {`${transect.latitude_start}°, ${transect.longitude_start}° -> ${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
+                            Coords: <br />&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
+                            <br />&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
                             Files: {transect.inputs?.length ? transect.inputs.length : 0}<br />
                             Submissions: {transect.submissions?.length ? transect.submissions.length : 0}<br />
                         </Tooltip>
