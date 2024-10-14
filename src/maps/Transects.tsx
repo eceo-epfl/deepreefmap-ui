@@ -14,6 +14,7 @@ import {
     Tooltip,
     FeatureGroup,
     Popup,
+    Marker,
 } from 'react-leaflet';
 import { EditControl } from "react-leaflet-draw"
 import { BaseLayers } from './Layers';
@@ -48,6 +49,8 @@ export const TransectMapAll = () => {
     return (
         <MapContainer
             style={{ width: '100%', height: '500px' }}
+            minZoom={2}
+            zoom={2}
             // Set bounds to a wider area than the calculated bounds to allow for
             // the user to zoom out and see the whole area
             bounds={bounds}
@@ -58,7 +61,7 @@ export const TransectMapAll = () => {
                 (transect, index) => (
                     <Polygon
                         key={index}
-                        pathOptions={{ fillOpacity: 0.25, weight: 20 }}  // Increased weight for thicker lines
+                        pathOptions={{ fillOpacity: 0.25, weight: 5 }}  // Increased weight for thicker lines
                         eventHandlers={{
                             click: () => {
                                 redirect('show', 'transects', transect['id']);
@@ -67,23 +70,32 @@ export const TransectMapAll = () => {
                         // Structure as transect.latitude_start, transect.longitude_start, transect.latitude_end, transect.longitude_end
                         positions={[[transect.latitude_start, transect.longitude_start], [transect.latitude_end, transect.longitude_end]]}
                     >
-                        <Tooltip
-                            permanent
-                            interactive={true}
+                        <Marker
+                            key={index}
+                            position={[transect.latitude_start, transect.longitude_start]}
                         >
-                            <Typography variant="subtitle1" >{transect.name}</Typography>
-                            <b>Length</b>: {transect.length ? transect.length : "N/A"} (m)<br />
-                            <b>Depth</b>: {transect.depth ? transect.depth : "N/A"} (m)<br />
-                            <b>Coordinates</b>:
-                            <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
-                            <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
-                            <b>Files</b>: {transect.inputs?.length ? transect.inputs.length : 0}<br />
-                            <b>Submissions</b>: {transect.submissions?.length ? transect.submissions.length : 0}<br />
-                        </Tooltip>
+                            <Tooltip permanent>{transect.name}</Tooltip>
+                            <Popup
+                            // permanent
+                            // interactive={true}
+                            >
+                                <Typography variant="subtitle1" >{transect.name}</Typography>
+                                <b>Length</b>: {transect.length ? transect.length : "N/A"} (m)<br />
+                                <b>Depth</b>: {transect.depth ? transect.depth : "N/A"} (m)<br />
+                                <b>Coordinates</b>:
+                                <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
+                                <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
+                                <b>Files</b>: {transect.inputs?.length ? transect.inputs.length : 0}<br />
+                                <b>Submissions</b>: {transect.submissions?.length ? transect.submissions.length : 0}<br />
+                                <Link to={createPath({ resource: 'transects', type: 'show', id: transect.id })}>
+                                    <Button variant="contained" color="primary">View</Button>
+                                </Link>
+                            </Popup>
+                        </Marker>
                     </Polygon>
                 )
             )}
-        </MapContainer>
+        </MapContainer >
     );
 };
 

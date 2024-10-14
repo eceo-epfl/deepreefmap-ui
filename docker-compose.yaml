@@ -42,6 +42,11 @@ services:
       - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
       - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
       - DEPLOYMENT=local
+      - CACHE_URL=deepreefmap-cache
+      - CACHE_PORT=6379
+      - CACHE_DB=0
+      - CACHE_SECRET=${CACHE_SECRET}
+      - CACHE_PASSWORD=${REDIS_PASSWORD}
     depends_on:
         - deepreefmap-db
     volumes:
@@ -115,12 +120,25 @@ services:
       - KEYCLOAK_URL=test
       - SERIALIZER_SECRET_KEY=test
       - DEPLOYMENT=local
+      - CACHE_URL=deepreefmap-cache
+      - CACHE_PORT=6379
+      - CACHE_DB=1
+      - CACHE_SECRET=test
+      - CACHE_PASSWORD=test
     depends_on:
         - deepreefmap-test-db
     volumes:
       - ../deepreefmap-api:/app
     ports:
       - 5445:8000
+
+  deepreefmap-cache:
+    image: redis:7.4.0
+    ports:
+      - 6379:6379
+    # environment:
+    #   - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
 
 volumes:
   deepreefmap-db-data:
