@@ -21,11 +21,10 @@ import {
     useCreate,
     useListContext,
     Button,
-    RecordContext,
-    ReferenceField,
+    useUnselectAll,
     useCreatePath,
 } from 'react-admin';
-import { Box, Typography, Grid } from '@mui/material';
+import { Typography, Grid } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
@@ -97,6 +96,16 @@ const CreateSubmissionButton = () => {
 const TransectTabs = () => {
     const record = useRecordContext();
     const createPath = useCreatePath();
+    const unselectAll = useUnselectAll('transects');
+    useEffect(() => {
+        return () =>
+
+
+
+            unselectAll();
+    }, []
+    );
+
 
     const objectClick = (id, resource, record) => (createPath({ resource: 'objects', type: 'show', id: record.id }));
     const submissionClick = (id, resource, record) => (createPath({ resource: 'submissions', type: 'show', id: record.id }));
