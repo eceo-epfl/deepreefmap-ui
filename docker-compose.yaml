@@ -114,6 +114,7 @@ services:
       - KEYCLOAK_REALM=test
       - KEYCLOAK_URL=test
       - SERIALIZER_SECRET_KEY=test
+      - DEPLOYMENT=local
     depends_on:
         - deepreefmap-test-db
     volumes:
