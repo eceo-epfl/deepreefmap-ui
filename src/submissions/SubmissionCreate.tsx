@@ -1,38 +1,28 @@
-/* eslint react/jsx-key: off */
 import {
     Create,
     SimpleForm,
-    useAuthProvider,
-    useCreate,
-    useDataProvider,
-    Toolbar,
-    SaveButton,
-    useRedirect,
-    Button,
-    TextField,
+    NumberInput,
     TextInput,
     ReferenceInput,
     SelectInput,
     required,
     ArrayInput,
     SimpleFormIterator,
-    NumberInput,
+    minValue,
 } from 'react-admin';
 import 'react-dropzone-uploader/dist/styles.css'
-import { FilePond, registerPlugin } from 'react-filepond';
-import 'filepond/dist/filepond.min.css';
-import Dropzone from 'react-dropzone-uploader'
-import { useState, useEffect, useRef } from 'react';
 
 
 const SubmissionCreate = () => {
-
     return (
         <Create redirect="show">
             <SimpleForm >
-                <TextField source="id" />
-                <TextInput source="name" helperText="Name your submission" validate={[required()]} />
+                <TextInput source="id" disabled />
+                <TextInput source="name" />
                 <TextInput source="description" />
+                <NumberInput source="fps" label="FPS to process with the model" step={1} validate={[required(), minValue(1)]} />
+                <NumberInput source="time_seconds_start" step={1} validate={[required(), minValue(0)]} />
+                <NumberInput source="time_seconds_end" step={1} validate={[required()]} helperText="If two files, this is the end time in seconds during the second video" />
                 <ReferenceInput
                     source="transect_id"
                     reference="transects"
@@ -43,20 +33,11 @@ const SubmissionCreate = () => {
                         }
                     />
                 </ReferenceInput>
-                <ArrayInput source="input_associations" validate={[required()]}>
-                    <SimpleFormIterator inline disableReordering disableAdd disableRemove >
-                        <ReferenceInput
-                            source="input_object_id"
-                            reference="objects"
-                            sort={{ field: 'time_added_utc', order: 'DESC' }}
-                        >
-                            <SelectInput
-                                optionText={(record) => `${record.filename} (${record.time_added_utc} FPS: ${record.fps} )`}
-                            />
-                        </ReferenceInput>
+                <ArrayInput source="input_associations" label="Videos" >
+                    <SimpleFormIterator inline disableReordering disableAdd disableRemove>
                         <SelectInput
                             source="processing_order"
-                            helperText="Select the order that this file should be processed in"
+                            helperText="Select the order to process this video in"
                             validate={[required()]}
                             choices={[
                                 { id: 1, name: 1 },
@@ -66,16 +47,15 @@ const SubmissionCreate = () => {
                                 1
                             }
                         />
+                        <TextInput source="input_object.filename" label="Filename" disabled />
+                        <TextInput source="input_object.size_bytes" label="Size (bytes)" disabled />
+                        <TextInput source="input_object.time_seconds" label="Duration (seconds)" disabled />
+                        <TextInput source="input_object.fps" label="FPS" disabled />
                     </SimpleFormIterator>
                 </ArrayInput>
-
-
-
             </SimpleForm>
         </Create >
-
     )
-
 };
 
 export default SubmissionCreate;

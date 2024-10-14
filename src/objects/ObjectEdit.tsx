@@ -21,7 +21,7 @@ import {
 
 const SubmissionEdit = () => {
     return (
-        <Edit redirect="show">
+        <Edit redirect="show" mutationMode="pessimistic">
             <SimpleForm>
                 <TextInput source="id" disabled />
                 <TextInput source="notes" multiline />

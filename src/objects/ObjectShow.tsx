@@ -53,7 +53,7 @@ const ObjectShowActions = () => {
         useEffect(() => {
             if (!data) return;
             if (data.id) {
-                redirect('edit', 'submissions', data.id);
+                redirect('show', 'submissions', data.id);
             }
         }, [data]);
         const handleClick = () => {
