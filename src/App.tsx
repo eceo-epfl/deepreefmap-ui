@@ -115,6 +115,13 @@ const App = () => {
                         (permissions === 'admin' || permissions === 'user') ? (
                             <>
                                 <Resource name="transects" {...transects} />
+                                <Resource name="objects"
+                                    edit={objects.edit}
+                                    list={permissions === 'admin' ? objects.list : undefined}
+                                    show={objects.show}
+                                    icon={objects.icon}
+                                    options={objects.options}
+                                />
                                 <Resource name="submissions" {...submissions} />
                                 <Resource name="submission_job_logs" show={SubmissionJobLogsShow} />
 
@@ -124,7 +131,6 @@ const App = () => {
                         <>
                             {permissions === 'admin' ? (
                                 <>
-                                    <Resource name="objects" {...objects} />
                                     <Resource name="users" {...users} />
                                     <Resource name="status" {...status} /></>
                             ) : null}
