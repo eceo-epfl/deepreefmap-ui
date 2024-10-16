@@ -30,6 +30,7 @@ services:
       - KUBECONFIG=/root/.kube/config.yaml
       - INCOMPLETE_OBJECT_CHECK_INTERVAL=${INCOMPLETE_OBJECT_CHECK_INTERVAL}
       - INCOMPLETE_OBJECT_TIMEOUT_SECONDS=${INCOMPLETE_OBJECT_TIMEOUT_SECONDS}
+      - INCOMPLETE_OBJECT_CONSIDER_ABANDONED=${INCOMPLETE_OBJECT_CONSIDER_ABANDONED}
       - DEEPREEFMAP_IMAGE_TAG=${DEEPREEFMAP_IMAGE_TAG}
       - DEEPREEFMAP_IMAGE=${DEEPREEFMAP_IMAGE}
       - NAMESPACE=${NAMESPACE}
@@ -88,6 +89,10 @@ services:
     ports:
       - 5444:5432
 
+  deepreefmap-test-cache:
+    image: redis:7.4.0
+    command: ["redis-server", "--requirepass", "test"]
+
   deepreefmap-test-api:
     build:
       context: ../deepreefmap-api
@@ -120,13 +125,14 @@ services:
       - KEYCLOAK_URL=test
       - SERIALIZER_SECRET_KEY=test
       - DEPLOYMENT=local
-      - CACHE_URL=deepreefmap-cache
+      - CACHE_URL=deepreefmap-test-cache
       - CACHE_PORT=6379
       - CACHE_DB=1
       - CACHE_SECRET=test
       - CACHE_PASSWORD=test
     depends_on:
-        - deepreefmap-test-db
+      - deepreefmap-test-db
+      - deepreefmap-test-cache
     volumes:
       - ../deepreefmap-api:/app
     ports:
@@ -140,5 +146,20 @@ services:
     #   - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
 
+  deepreefmap-tus:
+    image:  tusproject/tusd:latest
+    environment:
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
+      - AWS_REGION=us-east-1
+    command: -s3-bucket ${S3_BUCKET_ID} -s3-endpoint https://${S3_URL} -s3-object-prefix deepreefmap-local -behind-proxy -port 8080 -hooks-http http://deepreefmap-api:8000/api/objects/hooks
+    # volumes:
+      # - deepreefmap-tus-data:/data
+      # - ../tusd-hooks:/srv/tusd-hooks
+    labels:
+      - "traefik.http.routers.deepreefmap-tus.rule=Host(`deepreefmap`) && PathPrefix(`/files`)"
+      - "traefik.http.services.deepreefmap-tus.loadbalancer.server.port=8080"
+
 volumes:
   deepreefmap-db-data:
+  # deepreefmap-tus-data:
