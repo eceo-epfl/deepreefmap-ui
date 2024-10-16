@@ -23,7 +23,7 @@ export const FilePondUploaderList = () => {
             onprocessfiles={refresh}
             allowMultiple={true}
             credits={false}
-            chunkSize={25000000}
+            // chunkSize={25000000}
             timeout={200}
             maxParallelUploads={10}
             allowRevert={false}
@@ -33,6 +33,11 @@ export const FilePondUploaderList = () => {
                 process: (fieldName, file, metadata, load, error, progress, abort) => {
                     var upload = new tus.Upload(file, {
                         endpoint: "/files",
+                        parallelUploads: 10,
+                        metadataForPartialUploads: {
+                            filename: file.name,
+                            filetype: file.type
+                        },
                         retryDelays: [0, 1000, 3000, 5000],
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -83,7 +88,7 @@ export const FilePondUploaderTransect = () => {
             onprocessfiles={refresh}
             allowMultiple={true}
             credits={false}
-            chunkSize={25000000}
+            // chunkSize={25000000}
             timeout={200}
             maxParallelUploads={10}
             allowRevert={false}
@@ -93,6 +98,11 @@ export const FilePondUploaderTransect = () => {
                 process: (fieldName, file, metadata, load, error, progress, abort) => {
                     var upload = new tus.Upload(file, {
                         endpoint: "/files",
+                        parallelUploads: 10,
+                        metadataForPartialUploads: {
+                            filename: file.name,
+                            filetype: file.type
+                        },
                         retryDelays: [0, 1000, 3000, 5000],
                         headers: {
                             'Authorization': `Bearer ${token}`,
