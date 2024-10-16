@@ -23,7 +23,7 @@ export const FilePondUploaderList = () => {
             onprocessfiles={refresh}
             allowMultiple={true}
             credits={false}
-            chunkSize={50000000}
+            chunkSize={25000000}
             timeout={200}
             maxParallelUploads={10}
             allowRevert={false}
@@ -83,6 +83,7 @@ export const FilePondUploaderTransect = () => {
             onprocessfiles={refresh}
             allowMultiple={true}
             credits={false}
+            chunkSize={25000000}
             timeout={200}
             maxParallelUploads={10}
             allowRevert={false}
