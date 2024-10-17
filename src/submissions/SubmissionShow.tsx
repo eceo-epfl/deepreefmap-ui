@@ -312,7 +312,7 @@ const SubmissionShow = (props) => {
                         <ArrayField source="input_associations" label="File Inputs">
                             <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
                                 <TextField source="input_object.filename" label="Filename" />
-                                <NumberField source="input_object.size_bytes" label="Size (bytes)" />
+                                <FunctionField label="Size (MB)" render={(record) => { return (record.input_object.size_bytes / 1000000).toFixed(2); }} />
                                 <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
                                 <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
                                 <NumberField source="processing_order" />
@@ -331,7 +331,7 @@ const SubmissionShow = (props) => {
                             <Datagrid bulkActionButtons={false} rowClick={downloadFile}
                             >
                                 <TextField source="filename" label="Filename" />
-                                <NumberField source="size_bytes" label="Size (bytes)" />
+                                <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(5); }} />
                                 <DateField source="last_modified" showTime={true} sortable={false} />
                             </Datagrid>
                         </ArrayField>
