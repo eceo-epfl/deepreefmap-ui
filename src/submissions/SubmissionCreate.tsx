@@ -31,7 +31,7 @@ const videoArraySizeValidation = (value) => {
             return 'The processing order must be unique';
         }
     }
-    if (value.length === 2 && value[0].input_object.video_id === value[1].input_object.video_id) {
+    if (value.length === 2 && value[0].input_object_id === value[1].input_object_id) {
         return 'The videos must be unique. The same video has been chosen twice';
     }
     return undefined;
@@ -72,14 +72,14 @@ const TotalDuration = ({ videoChoices }) => {
         // time is not needed as we can just use the end time to add to the
         // first video's duration
         if (videos && videoChoices && videoChoices.length > 0 && videos.length > 0 && videos[0].input_object) {
-            const video_id = videos[0].input_object.video_id;
+            const video_id = videos[0].input_object_id;
             const video = videoChoices.find(video => video.id === video_id);
             if (video) {
                 setFirstVideoDuration(video.time_seconds);
             }
         }
         if (videos && videoChoices && videoChoices.length > 0 && videos.length > 1 && videos[1].input_object) {
-            const video_id = videos[1].input_object.video_id;
+            const video_id = videos[1].input_object_id;
             const video = videoChoices.find(video => video.id === video_id);
             if (video) {
                 setSecondVideoDuration(video.time_seconds);
@@ -157,7 +157,7 @@ export const VideoInput = ({ transectID, setChoices }) => {
     return (
         <>
             <SelectInput
-                optionText={(record) => `${record.filename} (${record.time_seconds} seconds, ${record.size_bytes} bytes)`}
+                optionText={(record) => `${record.filename} (${record.time_seconds} seconds, ${(record.size_bytes / 1024 / 1024).toFixed(2)} MB)`}
                 fullWidth
                 disabled={!transectID}
             />
@@ -202,7 +202,7 @@ const VideoChoice = ({ setQtyVideos, setChoices }) => {
             <SimpleFormIterator inline getItemLabel={index => `#${index + 1}`}>
                 <Grid container spacing={2}>
                     <Grid item xs={9}>
-                        <ReferenceInput source="input_object.video_id" reference="objects" label="Select Video" filter={{ transect_id: getValues('transect_id') }} >
+                        <ReferenceInput source="input_object_id" reference="objects" label="Select Video" filter={{ transect_id: getValues('transect_id') }} >
                             {transectID ? null : <Typography variant="caption" color="error" gutterBottom>Choose a transect first</Typography>}
                             <VideoInput transectID={transectID} setChoices={setChoices} />
                         </ReferenceInput>
