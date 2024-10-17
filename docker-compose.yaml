@@ -142,8 +142,6 @@ services:
     image: redis:7.4.0
     ports:
       - 6379:6379
-    # environment:
-    #   - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
 
   deepreefmap-tus:
@@ -152,14 +150,10 @@ services:
       - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
       - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
       - AWS_REGION=us-east-1
-    command: -s3-bucket ${S3_BUCKET_ID} -s3-endpoint https://${S3_URL} -s3-object-prefix deepreefmap-local -behind-proxy -port 8080 -hooks-http http://deepreefmap-api:8000/api/objects/hooks
-    # volumes:
-      # - deepreefmap-tus-data:/data
-      # - ../tusd-hooks:/srv/tusd-hooks
+    command: -s3-bucket ${S3_BUCKET_ID} -s3-endpoint https://${S3_URL} -s3-object-prefix deepreefmap-local -behind-proxy -port 8080 -hooks-http http://deepreefmap-api:8000/tus_hooks
     labels:
       - "traefik.http.routers.deepreefmap-tus.rule=Host(`deepreefmap`) && PathPrefix(`/files`)"
       - "traefik.http.services.deepreefmap-tus.loadbalancer.server.port=8080"
 
 volumes:
   deepreefmap-db-data:
-  # deepreefmap-tus-data:
