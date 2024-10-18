@@ -24,12 +24,12 @@ import {
     useNotify,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
 import { TransectMapOne } from '../maps/Transects';
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
-import { set } from 'ol/transform';
+import { FilePond } from 'react-filepond';
 
 const TransectNameField = () => {
     const createPath = useCreatePath();
@@ -51,16 +51,43 @@ const TransectNameField = () => {
                 This is the map of the transect that the submission is associated with.
             </Typography>
             <br />
-            <Link to={path} onClick={stopPropagation}>
-                <TextField source="transect.name" label="Area" emptyText='N/A' variant='h5' />
+            <Link to={path} onClick={stopPropagation} style={{ textDecoration: 'none' }} >
+                Transect: <TextField source="transect.name" label="Area" emptyText='No transect defined' />
             </Link>
             <TransectMapOne record={record.transect} />
         </>
     );
 };
 
+const calculateDuration = (record) => {
+    // const record = useRecordContext();
+    const [duration, setDuration] = useState(0);
+    // if (!record) return null;
+
+    // Get the total duration of the submission. We need to know the file inputs
+    const fileInputs = record.input_associations.sort((a, b) => a.processing_order - b.processing_order);
+
+    if (fileInputs.length === 0) {
+        return 0
+        // setDuration(0);
+    } else if (fileInputs.length === 1) {
+        return record.time_seconds_end - record.time_seconds_start
+        setDuration(fileInputs[0].input_object.time_seconds - record.time_seconds_start - record.time_seconds_end);
+    } else {
+        return fileInputs[0].input_object.time_seconds - record.time_seconds_start + record.time_seconds_end
+        setDuration(fileInputs[0].input_object.time_seconds - record.time_seconds_start + record.time_seconds_end);
+        // for (let i = 1; i < fileInputs.length - 1; i++) {
+        //     setDuration(duration + fileInputs[i].input_object.time_seconds);
+        // }
+
+    }
+    return 0
+}
+
 
 const SubmissionShow = (props) => {
+    const [disableExecuteButton, setDisableExecuteButton] = useState(false);
+    const [listOfDisabledDeletionButtons, setListOfDisabledDeletionButtons] = useState([]);
     const readinessStatusMessageGenerator = (record) => {
         // Add a list of possible statuses here. Append each if statement to the list
         var statusList = [];
@@ -98,7 +125,7 @@ const SubmissionShow = (props) => {
         function timeout(delay: number) {
             return new Promise(res => setTimeout(res, delay));
         }
-        const [disableExecuteButton, setDisableExecuteButton] = useState(false);
+
         const dataProvider = useDataProvider();
         const record = useRecordContext();
         const refresh = useRefresh();
@@ -171,12 +198,16 @@ const SubmissionShow = (props) => {
             variant="outlined"
             color="error"
             label="Request Deletion"
-            disabled={record.time_started === null}
+            disabled={record.time_started === null || listOfDisabledDeletionButtons.includes(record.submission_id)}
             onClick={(event) => {
                 dataProvider.deleteKubernetesJob(record.submission_id).then(
-                    () => notify('Deletion request sent. It may take some time for the job to be deleted.')
+                    () => {
+                        notify('Deletion request sent. It may take some time for the job to be deleted.')
+                        // Add record.submission_id from the record to the list of disabled buttons
+                        setListOfDisabledDeletionButtons([...listOfDisabledDeletionButtons, record.submission_id]);
+                    }
                 ).catch(
-                    () => notify('Deletion request failed. Please try again later.')
+                    () => notify('Deletion request failed. It may have already been deleted. Please try again later.')
                 );
                 event.stopPropagation();
             }
@@ -195,15 +226,17 @@ const SubmissionShow = (props) => {
         // If no data is available, return a message
         if (data.length === 0) {
             return <>
-                <br /><br /><br /><br /><br />
-                <Typography variant="h6" align='center'>
-                    No class data available
-                </Typography>
+                <Grid container justifyContent="center" alignItems="center">
+                    <Typography variant="body1" align='center'>
+                        Execute a job to obtain class information
+                    </Typography>
+                </Grid>
             </>;
         }
-        const labels = data.map((item) => item.class);
+        const labels = data.map((item) => `${item.class} (${(item.percentage_cover * 100).toFixed(2)}%)`);
         const colors = data.map((item) => rgbToString(item.color)); // Convert RGB array to CSS rgb string
         // Set labels to capitalise the first letter
+
         labels.forEach((label, index) => {
             labels[index] = label.charAt(0).toUpperCase() + label.slice(1);
         });
@@ -227,7 +260,7 @@ const SubmissionShow = (props) => {
                 data={pieData}
                 layout={{
                     width: 800,
-                    height: 600,
+                    height: 400,
                     paper_bgcolor: theme === 'dark' ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)',
                     autosize: true,
                     margin: {
@@ -238,64 +271,100 @@ const SubmissionShow = (props) => {
                     },
                     font: {
                         color: theme === 'dark' ? 'white' : 'black',
-                        size: 16,
+                        size: 14,
                     }
                 }}
             /></>
         );
     };
+    const StatusIndicator = () => {
+        const record = useRecordContext();
+        if (!record) return null;
+
+        const noUserInputErrors: boolean = (readinessStatusMessageGenerator(record).length === 0);
+
+        return (<><Brightness1TwoToneIcon color={noUserInputErrors ? "success" : "error"} />
+            <FunctionField paddingLeft={1}
+                label="Readiness status"
+                render={readinessStatusMessage}
+            /></>
+        );
+    }
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
-                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Box sx={{ flex: 1 }}>
-                        <Brightness1TwoToneIcon color='success' />
-                        <br />
-                        <Labeled>
-                            <TextField source="name" />
-                        </Labeled><br />
-                        {permissions === 'admin' ? <><Labeled><ReferenceField source="owner" reference="users" link="show">
-                            <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
-                        </ReferenceField></Labeled><br /></> : null}
-                        <Labeled>
-                            <TextField source="description" />
-                        </Labeled><br /><Labeled>
-                            <DateField
-                                label="Submitted at"
-                                source="time_added_utc"
-                                sortable={false}
-                                showTime
-                                transform={value => new Date(value + 'Z')}  // Fix UTC time
-                            />
-                        </Labeled><br /><Labeled>
-                            <FunctionField
-                                label="FPS"
-                                render={record => record.fps === null ? <Typography variant="body" color='red' >Required</Typography> : record.fps} />
-                        </Labeled><br /><Labeled>
-                            <FunctionField
-                                label="Start time (s)"
-                                render={record => record.time_seconds_start === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_start} />
-                        </Labeled><br /><Labeled>
-                            <FunctionField
-                                label="End time (s)"
-                                render={record => record.time_seconds_end === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_end} />
-                        </Labeled><br />
-                        <Labeled>
-                            <FunctionField
-                                label="Readiness status"
-                                render={readinessStatusMessage}
-                            />
-                        </Labeled><br /><Labeled>
-                            <FunctionField
-                                label="Last job status"
-                                render={jobStatus}
-                            />
-                        </Labeled>
-                    </Box>
-                    <Box sx={{ flex: 3 }}>
+                <Grid container alignItems="center" justifyContent="space-between">
+                    <Grid item>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <StatusIndicator />
+                        </Box>
+                    </Grid>
+                    <Grid item>
+                        <DateField
+                            label="Submitted at"
+                            source="time_added_utc"
+                            sortable={false}
+                            showTime
+                            transform={value => new Date(value + 'Z')}  // Fix UTC time
+                        />
+                    </Grid>
+                </Grid>
+                <Box
+                    sx={{
+                        height: 2,
+                        width: '100%',
+                        bgcolor: 'gray',
+                        marginY: 1,
+                    }}
+                />
+                <Grid container>
+                    <Grid item xs={2}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                            {permissions === 'admin' ? (
+                                <>
+                                    <Labeled>
+                                        <ReferenceField source="owner" reference="users" link="show">
+                                            <FunctionField render={record => `${record.firstName} ${record.lastName} `} source="Owner" />
+                                        </ReferenceField>
+                                    </Labeled>
+                                </>
+                            ) : null}
+                            <Labeled>
+                                <FunctionField
+                                    label="FPS"
+                                    render={record => record.fps === null ? <Typography variant="body" color='red' >Required</Typography> : record.fps}
+                                />
+                            </Labeled>
+                            <Labeled>
+                                <FunctionField
+                                    label="Start time (s)"
+                                    render={record => record.time_seconds_start === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_start}
+                                />
+                            </Labeled>
+                            <Labeled>
+                                <FunctionField
+                                    label="End time (s)"
+                                    render={record => record.time_seconds_end === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_end}
+                                />
+                            </Labeled>
+                            <Labeled>
+                                <FunctionField label="Duration (s)" render={(record) => calculateDuration(record)} />
+                            </Labeled>
+                            <Labeled>
+                                <FunctionField
+                                    label="Last job status"
+                                    render={jobStatus}
+                                />
+                            </Labeled>
+                            <Labeled>
+                                <TextField source="description" />
+                            </Labeled>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={10}>
                         <ClassPieChart />
-                    </Box>
-                </Box>
+                    </Grid>
+                </Grid>
                 <TabbedShowLayout>
                     <TabbedShowLayout.Tab label="Run status">
                         <Typography variant="caption">
@@ -366,7 +435,7 @@ const SubmissionShow = (props) => {
                     </TabbedShowLayout.Tab>
                 </TabbedShowLayout>
 
-            </SimpleShowLayout>
+            </SimpleShowLayout >
         </Show >
     )
 };

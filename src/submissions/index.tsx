@@ -13,4 +13,7 @@ export default {
     options: {
         label: 'Submissions',
     },
+    recordRepresentation: (record) => {
+        return (record && record.name) ? `${record.name}` : `${record.id}`;
+    }
 };

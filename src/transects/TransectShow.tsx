@@ -193,7 +193,7 @@ const TransectShow = (props) => {
         <Show actions={<TransectShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
                 <Grid container spacing={2}>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Grid item xs={6}>
                             <Labeled label="Name">
                                 <TextField source="name" />
@@ -244,7 +244,7 @@ const TransectShow = (props) => {
                             </Labeled>
                         </Grid>
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid item xs={9}>
                         <TransectMap />
                     </Grid>
                 </Grid>
