@@ -24,7 +24,6 @@ export const FilePondUploaderList = () => {
             allowMultiple={true}
             credits={false}
             timeout={200}
-            maxParallelUploads={10}
             allowRevert={false}
             allowRemove={false}
             server={{
@@ -86,9 +85,7 @@ export const FilePondUploaderTransect = () => {
             onprocessfiles={refresh}
             allowMultiple={true}
             credits={false}
-            // chunkSize={25000000}
             timeout={200}
-            maxParallelUploads={10}
             allowRevert={false}
             allowRemove={false}
             server={{
@@ -96,7 +93,6 @@ export const FilePondUploaderTransect = () => {
                 process: (fieldName, file, metadata, load, error, progress, abort) => {
                     var upload = new tus.Upload(file, {
                         endpoint: "/files",
-                        parallelUploads: 10,
                         metadataForPartialUploads: {
                             filename: file.name,
                             filetype: file.type
