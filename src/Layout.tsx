@@ -49,7 +49,21 @@ const StatusIcon = ({ gpu, storage }) => {
 
 
 const MyAppBar = (props) => {
-    const [systemStatus, setSystemStatus] = useState({});
+    const [systemStatus, setSystemStatus] = useState(
+        {
+            "kubernetes": [],
+            "s3_local": {
+                "total_object_count": 0,
+                "input_object_count": 0,
+                "output_object_count": 0,
+                "total_size": 0,
+                "input_size": 0,
+                "output_size": 0
+            },
+            "s3_global": null,
+            "s3_status": true,
+            "kubernetes_status": true
+        });
     const dataProvider = useDataProvider();
     const { isPending, permissions } = usePermissions();
     const appBarText = () => {
