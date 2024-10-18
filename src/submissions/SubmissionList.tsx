@@ -81,7 +81,8 @@ const SubmissionList = () => {
                     <DateField
                         label="Submitted at"
                         source="time_added_utc"
-                        showTime={true}
+                        showTime
+                        transform={value => new Date(value + 'Z')}  // Fix UTC time
                     />
                     <FieldWrapper label="Transect"><TransectNameField /></FieldWrapper>
                     {permissions === 'admin' ? (

@@ -252,7 +252,8 @@ const SubmissionShow = (props) => {
                                 label="Submitted at"
                                 source="time_added_utc"
                                 sortable={false}
-                                showTime={true}
+                                showTime
+                                transform={value => new Date(value + 'Z')}  // Fix UTC time
                             />
                         </Labeled><br /><Labeled>
                             <FunctionField
@@ -297,7 +298,12 @@ const SubmissionShow = (props) => {
                                 bulkActionButtons={false}
                                 rowClick={redirectToJobLogs}
                             >
-                                <DateField source="time_started" showTime={true} sortable={false} />
+                                <DateField
+                                    source="time_started"
+                                    sortable={false}
+                                    showTime
+                                    transform={value => new Date(value + 'Z')}  // Fix UTC time
+                                />
                                 <TextField source="submission_id" label="Submission ID" sortable={false} />
                                 <TextField source="status" sortable={false} />
                                 <DeleteKubernetesJobButton />
@@ -313,7 +319,10 @@ const SubmissionShow = (props) => {
                             <Datagrid bulkActionButtons={false} rowClick={redirectToObject}>
                                 <TextField source="input_object.filename" label="Filename" />
                                 <FunctionField label="Size (MB)" render={(record) => { return (record.input_object.size_bytes / 1000000).toFixed(2); }} />
-                                <DateField source="input_object.time_added_utc" showTime={true} label="Time Added (UTC)" />
+                                <DateField source="input_object.time_added_utc"
+                                    showTime
+                                    transform={value => new Date(value + 'Z')}  // Fix UTC time
+                                    label="Time Added" />
                                 <TextField source="input_object.hash_md5sum" label="MD5 Hash" />
                                 <NumberField source="processing_order" />
                                 <NumberField source="input_object.fps" label="FPS" />
@@ -332,7 +341,12 @@ const SubmissionShow = (props) => {
                             >
                                 <TextField source="filename" label="Filename" />
                                 <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(5); }} />
-                                <DateField source="last_modified" showTime={true} sortable={false} />
+                                <DateField
+                                    source="last_modified"
+                                    sortable={false}
+                                    showTime
+                                    transform={value => new Date(value + 'Z')}  // Fix UTC time
+                                />
                             </Datagrid>
                         </ArrayField>
                     </TabbedShowLayout.Tab>

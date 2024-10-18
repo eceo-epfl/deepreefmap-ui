@@ -133,7 +133,8 @@ const ObjectList = () => {
                     <DateField
                         label="Submitted at"
                         source="time_added_utc"
-                        showTime={true}
+                        showTime
+                        transform={value => new Date(value + 'Z')}  // Fix UTC time
                     />
                     <TextField source="filename" />
                     <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(2); }} />

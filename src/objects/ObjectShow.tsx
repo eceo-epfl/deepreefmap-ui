@@ -140,7 +140,8 @@ const ObjectShow = (props) => {
                 <DateField
                     label="Submitted at"
                     source="time_added_utc"
-                    showTime={true}
+                    showTime
+                    transform={value => new Date(value + 'Z')}  // Fix UTC time
                 />
                 <TextField source="hash_md5sum" label="MD5" />
                 <TextField source="notes" />

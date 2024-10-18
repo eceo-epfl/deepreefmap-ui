@@ -28,7 +28,7 @@ import { Typography, Grid } from '@mui/material';
 import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
-
+import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
 
 const CreateSubmissionButton = () => {
     const record = useRecordContext();
@@ -109,7 +109,6 @@ const TransectTabs = () => {
 
     const objectClick = (id, resource, record) => (createPath({ resource: 'objects', type: 'show', id: record.id }));
     const submissionClick = (id, resource, record) => (createPath({ resource: 'submissions', type: 'show', id: record.id }));
-
     if (!record) return <Loading />;
     return (
         <><Typography variant="h6" gutterBottom>Associations</Typography>
@@ -126,16 +125,22 @@ const TransectTabs = () => {
                             rowClick={objectClick}
                         >
                             <DateField
-                                label="Submitted at"
+                                label="Uploaded at"
                                 source="time_added_utc"
+                                transform={value => new Date(value + 'Z')}  // Fix UTC time
+                                showTime
                             />
                             <TextField source="filename" />
                             <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(2); }} />
                             <NumberField source="time_seconds" label="Duration (s)" />
-                            <TextField source="processing_message" />
-                            <BooleanField label="Upload complete" source="all_parts_received" />
-                            <BooleanField label="Processing started" source="processing_has_started" />
-                            <BooleanField label="Processing successful" source="processing_completed_successfully" />
+                            <NumberField source="fps" label="FPS" />
+                            <FunctionField label="Ready" render={(record) => {
+                                return (
+                                    record.all_parts_received && record.processing_has_started && record.processing_completed_successfully ?
+                                        <Brightness1TwoToneIcon color="success" /> : <Brightness1TwoToneIcon color="error" />
+                                )
+                            }
+                            } />
                         </Datagrid>
                     </ArrayField>
                 </TabbedShowLayout.Tab>
@@ -145,7 +150,12 @@ const TransectTabs = () => {
                     </Typography>
                     <ArrayField source="submissions">
                         <Datagrid rowClick={submissionClick}>
-                            <DateField source="time_added_utc" label="Added (UTC)" />
+                            <DateField
+                                source="time_added_utc"
+                                label="Added"
+                                showTime
+                                transform={value => new Date(value + 'Z')}  // Fix UTC time
+                            />
                             <TextField source="id" />
                             <TextField source="name" />
                         </Datagrid>
