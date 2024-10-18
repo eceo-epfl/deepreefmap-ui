@@ -227,7 +227,7 @@ const SubmissionCreate = () => {
                 </Typography>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <TextInput source="name" fullWidth />
+                        <TextInput source="name" fullWidth validate={[required()]} />
                     </Grid>
                     <Grid item xs={12}>
                         <TextInput source="description" multiline fullWidth />

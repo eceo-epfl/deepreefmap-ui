@@ -23,11 +23,13 @@ import {
     ReferenceField,
     useNotify,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
+import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import Plot from 'react-plotly.js';
 import { stopPropagation } from 'ol/events/Event';
 import { TransectMapOne } from '../maps/Transects';
-
+import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
+import { set } from 'ol/transform';
 
 const TransectNameField = () => {
     const createPath = useCreatePath();
@@ -59,8 +61,6 @@ const TransectNameField = () => {
 
 
 const SubmissionShow = (props) => {
-    const FieldWrapper = ({ children, label }) => children;
-
     const readinessStatusMessageGenerator = (record) => {
         // Add a list of possible statuses here. Append each if statement to the list
         var statusList = [];
@@ -98,6 +98,7 @@ const SubmissionShow = (props) => {
         function timeout(delay: number) {
             return new Promise(res => setTimeout(res, delay));
         }
+        const [disableExecuteButton, setDisableExecuteButton] = useState(false);
         const dataProvider = useDataProvider();
         const record = useRecordContext();
         const refresh = useRefresh();
@@ -106,7 +107,13 @@ const SubmissionShow = (props) => {
         // Create a function callback for onClick that calls a PUT request to the API
         const executeJob = () => {
             // Wait for return of the promise before refreshing the page
-            dataProvider.executeKubernetesJob(record.id).then(() => timeout(1000)).then(() => refresh());
+            dataProvider.executeKubernetesJob(record.id).then(() => {
+                notify('Job submitted. It may take some time for it to appear...');
+                setDisableExecuteButton(true);
+                timeout(10000).then(() => {
+                    setDisableExecuteButton(false);
+                });
+            });
         }
         const readyToSubmit = readinessStatusMessageGenerator(record).length !== 0;
 
@@ -119,7 +126,7 @@ const SubmissionShow = (props) => {
                     <Button
                         variant="contained"
                         color="success"
-                        disabled={readyToSubmit}
+                        disabled={readyToSubmit || disableExecuteButton}
                         onClick={executeJob}>Execute Job</Button>
                     <EditButton />
                     <DeleteButton /></>
@@ -166,7 +173,11 @@ const SubmissionShow = (props) => {
             label="Request Deletion"
             disabled={record.time_started === null}
             onClick={(event) => {
-                dataProvider.deleteKubernetesJob(record.submission_id);
+                dataProvider.deleteKubernetesJob(record.submission_id).then(
+                    () => notify('Deletion request sent. It may take some time for the job to be deleted.')
+                ).catch(
+                    () => notify('Deletion request failed. Please try again later.')
+                );
                 event.stopPropagation();
             }
             }
@@ -236,9 +247,10 @@ const SubmissionShow = (props) => {
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
-
                 <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Box sx={{ flex: 1 }}>
+                        <Brightness1TwoToneIcon color='success' />
+                        <br />
                         <Labeled>
                             <TextField source="name" />
                         </Labeled><br />
@@ -268,7 +280,6 @@ const SubmissionShow = (props) => {
                                 label="End time (s)"
                                 render={record => record.time_seconds_end === null ? <Typography variant="body" color='red' >Required</Typography> : record.time_seconds_end} />
                         </Labeled><br />
-
                         <Labeled>
                             <FunctionField
                                 label="Readiness status"
@@ -302,7 +313,6 @@ const SubmissionShow = (props) => {
                                     source="time_started"
                                     sortable={false}
                                     showTime
-                                    transform={value => new Date(value + 'Z')}  // Fix UTC time
                                 />
                                 <TextField source="submission_id" label="Submission ID" sortable={false} />
                                 <TextField source="status" sortable={false} />

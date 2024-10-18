@@ -3,20 +3,16 @@ import { Layout, AppBar, TitlePortal, useDataProvider, usePermissions } from 're
 import { CssBaseline } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { Typography, Box } from '@mui/material';
+import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
 
 
 const StatusIcon = ({ gpu, storage }) => {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box
-                sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    bgcolor: gpu ? 'green' : 'red',
-                    marginRight: 1,
-                }}
-            />
+            <Brightness1TwoToneIcon sx={{
+                width: 16,
+                marginRight: 1,
+            }} color={gpu ? 'success' : 'error'} />
             <Typography variant="body1" color={gpu ? 'textPrimary' : 'textSecondary'}>
                 GPU
             </Typography>
@@ -30,16 +26,10 @@ const StatusIcon = ({ gpu, storage }) => {
                     marginX: 2,
                 }}
             />
-
-            <Box
-                sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    bgcolor: storage ? 'green' : 'red',
-                    marginRight: 1,
-                }}
-            />
+            <Brightness1TwoToneIcon sx={{
+                width: 16,
+                marginRight: 1,
+            }} color={storage ? 'success' : 'error'} />
             <Typography variant="body1" color={storage ? 'textPrimary' : 'textSecondary'}>
                 Storage
             </Typography>
