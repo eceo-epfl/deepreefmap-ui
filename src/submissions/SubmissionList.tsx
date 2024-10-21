@@ -64,25 +64,25 @@ const SubmissionList = () => {
                 <Datagrid
                     bulkActionButtons={permissions === 'admin' ? true : false}
                     rowClick="show"
+                    size="small"
                 >
+                    <DateField
+                        label="Submitted at"
+                        source="time_added_utc"
+                        showTime
+                        transform={value => new Date(value + 'Z')}  // Fix UTC time
+                    />
                     <FunctionField render={(record) => {
                         if (record.name === null) {
                             return record.id
                         }
                         return `${record.name}`
                     }} label="Name" />
-                    <TextField source="description" />
                     <FunctionField render={record => `${record?.input_associations?.length ?? ""}`} label="Files" />
 
                     <FunctionField
                         label="Last job status"
                         render={record => `${record?.run_status[0]?.status ?? 'No jobs submitted'}`}
-                    />
-                    <DateField
-                        label="Submitted at"
-                        source="time_added_utc"
-                        showTime
-                        transform={value => new Date(value + 'Z')}  // Fix UTC time
                     />
                     <FieldWrapper label="Transect"><TransectNameField /></FieldWrapper>
                     {permissions === 'admin' ? (

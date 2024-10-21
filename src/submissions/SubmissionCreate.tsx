@@ -10,15 +10,13 @@ import {
     ArrayInput,
     SimpleFormIterator,
     minValue,
-    TextField,
     useChoicesContext,
 } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
-import 'react-dropzone-uploader/dist/styles.css';
 
 
-const videoArraySizeValidation = (value) => {
+export const videoArraySizeValidation = (value) => {
     if (value.length < 1) {
         return 'At least one video must be processed';
     }
@@ -37,14 +35,14 @@ const videoArraySizeValidation = (value) => {
     return undefined;
 }
 
-const endDurationValidation = (value, allValues) => {
+export const endDurationValidation = (value, allValues) => {
     if (value <= allValues.time_seconds_start) {
         return 'The end time must be greater than the start time';
     }
     return undefined;
 };
 
-const TotalDuration = ({ videoChoices }) => {
+export const TotalDuration = ({ videoChoices }) => {
     // Overengineered component to calculate the total duration of the videos
 
     const { getValues, watch } = useFormContext();
@@ -161,14 +159,13 @@ export const VideoInput = ({ transectID, setChoices }) => {
                 fullWidth
                 disabled={!transectID}
             />
-            <TextField source="filename" />
         </>
     );
 };
 
 
 
-const VideoChoice = ({ setQtyVideos, setChoices }) => {
+export const VideoChoice = ({ setQtyVideos, setChoices }) => {
     const { setValue, getValues, watch } = useFormContext();
     const [transectID, setTransectID] = useState(null);
 
@@ -199,9 +196,14 @@ const VideoChoice = ({ setQtyVideos, setChoices }) => {
             Select a video in the order it is to be processed with the model. If you select two, the videos will be concatenated by the model.
         </Typography>
         <ArrayInput source="input_associations" label="Videos" validate={[videoArraySizeValidation]}>
-            <SimpleFormIterator inline getItemLabel={index => `#${index + 1}`}>
+            <SimpleFormIterator
+                inline
+                getItemLabel={index => `#${index + 1}`}
+                disableAdd={getValues('input_associations')?.length === 2}
+                disableClear
+            >
                 <Grid container spacing={2}>
-                    <Grid item xs={9}>
+                    <Grid item xs={12}>
                         <ReferenceInput source="input_object_id" reference="objects" label="Select Video" filter={{ transect_id: getValues('transect_id') }} >
                             {transectID ? null : <Typography variant="caption" color="error" gutterBottom>Choose a transect first</Typography>}
                             <VideoInput transectID={transectID} setChoices={setChoices} />

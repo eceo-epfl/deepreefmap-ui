@@ -22,6 +22,7 @@ import {
     useListContext,
     Button,
     useUnselectAll,
+    useNotify,
     useCreatePath,
 } from 'react-admin';
 import { Typography, Grid } from '@mui/material';
@@ -29,9 +30,13 @@ import { TransectMapOne } from '../maps/Transects';
 import { FilePondUploaderTransect } from '../uploader/FilePond';
 import { useEffect } from "react";
 import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
+import { IconButton } from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 const CreateSubmissionButton = () => {
     const record = useRecordContext();
+    if (!record) return null;
+
     const listContext = useListContext();
     const redirect = useRedirect();
     const [create, { data, loading, loaded, error }] = useCreate();
@@ -60,10 +65,10 @@ const CreateSubmissionButton = () => {
         return record.all_parts_received === false;
     });
     const handleClick = () => {
-        create('submissions', {
-            data: {
+        redirect('create', 'submissions', null, {}, {
+            record: {
                 transect_id: record.id,
-                input_associations: input_associations
+                input_associations: input_associations,
             }
         })
     }
@@ -92,6 +97,64 @@ const CreateSubmissionButton = () => {
 };
 
 
+export const CreateSingleSubmissionButton = () => {
+    const record = useRecordContext();
+    if (!record) return null;
+    const notify = useNotify();
+    const redirect = useRedirect();
+    let color = 'error';
+
+    const getColor = (record) => {
+        if (record.all_parts_received && record.processing_has_started && record.processing_completed_successfully) {
+            return "success";
+        } else if (record.all_parts_received && record.processing_has_started) {
+            return "warning";
+        } else {
+            return "error";
+        }
+    }
+
+    const getProcessingMessage = (record) => {
+        if (record.all_parts_received && record.processing_has_started && record.processing_completed_successfully) {
+            return "Click to create submission from video";
+        } else if (record.all_parts_received && record.processing_has_started) {
+            return "Upload has finished, processing video";
+        } else {
+            return "Upload in progress";
+        }
+    }
+
+    return <IconButton
+        color={getColor(record)}
+        title={getProcessingMessage(record)}
+        onClick={(event) => {
+            if (record.all_parts_received && record.processing_has_started && record.processing_completed_successfully) {
+                redirect('create', 'submissions', null, {}, {
+                    record: {
+                        transect_id: record.transect_id,
+                        input_associations: [
+                            {
+                                input_object_id: record.id,
+                                processing_order: 1
+                            }
+                        ],
+                    }
+                })
+                event.stopPropagation();
+            } else if (record.all_parts_received && record.processing_has_started) {
+                notify("Please wait, processing video");
+                event.stopPropagation();
+            } else {
+                notify('Upload in progress, please wait for it to finish');
+                event.stopPropagation();
+            }
+
+        }}
+    >
+        <AddCircleOutlineIcon />
+    </IconButton>;
+};
+
 
 const TransectTabs = () => {
     const record = useRecordContext();
@@ -99,9 +162,6 @@ const TransectTabs = () => {
     const unselectAll = useUnselectAll('transects');
     useEffect(() => {
         return () =>
-
-
-
             unselectAll();
     }, []
     );
@@ -123,6 +183,7 @@ const TransectTabs = () => {
                         <Datagrid
                             bulkActionButtons={<CreateSubmissionButton />}
                             rowClick={objectClick}
+                            isRowSelectable={(record) => (record.all_parts_received && record.processing_has_started && record.processing_completed_successfully)}
                         >
                             <DateField
                                 label="Uploaded at"
@@ -134,13 +195,8 @@ const TransectTabs = () => {
                             <FunctionField label="Size (MB)" render={(record) => { return (record.size_bytes / 1000000).toFixed(2); }} />
                             <NumberField source="time_seconds" label="Duration (s)" />
                             <NumberField source="fps" label="FPS" />
-                            <FunctionField label="Ready" render={(record) => {
-                                return (
-                                    record.all_parts_received && record.processing_has_started && record.processing_completed_successfully ?
-                                        <Brightness1TwoToneIcon color="success" /> : <Brightness1TwoToneIcon color="error" />
-                                )
-                            }
-                            } />
+                            <CreateSingleSubmissionButton label="Ready" />
+
                         </Datagrid>
                     </ArrayField>
                 </TabbedShowLayout.Tab>
@@ -148,16 +204,21 @@ const TransectTabs = () => {
                     <Typography variant="caption">
                         These are the related submissions to this transect. Click on them to view their details.
                     </Typography>
-                    <ArrayField source="submissions">
-                        <Datagrid rowClick={submissionClick}>
+                    <ArrayField source="submissions" sort={{ field: "time_added_utc", order: "DESC" }}>
+                        <Datagrid rowClick={submissionClick} bulkActionButtons={false}
+                        >
                             <DateField
                                 source="time_added_utc"
                                 label="Added"
                                 showTime
                                 transform={value => new Date(value + 'Z')}  // Fix UTC time
                             />
-                            <TextField source="id" />
                             <TextField source="name" />
+                            <FunctionField
+                                label="Last job status"
+                                render={record => `${record?.run_status[0]?.status ?? 'No jobs submitted'}`}
+                            />
+
                         </Datagrid>
                     </ArrayField>
                 </TabbedShowLayout.Tab>
