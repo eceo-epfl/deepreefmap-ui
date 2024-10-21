@@ -22,6 +22,7 @@ import {
     Link,
     ReferenceField,
     useNotify,
+    BooleanField,
 } from 'react-admin'; // eslint-disable-line import/no-unresolved
 import { useState } from 'react';
 import { Box, Typography, Grid } from '@mui/material';
@@ -174,7 +175,7 @@ const SubmissionShow = (props) => {
         return createPath({
             resource: 'submission_job_logs',
             type: 'show',
-            id: record.submission_id,
+            id: record.kubernetes_pod_name,
         });
     };
     const redirectToObject = (id, basePath, record) => {
@@ -198,13 +199,14 @@ const SubmissionShow = (props) => {
             variant="outlined"
             color="error"
             label="Request Deletion"
-            disabled={record.time_started === null || listOfDisabledDeletionButtons.includes(record.submission_id)}
+            disabled={record.time_started === null || !record.is_still_kubernetes_resource || listOfDisabledDeletionButtons.includes(record.kubernetes_pod_name)
+            }
             onClick={(event) => {
-                dataProvider.deleteKubernetesJob(record.submission_id).then(
+                dataProvider.deleteKubernetesJob(record.kubernetes_pod_name).then(
                     () => {
                         notify('Deletion request sent. It may take some time for the job to be deleted.')
-                        // Add record.submission_id from the record to the list of disabled buttons
-                        setListOfDisabledDeletionButtons([...listOfDisabledDeletionButtons, record.submission_id]);
+                        // Add record.kubernetes_pod_name from the record to the list of disabled buttons
+                        setListOfDisabledDeletionButtons([...listOfDisabledDeletionButtons, record.kubernetes_pod_name]);
                     }
                 ).catch(
                     () => notify('Deletion request failed. It may have already been deleted. Please try again later.')
@@ -383,7 +385,8 @@ const SubmissionShow = (props) => {
                                     sortable={false}
                                     showTime
                                 />
-                                <TextField source="submission_id" label="Submission ID" sortable={false} />
+                                <TextField source="kubernetes_pod_name" label="Job ID" sortable={false} />
+                                <BooleanField source="is_still_kubernetes_resource" label="Is resource" sortable={false} />
                                 <TextField source="status" sortable={false} />
                                 <DeleteKubernetesJobButton />
 
@@ -424,7 +427,6 @@ const SubmissionShow = (props) => {
                                     source="last_modified"
                                     sortable={false}
                                     showTime
-                                    transform={value => new Date(value + 'Z')}  // Fix UTC time
                                 />
                             </Datagrid>
                         </ArrayField>

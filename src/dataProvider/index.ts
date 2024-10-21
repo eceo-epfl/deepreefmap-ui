@@ -209,7 +209,7 @@ const dataProvider = (
         return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
     },
     deleteKubernetesJob: (id) => {
-        const url = `${apiUrl}/submissions/kubernetes/jobs/${id}`;
+        const url = `${apiUrl}/submissions/jobs/${id}`;
         return httpClient(url, { method: "DELETE" }).then(({ json }) => ({ data: json }));
     }
 });
