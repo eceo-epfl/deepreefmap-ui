@@ -115,6 +115,9 @@ const SubmissionShow = (props) => {
         const statusList = readinessStatusMessageGenerator(record);
 
         // Return the text in green if ready, red if not
+        if (jobStatus(record) === 'Pending' || jobStatus(record) === 'Running') {
+            return 'Job is running...';
+        }
         if (statusList.length === 0) {
             return 'Ready. Click "Execute Job" to run.';
         }
@@ -170,6 +173,10 @@ const SubmissionShow = (props) => {
     const redirectToJobLogs = (id, basePath, record, event) => {
         if (record.status == 'Pending') {
             notify('Job is pending, logs are not available yet');
+            return false;
+        }
+        if (record.logs.length === 0) {
+            notify('Logs are not available for this job');
             return false;
         }
         return createPath({
@@ -284,14 +291,40 @@ const SubmissionShow = (props) => {
         if (!record) return null;
 
         const noUserInputErrors: boolean = (readinessStatusMessageGenerator(record).length === 0);
+        const jobStatusMessage = jobStatus(record);
 
-        return (<><Brightness1TwoToneIcon color={noUserInputErrors ? "success" : "error"} />
+        return (<><Brightness1TwoToneIcon color={
+            noUserInputErrors ? (
+                (jobStatusMessage == "Pending" || jobStatusMessage == "Running") ? "warning" : "success")
+                : "error"} />
             <FunctionField paddingLeft={1}
                 label="Readiness status"
                 render={readinessStatusMessage}
             /></>
         );
     }
+    const RunStatusIndicator = (
+
+    ) => {
+        const record = useRecordContext();
+        if (!record) return null;
+
+        console.log(record);
+        const isRunning = record.status === 'Running' || record.status === 'Pending';
+        const isError = record.status === 'Error';
+        const isComplete = record.status === 'Succeeded';
+
+        return (<>
+            <Brightness1TwoToneIcon
+                color={isRunning ? "warning" : isError ? "error" : isComplete ? "success" : "disabled"}
+            /></>
+
+        );
+
+
+
+    };
+
     return (
         <Show actions={<SubmissionShowActions />} {...props} queryOptions={{ refetchInterval: 5000 }}>
             <SimpleShowLayout>
@@ -380,13 +413,12 @@ const SubmissionShow = (props) => {
                                 bulkActionButtons={false}
                                 rowClick={redirectToJobLogs}
                             >
+                                <RunStatusIndicator />
                                 <DateField
                                     source="time_started"
                                     sortable={false}
                                     showTime
                                 />
-                                <TextField source="kubernetes_pod_name" label="Job ID" sortable={false} />
-                                <BooleanField source="is_still_kubernetes_resource" label="Is resource" sortable={false} />
                                 <TextField source="status" sortable={false} />
                                 <DeleteKubernetesJobButton />
 
