@@ -62,31 +62,26 @@ export const TotalDuration = ({ videoChoices }) => {
         setStartTime(startTime);
         setEndTime(endTime);
         setVideos(videos);
-
     }, [watch('time_seconds_start'), watch('time_seconds_end'), watch('input_associations'), videoChoices]);
 
     useEffect(() => {
         // Get just the first video's duration, as the second video's total
         // time is not needed as we can just use the end time to add to the
         // first video's duration
-        if (videos && videoChoices && videoChoices.length > 0 && videos.length > 0 && videos[0].input_object) {
+        if (videos && videoChoices && videoChoices.length > 0 && videos.length > 0 && videos[0].input_object_id) {
             const video_id = videos[0].input_object_id;
             const video = videoChoices.find(video => video.id === video_id);
             if (video) {
                 setFirstVideoDuration(video.time_seconds);
             }
         }
-        if (videos && videoChoices && videoChoices.length > 0 && videos.length > 1 && videos[1].input_object) {
+        if (videos && videoChoices && videoChoices.length > 0 && videos.length > 1 && videos[1].input_object_id) {
             const video_id = videos[1].input_object_id;
             const video = videoChoices.find(video => video.id === video_id);
             if (video) {
                 setSecondVideoDuration(video.time_seconds);
             }
         }
-
-        // We have to make sure we don't go over the total duration of the video.
-        // Set a boolean if they are over the total duration
-
 
         if (videos && startTime && endTime) {
             if (videos.length === 1) {
