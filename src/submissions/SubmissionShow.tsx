@@ -61,25 +61,15 @@ const TransectNameField = () => {
 };
 
 const calculateDuration = (record) => {
-    // const record = useRecordContext();
-    const [duration, setDuration] = useState(0);
-    // if (!record) return null;
-
     // Get the total duration of the submission. We need to know the file inputs
     const fileInputs = record.input_associations.sort((a, b) => a.processing_order - b.processing_order);
 
     if (fileInputs.length === 0) {
         return 0
-        // setDuration(0);
     } else if (fileInputs.length === 1) {
-        return record.time_seconds_end - record.time_seconds_start
-        setDuration(fileInputs[0].input_object.time_seconds - record.time_seconds_start - record.time_seconds_end);
+        return Math.round(record.time_seconds_end - record.time_seconds_start)
     } else {
-        return fileInputs[0].input_object.time_seconds - record.time_seconds_start + record.time_seconds_end
-        setDuration(fileInputs[0].input_object.time_seconds - record.time_seconds_start + record.time_seconds_end);
-        // for (let i = 1; i < fileInputs.length - 1; i++) {
-        //     setDuration(duration + fileInputs[i].input_object.time_seconds);
-        // }
+        return Math.round(fileInputs[0].input_object.time_seconds - record.time_seconds_start + record.time_seconds_end)
 
     }
     return 0

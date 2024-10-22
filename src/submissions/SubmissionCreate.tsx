@@ -116,7 +116,7 @@ export const TotalDuration = ({ videoChoices }) => {
     }, [firstVideoDuration, secondVideoDuration, startTime, endTime, videos]);
     useEffect(() => {
         if (totalDuration > 0) {
-            setOutputText(`Total duration: ${totalDuration} seconds`);
+            setOutputText(`Total duration: ${Math.round(totalDuration)} seconds`);
         } else {
             setOutputText("Choose a video, a start and an end time");
         }
