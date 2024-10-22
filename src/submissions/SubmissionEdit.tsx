@@ -3,17 +3,14 @@ import {
     SimpleForm,
     TextInput,
     NumberInput,
-    ArrayInput,
-    SimpleFormIterator,
     minValue,
     required,
     SelectInput,
     ReferenceInput,
 } from 'react-admin';
-import { TotalDuration, endDurationValidation, videoArraySizeValidation, VideoInput, VideoChoice } from './SubmissionCreate';
-import { useFormContext } from 'react-hook-form';
+import { TotalDuration, endDurationValidation, VideoChoice } from './SubmissionCreate';
 import { Grid, Typography } from '@mui/material';
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 
 const SubmissionEdit = () => {

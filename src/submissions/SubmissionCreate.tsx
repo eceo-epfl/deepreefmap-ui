@@ -36,7 +36,7 @@ export const videoArraySizeValidation = (value) => {
 }
 
 export const endDurationValidation = (value, allValues) => {
-    if (value <= allValues.time_seconds_start) {
+    if (value <= allValues.time_seconds_start && allValues.input_associations.length === 1) {
         return 'The end time must be greater than the start time';
     }
     return undefined;
@@ -59,6 +59,7 @@ export const TotalDuration = ({ videoChoices }) => {
         const startTime = getValues('time_seconds_start');
         const endTime = getValues('time_seconds_end');
         const videos = getValues('input_associations');
+
         setStartTime(startTime);
         setEndTime(endTime);
         setVideos(videos);
@@ -68,6 +69,7 @@ export const TotalDuration = ({ videoChoices }) => {
         // Get just the first video's duration, as the second video's total
         // time is not needed as we can just use the end time to add to the
         // first video's duration
+
         if (videos && videoChoices && videoChoices.length > 0 && videos.length > 0 && videos[0].input_object_id) {
             const video_id = videos[0].input_object_id;
             const video = videoChoices.find(video => video.id === video_id);
@@ -82,7 +84,9 @@ export const TotalDuration = ({ videoChoices }) => {
                 setSecondVideoDuration(video.time_seconds);
             }
         }
+    }, [videos, startTime, endTime, videoChoices]);
 
+    useEffect(() => {
         if (videos && startTime && endTime) {
             if (videos.length === 1) {
                 setTotalDuration(endTime - startTime);
@@ -92,7 +96,7 @@ export const TotalDuration = ({ videoChoices }) => {
         } else {
             setTotalDuration(0);
         }
-    }, [videos, startTime, endTime, videoChoices]);
+    }, [videos, startTime, endTime, firstVideoDuration, secondVideoDuration]);
 
     useEffect(() => {
         if (videos) {
