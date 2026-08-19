@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Yarn keeps its install state here. Only patches and plugins are ours to commit.
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

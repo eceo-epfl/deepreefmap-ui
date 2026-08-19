@@ -1,159 +1,279 @@
+# Local development stack: Postgres, Keycloak, the Rust API with hot reload, and the
+# web interface, behind one traefik so everything shares an origin.
+#
+#   docker compose up -d
+#   open http://localhost:88          the interface
+#   open http://localhost:88/docs     the API reference
+#   open http://localhost:8280        Keycloak (admin / admin)
+#
+# Sign in as admin/admin or user/user. The `norole` user exists to check that an
+# authenticated person without a project role is refused.
+#
+# Integration tests run in their own containers against a throwaway database:
+#   docker compose up -d deepreefmap-test-watcher
+#   docker compose logs -f deepreefmap-test-watcher
+
 services:
   traefik:
-    image: traefik:v2.9.6
+    image: traefik:v3.7
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      # Declared rather than inherited, so the published port below is unambiguous.
+      - "--entryPoints.web.address=:80"
     ports:
-      - "88:80"
-      - "8088:8080"
+      - "127.0.0.1:${TRAEFIK_HTTP_PORT:-88}:80"
+      - "127.0.0.1:${TRAEFIK_DASHBOARD_PORT:-8088}:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   deepreefmap-api:
     build:
       context: ../deepreefmap-api
+      dockerfile: Dockerfile.dev
     environment:
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-psql}
       - DB_HOST=deepreefmap-db
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=psql
-      - DB_NAME=postgres
-      - DB_PREFIX=postgresql+asyncpg
-      - S3_URL=${S3_URL}
-      - S3_BUCKET_ID=${S3_BUCKET_ID}
-      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
-      - S3_SECRET_KEY=${S3_SECRET_KEY}
-      - S3_PREFIX=${S3_PREFIX}
-      - KUBERNETES_SERVICE_HOST=caas-test.rcp.epfl.ch
-      - KUBERNETES_SERVICE_PORT=443
-      - KUBECONFIG=/root/.kube/config.yaml
-      - INCOMPLETE_OBJECT_CHECK_INTERVAL=${INCOMPLETE_OBJECT_CHECK_INTERVAL}
-      - INCOMPLETE_OBJECT_TIMEOUT_SECONDS=${INCOMPLETE_OBJECT_TIMEOUT_SECONDS}
-      - INCOMPLETE_OBJECT_CONSIDER_ABANDONED=${INCOMPLETE_OBJECT_CONSIDER_ABANDONED}
-      - DEEPREEFMAP_IMAGE_TAG=${DEEPREEFMAP_IMAGE_TAG}
-      - DEEPREEFMAP_IMAGE=${DEEPREEFMAP_IMAGE}
-      - NAMESPACE=${NAMESPACE}
-      - PROJECT=${PROJECT}
-      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - KEYCLOAK_API_ID=${KEYCLOAK_API_ID}
-      - KEYCLOAK_API_SECRET=${KEYCLOAK_API_SECRET}
-      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
-      - KEYCLOAK_URL=${KEYCLOAK_URL}
-      - DEEPREEFMAP_API_URL=http://deepreefmap-api:8000
-      - SERIALIZER_SECRET_KEY=${SERIALIZER_SECRET_KEY}
-      - DEPLOYMENT=local
-      - CACHE_URL=deepreefmap-cache
-      - CACHE_PORT=6379
-      - CACHE_DB=0
-      - CACHE_SECRET=${CACHE_SECRET}
-      - CACHE_PASSWORD=${REDIS_PASSWORD}
-    depends_on:
-        - deepreefmap-db
-    volumes:
-      - ../deepreefmap-api/app:/app/app
-      - ../config.yaml:/root/.kube/config.yaml
+      - DB_NAME=${POSTGRES_DB:-postgres}
+      - API_HOST=0.0.0.0
+      - API_PORT=${API_PORT:-3000}
+      - DEPLOYMENT=${DEPLOYMENT:-dev}
+      - RUST_LOG=${LOG_LEVEL:-info,deepreefmap_api=debug}
+      # Container-internal URL: this is where the API validates tokens. The browser
+      # uses the host-published URL instead, which is why the two differ.
+      - KEYCLOAK_URL=http://deepreefmap-keycloak:8080/
+      # What /api/config/keycloak advertises: the browser is on the host and cannot
+      # resolve the container name above.
+      - KEYCLOAK_BROWSER_URL=http://localhost:${KEYCLOAK_EXTERNAL_PORT:-8280}/
+      - KEYCLOAK_REALM=deepreefmap
+      - KEYCLOAK_CLIENT_ID=deepreefmap-ui-local
+      # Embedded in every connect code, so it must be an address the desktop
+      # application can reach from the host, not a container name.
+      - PUBLIC_BASE_URL=http://localhost:${TRAEFIK_HTTP_PORT:-88}/api
+      - CORS_ALLOWED_ORIGINS=http://localhost:${TRAEFIK_HTTP_PORT:-88},http://localhost:5173
+      - DISABLE_RATE_LIMITING=${DISABLE_RATE_LIMITING:-true}
+      # The blob archive. In-network endpoint for the API's own bucket operations.
+      - S3_URL=http://minio:9000
+      # What presigned URLs are signed against: the browser is on the host and
+      # cannot resolve the container name above. MinIO publishes this port.
+      - S3_PUBLIC_URL=http://localhost:${MINIO_EXTERNAL_PORT:-9000}
+      - S3_BUCKET_ID=deepreefmap
+      - S3_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - S3_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_PREFIX=dev
     ports:
-      - 5001:8000
+      - "127.0.0.1:${API_EXTERNAL_PORT:-3005}:${API_PORT:-3000}"
+    depends_on:
+      deepreefmap-db:
+        condition: service_healthy
+      deepreefmap-keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:${API_PORT:-3000}/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # Generous: the first run compiles the whole dependency tree.
+      start_period: 300s
+    volumes:
+      - ../deepreefmap-api/src:/app/src
+      - ../deepreefmap-api/tests:/app/tests
+      - ../deepreefmap-api/migration:/app/migration
+      # The exporter writes here and the contract test diffs it.
+      - ../deepreefmap-api/contract:/app/contract
+      - ../deepreefmap-api/Cargo.toml:/app/Cargo.toml
+      - ../deepreefmap-api/Cargo.lock:/app/Cargo.lock
+      - ../deepreefmap-api/bacon.toml:/app/bacon.toml
+      # Named volume, so cargo's build cache survives a container rebuild.
+      - deepreefmap-rust-data:/app/target
     labels:
-      - "traefik.http.routers.deepreefmap-bff.rule=Host(`deepreefmap`) && PathPrefix(`/api`)"
-      - "traefik.http.services.deepreefmap-bff.loadbalancer.server.port=8000"
+      - "traefik.enable=true"
+      - "traefik.http.routers.deepreefmap-api.rule=PathPrefix(`/api`) || PathPrefix(`/docs`)"
+      - "traefik.http.routers.deepreefmap-api.priority=100"
+      - "traefik.http.services.deepreefmap-api.loadbalancer.server.port=${API_PORT:-3000}"
 
   deepreefmap-ui:
     build:
       context: .
-      dockerfile: Dockerfile.dev  # Uses the dockerfile containing yarn dev
+      dockerfile: Dockerfile.dev
+    depends_on:
+      deepreefmap-api:
+        condition: service_started
     labels:
-      - "traefik.http.routers.deepreefmap-ui.rule=Host(`deepreefmap`)"
+      - "traefik.enable=true"
+      - "traefik.http.routers.deepreefmap-ui.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.deepreefmap-ui.priority=10"
       - "traefik.http.services.deepreefmap-ui.loadbalancer.server.port=5173"
     volumes:
-      - ../deepreefmap-ui:/app
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+      - ./vite.config.mts:/app/vite.config.mts
+      - ./public:/app/public
 
   deepreefmap-db:
-    image: postgis/postgis:16-master
+    image: postgres:18-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=psql
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-psql}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
     ports:
-      - 5433:5432
+      - "127.0.0.1:${POSTGRES_EXTERNAL_PORT:-5433}:5432"
     volumes:
-      - deepreefmap-db-data:/var/lib/postgresql/data
+      # Postgres 18 puts the cluster in /var/lib/postgresql/18/docker and declares the
+      # volume a level up, so mounting .../data loses it.
+      - deepreefmap-db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  deepreefmap-keycloak:
+    image: quay.io/keycloak/keycloak:26.7
+    command: start-dev --import-realm
+    environment:
+      KC_DB: dev-file
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME_STRICT: false
+    ports:
+      - "127.0.0.1:${KEYCLOAK_EXTERNAL_PORT:-8280}:8080"
+    volumes:
+      - ./keycloak-realm-dev.json:/opt/keycloak/data/import/realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  # ── Blob archive ─────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      # The console PUTs presigned parts cross-origin and must read each ETag
+      # response header, which MinIO only exposes with CORS enabled.
+      - MINIO_API_CORS_ALLOW_ORIGIN=${MINIO_API_CORS_ALLOW_ORIGIN:-*}
+    ports:
+      # Published so presigned URLs signed against localhost work from the host,
+      # which is how the API's gated S3 tests run.
+      - "127.0.0.1:${MINIO_EXTERNAL_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - deepreefmap-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: the API expects its bucket to exist rather than creating it, so a typo
+  # in S3_BUCKET_ID fails loudly instead of silently making a second bucket.
+  minio-seed:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}
+        mc mb --ignore-existing local/deepreefmap
+    restart: "no"
+
+  # ── Dev connect-code seeder (one-shot) ──────────────────────────────────
+  # Minting a connect code normally needs an interactive login, which makes
+  # testing the desktop sync path a click-through. This seeds a fixed code so
+  # `POST /api/enrol` can be exercised straight away:
+  #
+  #   curl -X POST http://localhost:88/api/enrol \
+  #     -H 'Content-Type: application/json' \
+  #     -d '{"code":"'$(printf 'ab%.0s' {1..32})'","device_name":"Dev laptop"}'
+  #
+  # Single use, like any connect code: re-run this service to get another.
+  dev-seed-connect-code:
+    image: postgres:18-alpine
+    # Opt in with `--profile seed`: the secret below is public, so an unattended stack
+    # must not carry a live enrolment credential.
+    profiles: ["seed"]
+    depends_on:
+      deepreefmap-api:
+        condition: service_healthy
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-psql}
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        until pg_isready -h deepreefmap-db -U ${POSTGRES_USER:-postgres}; do sleep 1; done
+        psql -h deepreefmap-db -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres} <<'SQL'
+          CREATE EXTENSION IF NOT EXISTS pgcrypto;
+          -- sha256 of the 64-hex secret 'abab...ab', matching the curl above. The
+          -- server stores only this digest, so the seeded row is indistinguishable
+          -- from one the mint endpoint wrote.
+          INSERT INTO connect_code (id, code_hash, created_by, note, expires_at, created_at)
+          VALUES (
+            gen_random_uuid(),
+            encode(digest(repeat('ab', 32), 'sha256'), 'hex'),
+            'dev-local-admin',
+            'seeded by docker compose for local development',
+            now() + interval '15 minutes',
+            now()
+          )
+          ON CONFLICT (code_hash) DO NOTHING;
+        SQL
+        echo "Seeded dev connect code: $(printf 'ab%.0s' $(seq 32))"
+    restart: "no"
+
+  # ── Test infrastructure ─────────────────────────────────────────────────
   deepreefmap-test-db:
-    image: postgis/postgis:16-master
+    image: postgres:18-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=psql
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=deepreefmap_test
     ports:
-      - 5444:5432
+      - "127.0.0.1:${TEST_POSTGRES_EXTERNAL_PORT:-5444}:5432"
+    # In memory: the suite recreates the schema, so nothing here needs to survive.
+    tmpfs:
+      - /var/lib/postgresql
+    # Quiet, so a failing test is not buried under statement logs in the watcher.
+    command: ["postgres", "-c", "log_min_messages=fatal", "-c", "log_statement=none"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  deepreefmap-test-cache:
-    image: redis:7.4.0
-    command: ["redis-server", "--requirepass", "test"]
-
-  deepreefmap-test-api:
+  deepreefmap-test-watcher:
     build:
       context: ../deepreefmap-api
-      dockerfile: Dockerfile.dev  # Uses the dockerfile just for pytest
+      dockerfile: Dockerfile.dev
     environment:
-      - DB_HOST=deepreefmap-test-db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=psql
-      - DB_NAME=postgres
-      - DB_PREFIX=postgresql+asyncpg
-      - S3_URL=https://s3.example.com
-      - S3_BUCKET_ID=1234
-      - S3_ACCESS_KEY=1234
-      - S3_SECRET_KEY=1234
-      - S3_PREFIX=test-only
-      - KUBERNETES_SERVICE_HOST=test-only
-      - KUBERNETES_SERVICE_PORT=443
-      - KUBECONFIG=/dev/null
-      - INCOMPLETE_OBJECT_CHECK_INTERVAL=${INCOMPLETE_OBJECT_CHECK_INTERVAL}
-      - INCOMPLETE_OBJECT_TIMEOUT_SECONDS=${INCOMPLETE_OBJECT_TIMEOUT_SECONDS}
-      - DEEPREEFMAP_IMAGE_TAG=${DEEPREEFMAP_IMAGE_TAG}
-      - DEEPREEFMAP_IMAGE=${DEEPREEFMAP_IMAGE}
-      - NAMESPACE=test
-      - PROJECT=test
-      - KEYCLOAK_CLIENT_ID=test
-      - KEYCLOAK_API_ID=test
-      - KEYCLOAK_API_SECRET=test
-      - KEYCLOAK_REALM=test
-      - KEYCLOAK_URL=test
-      - SERIALIZER_SECRET_KEY=test
+      - DATABASE_URL=postgresql://postgres:psql@deepreefmap-test-db:5432/deepreefmap_test
+      - RUST_LOG=${LOG_LEVEL:-warn}
       - DEPLOYMENT=local
-      - CACHE_URL=deepreefmap-test-cache
-      - CACHE_PORT=6379
-      - CACHE_DB=1
-      - CACHE_SECRET=test
-      - CACHE_PASSWORD=test
     depends_on:
-      - deepreefmap-test-db
-      - deepreefmap-test-cache
+      deepreefmap-test-db:
+        condition: service_healthy
+    entrypoint: ["bacon", "--headless", "test-integration"]
     volumes:
-      - ../deepreefmap-api:/app
-    ports:
-      - 5445:8000
-
-  deepreefmap-cache:
-    image: redis:7.4.0
-    ports:
-      - 6379:6379
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
-
-  deepreefmap-tus:
-    image:  tusproject/tusd:latest
-    environment:
-      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
-      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
-      - AWS_REGION=us-east-1
-    command: -s3-bucket ${S3_BUCKET_ID} -s3-endpoint https://${S3_URL} -s3-object-prefix deepreefmap-local -behind-proxy -port 8080 -hooks-http http://deepreefmap-api:8000/tus_hooks
-    labels:
-      - "traefik.http.routers.deepreefmap-tus.rule=Host(`deepreefmap`) && PathPrefix(`/files`)"
-      - "traefik.http.services.deepreefmap-tus.loadbalancer.server.port=8080"
+      - ../deepreefmap-api/src:/app/src
+      - ../deepreefmap-api/tests:/app/tests
+      - ../deepreefmap-api/migration:/app/migration
+      - ../deepreefmap-api/contract:/app/contract
+      - ../deepreefmap-api/Cargo.toml:/app/Cargo.toml
+      - ../deepreefmap-api/Cargo.lock:/app/Cargo.lock
+      - ../deepreefmap-api/bacon.toml:/app/bacon.toml
+      - deepreefmap-test-rust-data:/app/target
 
 volumes:
   deepreefmap-db-data:
+  deepreefmap-minio-data:
+  deepreefmap-rust-data:
+  deepreefmap-test-rust-data:
