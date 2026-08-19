@@ -1,116 +1,50 @@
-import * as React from 'react';
-import { Layout, AppBar, TitlePortal, useDataProvider, usePermissions } from 'react-admin';
-import { CssBaseline } from '@mui/material';
-import { useState, useEffect } from 'react';
-import { Typography, Box } from '@mui/material';
-import Brightness1TwoToneIcon from '@mui/icons-material/Brightness1TwoTone';
+import type { ReactNode } from 'react';
+import { AppBar, Layout, TitlePortal } from 'react-admin';
+import { Chip, CssBaseline } from '@mui/material';
 
+import DrmMenu from './layout/Menu';
 
-const StatusIcon = ({ gpu, storage }) => {
+type Severity = 'warning' | 'info' | 'default';
+
+// Anything other than production is worth calling out, so nobody edits staging by accident.
+const DEPLOYMENT_LABELS: Record<string, { label: string; colour: Severity }> = {
+    local: { label: 'Local development', colour: 'default' },
+    dev: { label: 'Development', colour: 'info' },
+    stage: { label: 'Staging', colour: 'warning' },
+};
+
+const DeploymentChip = ({ deployment }: { deployment?: string }) => {
+    const banner = deployment ? DEPLOYMENT_LABELS[deployment] : undefined;
+    if (!banner) return null;
     return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Brightness1TwoToneIcon sx={{
-                width: 16,
-                marginRight: 1,
-            }} color={gpu ? 'success' : 'error'} />
-            <Typography variant="body1" color={gpu ? 'textPrimary' : 'textSecondary'}>
-                GPU
-            </Typography>
-
-            {/* Add a vertical separator line */}
-            <Box
-                sx={{
-                    height: 24,
-                    width: 2,
-                    bgcolor: 'gray',
-                    marginX: 2,
-                }}
-            />
-            <Brightness1TwoToneIcon sx={{
-                width: 16,
-                marginRight: 1,
-            }} color={storage ? 'success' : 'error'} />
-            <Typography variant="body1" color={storage ? 'textPrimary' : 'textSecondary'}>
-                Storage
-            </Typography>
-        </Box>
+        <Chip
+            size="small"
+            label={banner.label}
+            color={banner.colour}
+            sx={{ mr: 2, fontWeight: 600 }}
+        />
     );
 };
 
+const DrmAppBar = ({ deployment }: { deployment?: string }) => (
+    <AppBar color="primary">
+        <TitlePortal />
+        <DeploymentChip deployment={deployment} />
+    </AppBar>
+);
 
-const MyAppBar = (props) => {
-    const [systemStatus, setSystemStatus] = useState(
-        {
-            "kubernetes": [],
-            "s3_local": {
-                "total_object_count": 0,
-                "input_object_count": 0,
-                "output_object_count": 0,
-                "total_size": 0,
-                "input_size": 0,
-                "output_size": 0
-            },
-            "s3_global": null,
-            "s3_status": true,
-            "kubernetes_status": true
-        });
-    const dataProvider = useDataProvider();
-    const { isPending, permissions } = usePermissions();
-    const appBarText = () => {
-        if (props.deployment) {
-            if (props.deployment == 'local') {
-                return "⭐Local Development⭐"
-            }
-            if (props.deployment == 'dev') {
-                return "⭐Development⭐"
-            }
-            if (props.deployment == 'stage') {
-                return "⭐Staging⭐"
-            }
-        }
-    }
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const statusData = await dataProvider.getStatus();
-            setSystemStatus(statusData.data);
-        };
-
-        fetchData();
-
-    }, []);
-    if (isPending) return null;
-
-    return (
-        <AppBar color="primary" >
-            <TitlePortal />
-            <Typography
-                variant="h6"
-                color='#FF69B4'
-                id="react-admin-title"
-            >
-                {props.deployment ? appBarText() : ""}&nbsp;&nbsp;
-
-            </Typography>
-
-
-            {(permissions === 'user' || permissions === 'admin') ? (
-                <StatusIcon
-                    gpu={systemStatus.kubernetes_status}
-                    storage={systemStatus.s3_status}
-                />
-            ) : null}
-        </AppBar>
-    )
-};
-
-export const MyLayout = ({ children, deployment }) => (
+export const MyLayout = ({
+    children,
+    deployment,
+}: {
+    children?: ReactNode;
+    deployment?: string;
+}) => (
     <>
         <CssBaseline />
-        <Layout appBar={() => <MyAppBar deployment={deployment} />} >
+        <Layout appBar={() => <DrmAppBar deployment={deployment} />} menu={DrmMenu}>
             {children}
         </Layout>
-
     </>
 );
 

@@ -1,65 +1,96 @@
 import {
-    List,
-    Datagrid,
-    TextField,
-    usePermissions,
-    TopToolbar,
     CreateButton,
+    Datagrid,
     ExportButton,
-    FunctionField,
+    List,
+    NumberField,
     ReferenceField,
-    DateField,
-} from "react-admin";
-import { useEffect, useState } from "react";
-import { TransectMapAll } from "../maps/Transects";
-import { Typography } from "@mui/material";
+    ReferenceInput,
+    SearchInput,
+    SelectInput,
+    TextField,
+    TopToolbar,
+    useListContext,
+} from 'react-admin';
+import { Stack, Typography } from '@mui/material';
 
+import type { Transect } from '../contract';
+import { TransectMapAll } from '../maps/Transects';
+import { useCanAuthor } from '../permissions';
+import AssignSiteButton from './AssignSiteButton';
+
+const transectFilters = [
+    <SearchInput source="q" alwaysOn key="q" />,
+    <ReferenceInput source="site_id" reference="sites" key="site_id">
+        <SelectInput optionText="name" label="Site" />
+    </ReferenceInput>,
+];
 
 const TransectListActions = () => {
+    const canAuthor = useCanAuthor();
     return (
-
-        <TopToolbar >
-            <CreateButton />
+        <TopToolbar>
+            {canAuthor && <CreateButton />}
             <ExportButton />
         </TopToolbar>
     );
-}
+};
 
-const TransectList = () => {
-    const { permissions } = usePermissions();
+const TransectListEmpty = () => {
+    const canAuthor = useCanAuthor();
+    return (
+        <Stack
+            spacing={2}
+            sx={{
+                alignItems: 'center',
+                p: 6,
+                textAlign: 'center',
+            }}
+        >
+            <Typography variant="h6">No transects yet</Typography>
+            {canAuthor && <CreateButton label="Create transect" />}
+        </Stack>
+    );
+};
+
+const TransectListBody = () => {
+    const { filterValues } = useListContext<Transect>();
+    const canAuthor = useCanAuthor();
 
     return (
         <>
-            <List disableSyncWithLocation
-                actions={<TransectListActions />}
-                perPage={25}        >
-                <>
-                    <Typography variant="caption">
-                        This is a list of all transects that have been created. Click on a transect to view more details or to create a new one select '+ Create'.
-                    </Typography>
-                    <TransectMapAll />
-                    <Datagrid
-                        bulkActionButtons={permissions === 'admin' ? true : false}
-                        rowClick="show"
-                    >
-                        <TextField source="name" />
-                        <DateField source="created_on" />
-                        <TextField source="length" label="Length (m)" />
-                        <TextField source="depth" label="Depth (m)" />
-                        <FunctionField label="Associated submissions" render={(record) => {
-                            return record.submissions?.length ? record.submissions.length : 0;
-                        }} />
-                        <FunctionField label="Associated files" render={(record) => {
-                            return record.inputs?.length ? record.inputs.length : 0;
-                        }} />
-                        {permissions === 'admin' ? (<ReferenceField source="owner" reference="users" link="show">
-                            <FunctionField render={record => `${record.firstName} ${record.lastName}`} source="Owner" />
-                        </ReferenceField>) : null}
-                    </Datagrid>
-                </>
-            </List ></>
-
-    )
+            <TransectMapAll filter={filterValues} />
+            <Datagrid
+                rowClick="show"
+                bulkActionButtons={canAuthor ? <AssignSiteButton /> : false}
+            >
+                <TextField source="name" />
+                <ReferenceField
+                    source="site_id"
+                    reference="sites"
+                    link="show"
+                    sortable={false}
+                    emptyText="unassigned"
+                >
+                    <TextField source="name" />
+                </ReferenceField>
+                <NumberField source="length_m" label="Length (m)" />
+                <NumberField source="depth_m" label="Depth (m)" />
+            </Datagrid>
+        </>
+    );
 };
+
+const TransectList = () => (
+    <List
+        filters={transectFilters}
+        actions={<TransectListActions />}
+        empty={<TransectListEmpty />}
+        sort={{ field: 'name', order: 'ASC' }}
+        perPage={25}
+    >
+        <TransectListBody />
+    </List>
+);
 
 export default TransectList;

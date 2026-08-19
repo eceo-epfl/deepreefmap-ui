@@ -1,161 +1,159 @@
-import React from 'react';
-import './css/css.css';
-import './css/academicons.min.css';
-import './css/bulma.min.css';
-import './css/bulma-carousel.min.css';
-import './css/bulma-slider.min.css';
-import { usePermissions, useGetList, Link } from 'react-admin';
-import { Typography, Button, Container, Box, Divider } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilePdf, faSheetPlastic } from '@fortawesome/free-solid-svg-icons';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import {
+    Datagrid,
+    DateField,
+    ListContextProvider,
+    ReferenceField,
+    ResourceContextProvider,
+    TextField,
+    Title,
+    useGetList,
+    useList,
+    usePermissions,
+} from 'react-admin';
+import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
 
-const GettingStartedTooltip = () => {
-    const { data, total, isPending, error } = useGetList('transects');
-    if (isPending || error) return null;
-    if (total > 0) return null;
-    return (
-        <Box sx={{
-            position: 'absolute',
-            top: '1%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'primary.main',
-            color: 'primary.contrastText',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            boxShadow: 3,
-            zIndex: 10000,
-            display: 'flex',
-            alignItems: 'center',
-            maxWidth: '90%',
-            textAlign: 'center'
-        }}>
-            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                To get started, go to <span style={{ backgroundColor: '#ffeb3b', color: '#000', padding: '2px 4px', borderRadius: '4px' }}>Transects</span>, and create a transect.
+import type { RunRecord, Transect } from './contract';
+import Overview from './maps/Overview';
+import StatusField from './runs/StatusField';
+
+// A Keycloak login without a deepreefmap realm role. The API answers every route with a
+// 403, so there is nothing to show and nothing worth requesting.
+const NoAccess = () => (
+    <Card sx={{ mt: 2, maxWidth: 620 }}>
+        <CardContent>
+            <Typography variant="h6" gutterBottom>
+                You are signed in without access
             </Typography>
-        </Box>
+            <Typography
+                variant="body2"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                Ask an administrator for the member or administrator role, then sign in again.
+            </Typography>
+        </CardContent>
+    </Card>
+);
+
+const RECENT = 8;
+
+const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <Card sx={{ flex: 1, minWidth: 320 }}>
+        <CardContent>
+            <Typography
+                variant="overline"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                {title}
+            </Typography>
+            {children}
+        </CardContent>
+    </Card>
+);
+
+const Nothing = ({ what }: { what: string }) => (
+    <Typography
+        variant="body2"
+        sx={{
+            color: 'text.secondary',
+            mt: 1,
+        }}
+    >
+        No {what} yet.
+    </Typography>
+);
+
+const LatestRuns = () => {
+    const { data, isPending } = useGetList<RunRecord>('runs', {
+        pagination: { page: 1, perPage: RECENT },
+        sort: { field: 'started_at', order: 'DESC' },
+    });
+    const context = useList({ data, isPending, perPage: RECENT });
+    if (!isPending && !data?.length) return <Nothing what="uploads" />;
+
+    return (
+        // The resource context is what lets rowClick resolve a show route from here.
+        <ResourceContextProvider value="runs">
+            <ListContextProvider value={context}>
+                <Datagrid rowClick="show" bulkActionButtons={false}>
+                    <ReferenceField
+                        source="pass_id"
+                        reference="passes"
+                        link="show"
+                        label="Pass"
+                    >
+                        <TextField source="label" emptyText="unnamed" />
+                    </ReferenceField>
+                    <DateField source="started_at" label="Ran" showTime sortable={false} />
+                    <StatusField label="Status" />
+                </Datagrid>
+            </ListContextProvider>
+        </ResourceContextProvider>
+    );
+};
+
+const RecentlyChanged = () => {
+    const { data, isPending } = useGetList<Transect>('transects', {
+        pagination: { page: 1, perPage: RECENT },
+        sort: { field: 'updated_at', order: 'DESC' },
+    });
+    const context = useList({ data, isPending, perPage: RECENT });
+    if (!isPending && !data?.length) return <Nothing what="transects" />;
+
+    return (
+        <ResourceContextProvider value="transects">
+            <ListContextProvider value={context}>
+                <Datagrid rowClick="show" bulkActionButtons={false}>
+                    <TextField source="name" sortable={false} />
+                    <ReferenceField
+                        source="site_id"
+                        reference="sites"
+                        link="show"
+                        emptyText="unassigned"
+                        sortable={false}
+                    >
+                        <TextField source="name" />
+                    </ReferenceField>
+                    <DateField source="updated_at" label="Changed" showTime sortable={false} />
+                </Datagrid>
+            </ListContextProvider>
+        </ResourceContextProvider>
     );
 };
 
 const Dashboard = () => {
-    const { permissions } = usePermissions();
+    const { permissions, isPending } = usePermissions();
+    if (isPending) return null;
+
+    if (permissions !== 'admin' && permissions !== 'user') {
+        return (
+            <>
+                <Title title="DeepReefMap" />
+                <NoAccess />
+            </>
+        );
+    }
 
     return (
-        <Box sx={{ position: 'relative', minHeight: '100vh' }}>
-            {(permissions === 'admin' || permissions === 'user') ? (
-                <GettingStartedTooltip />
-            ) : (
-                <Typography variant="body1" color="error" align="center" gutterBottom>
-                    To access the DeepReefMap portal, please contact the administrator to request access.
-                </Typography>
-            )}
-
-            <Box component="section" sx={{ py: 6 }}>
-                <Container maxWidth="md" sx={{ textAlign: 'center' }}>
-                    <Typography variant="h3" component="h1" gutterBottom>
-                        DeepReefMap:
-                        <br />
-                        Scalable Semantic 3D Mapping of Coral Reefs with Deep Learning
-                    </Typography>
-
-                    <Typography variant="h6" component="div" gutterBottom>
-                        <a href="https://scholar.google.com/citations?user=P1YcQw4AAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener noreferrer">Jonathan Sauder</a>,{' '}
-                        <a href="https://scholar.google.com/citations?user=ApxnBkYAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener noreferrer">Guilhem Banc-Prandi</a>,{' '}
-                        <a href="https://scholar.google.com/citations?user=W5cZVtQAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener noreferrer">Gabriela Perna</a>,{' '}
-                        <a href="https://scholar.google.com/citations?user=6sXSYJMAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener noreferrer">Anders Meibom</a>,{' '}
-                        <a href="https://scholar.google.com/citations?user=p3iJiLIAAAAJ&amp;hl=en&amp;oi=ao" target="_blank" rel="noopener noreferrer">Devis Tuia</a>
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 3 }}>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.14307"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faFilePdf} />}
-                        >
-                            Paper
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            href="https://github.com/josauder/mee-deepreefmap"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faGithub} />}
-                        >
-                            Code
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            href="https://josauder.github.io/deepreefmap/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faSheetPlastic} />}
-                        >
-                            Project page
-                        </Button>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
-                        <a href="http://epfl.ch"><img src="epfl.png" width="200px" alt="EPFL Logo" /></a>
-                        <a href="http://trsc.org"><img src="trsc.png" width="200px" alt="TRSC Logo" /></a>
-                        <a href="http://www.epfl.ch/labs/eceo/"><img src="eceo.png" width="200px" alt="ECEO Logo" /></a>
-                    </Box>
-                </Container>
-            </Box>
-
-            <Box component="section" >
-                <Container maxWidth="md">
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-                        <video poster="" id="tree" autoPlay controls muted loop width="100%">
-                            <source src="https://josauder.github.io/deepreefmap/static/videos/sunken_buoy_fast_480.mov" type="video/mp4" />
-                        </video>
-                    </Box>
-                </Container>
-            </Box>
-
-            <Box component="footer" sx={{ py: 6, backgroundColor: 'background.default', textAlign: 'center' }}>
-                <Container maxWidth="md">
-                    <Divider sx={{ my: 4 }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mt: 4 }}>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            href="https://github.com/eceo-epfl/deepreefmap-ui"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faGithub} />}
-                        >
-                            Frontend
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            href="https://github.com/eceo-epfl/deepreefmap-api"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            startIcon={<FontAwesomeIcon icon={faGithub} />}
-                        >
-                            API
-                        </Button>
-                    </Box>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
-                        <Typography variant="body2" color="textSecondary">
-                            Interface developed by <Link to="https://evanjt.com" target="_blank" rel="noopener noreferrer">Evan Thomas</Link> for the DeepReefMap project
-                            in collaboration<br />
-                            with the <Link to="https://www.epfl.ch/labs/eceo/" target="_blank" rel="noopener noreferrer">ECEO lab</Link> and
-                            the <Link to="http://trsc.org" target="_blank" rel="noopener noreferrer">Transnational Red Sea Center</Link>.
-                        </Typography>
-
-                    </Box>
-
-                </Container>
-            </Box>
-        </Box>
+        <>
+            <Title title="DeepReefMap" />
+            <Stack spacing={2} sx={{ mt: 2 }}>
+                <Box sx={{ '& .leaflet-container': { borderRadius: 1 } }}>
+                    <Overview />
+                </Box>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+                    <Panel title="Latest uploads">
+                        <LatestRuns />
+                    </Panel>
+                    <Panel title="Recently changed transects">
+                        <RecentlyChanged />
+                    </Panel>
+                </Stack>
+            </Stack>
+        </>
     );
 };
 
