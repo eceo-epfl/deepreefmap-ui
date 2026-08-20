@@ -1890,8 +1890,6 @@ export interface components {
              * @description Set to revoke. Kept, so a revoked device stays visible in the audit trail.
              */
             revoked_at?: string | null;
-            /** @description Hardware and driver survey the device reports about itself, stored as sent. */
-            system_profile?: unknown;
         };
         DeviceResponse: {
             /** Format: date-time */
@@ -1923,7 +1921,10 @@ export interface components {
              * @description Set to revoke. Kept, so a revoked device stays visible in the audit trail.
              */
             revoked_at?: string | null;
-            /** @description Hardware and driver survey the device reports about itself, stored as sent. */
+            /**
+             * @description Hardware and driver survey the device reports about itself, stored as sent.
+             *     Detail view only.
+             */
             system_profile?: unknown;
         };
         DownloadResponse: {
@@ -2401,8 +2402,6 @@ export interface components {
             name: string;
             /** Format: int64 */
             server_seq: number;
-            /** @description The settings document itself, opaque to the registry. */
-            settings: unknown;
             /**
              * Format: date-time
              * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
@@ -2435,7 +2434,10 @@ export interface components {
             name: string;
             /** Format: int64 */
             server_seq: number;
-            /** @description The settings document itself, opaque to the registry. */
+            /**
+             * @description The settings document itself, opaque to the registry. Detail view only: a page
+             *     of presets does not carry every document.
+             */
             settings: unknown;
             /**
              * Format: date-time
@@ -2602,11 +2604,6 @@ export interface components {
             id: string;
             library_version?: string | null;
             mapping_backend?: string | null;
-            /**
-             * @description Repository to upstream revision present at launch. Best-effort: the version
-             *     available, not proof it was loaded.
-             */
-            model_revisions?: unknown;
             /** Format: uuid */
             pass_id: string;
             /** @description Settings that departed from the preset, separating "unchanged" from "unrecorded". */
@@ -2626,10 +2623,6 @@ export interface components {
             segmentation_model?: string | null;
             /** Format: int64 */
             server_seq: number;
-            /** @description Stage name to wall-clock seconds, so a slow run names its slow stage. */
-            stage_durations?: unknown;
-            /** @description Stage name to peak resource use, so an out-of-memory run stays explicable. */
-            stage_peaks?: unknown;
             /** Format: date-time */
             started_at?: string | null;
             status: string;
@@ -2671,7 +2664,7 @@ export interface components {
             mapping_backend?: string | null;
             /**
              * @description Repository to upstream revision present at launch. Best-effort: the version
-             *     available, not proof it was loaded.
+             *     available, not proof it was loaded. Detail view only.
              */
             model_revisions?: unknown;
             /** Format: uuid */
@@ -2693,9 +2686,15 @@ export interface components {
             segmentation_model?: string | null;
             /** Format: int64 */
             server_seq: number;
-            /** @description Stage name to wall-clock seconds, so a slow run names its slow stage. */
+            /**
+             * @description Stage name to wall-clock seconds, so a slow run names its slow stage. Detail
+             *     view only.
+             */
             stage_durations?: unknown;
-            /** @description Stage name to peak resource use, so an out-of-memory run stays explicable. */
+            /**
+             * @description Stage name to peak resource use, so an out-of-memory run stays explicable.
+             *     Detail view only.
+             */
             stage_peaks?: unknown;
             /** Format: date-time */
             started_at?: string | null;

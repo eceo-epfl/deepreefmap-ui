@@ -55,6 +55,22 @@ const withoutTombstones = (filter: Record<string, unknown> | undefined) => ({
     ...filter,
 });
 
+// react-admin round-trips whole records into save, but the registry owns these
+// columns and refuses payloads that carry them.
+const SERVER_OWNED_KEYS = [
+    'id',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    'device_id',
+    'server_seq',
+];
+
+const stripServerOwned = (data: Record<string, unknown>) =>
+    Object.fromEntries(
+        Object.entries(data).filter(([key]) => !SERVER_OWNED_KEYS.includes(key)),
+    );
+
 const listQuery = (
     params: GetListParams | GetManyReferenceParams,
     filter: Record<string, unknown>,
@@ -148,7 +164,7 @@ const dataProvider = (
         update: (resource, params) =>
             httpClient(`${apiUrl}/${resource}/${params.id}`, {
                 method: 'PUT',
-                body: JSON.stringify(params.data),
+                body: JSON.stringify(stripServerOwned(params.data)),
             }).then(({ json }) => ({ data: json })),
 
         // simple-rest has no updateMany route, so fall back to n updates.
@@ -157,7 +173,7 @@ const dataProvider = (
                 params.ids.map(id =>
                     httpClient(`${apiUrl}/${resource}/${id}`, {
                         method: 'PUT',
-                        body: JSON.stringify(params.data),
+                        body: JSON.stringify(stripServerOwned(params.data)),
                     }),
                 ),
             ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
@@ -165,7 +181,7 @@ const dataProvider = (
         create: (resource, params) =>
             httpClient(`${apiUrl}/${resource}`, {
                 method: 'POST',
-                body: JSON.stringify(params.data),
+                body: JSON.stringify(stripServerOwned(params.data)),
             }).then(({ json }) => ({ data: json })),
 
         // The registry tombstones rather than removes, so the row keeps coming back
