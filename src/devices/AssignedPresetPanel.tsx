@@ -10,7 +10,6 @@ import {
 import {
     Box,
     Button,
-    Chip,
     MenuItem,
     Stack,
     TextField as MuiTextField,
@@ -22,33 +21,21 @@ import type { Device, Preset } from '../contract';
 import { relativeTime } from './RelativeDateField';
 
 /** How the device answered the assignment, from its heartbeat. */
-const AcknowledgementChip = ({ device, assigned }: { device: Device; assigned?: Preset }) => {
-    if (!device.assigned_preset_id) return null;
-    if (!device.active_preset_reported_at) {
-        return <Chip size="small" label="Not yet acknowledged" />;
+const acknowledgement = (device: Device, assigned?: Preset): string => {
+    if (!device.assigned_preset_id) {
+        return 'No preset assigned. The device follows its own default.';
     }
+    if (!device.active_preset_reported_at) return 'Not yet acknowledged.';
     const matches =
         assigned &&
         device.active_preset_name === assigned.name &&
         device.active_preset_version === assigned.version;
     if (matches) {
-        return (
-            <Chip
-                size="small"
-                color="success"
-                label={`Acknowledged ${relativeTime(device.active_preset_reported_at)}`}
-            />
-        );
+        return `Acknowledged ${relativeTime(device.active_preset_reported_at)}.`;
     }
-    return (
-        <Chip
-            size="small"
-            color="warning"
-            label={`Reports ${device.active_preset_name ?? 'nothing'} v${
-                device.active_preset_version ?? '?'
-            }`}
-        />
-    );
+    return `Device reports ${device.active_preset_name ?? 'nothing'} v${
+        device.active_preset_version ?? '?'
+    }.`;
 };
 
 /** The server-chosen default preset for this device, with its acknowledgement state.
@@ -58,6 +45,7 @@ const AssignedPresetPanel = () => {
     const dataProvider = useDataProvider<DrmDataProvider>();
     const notify = useNotify();
     const refresh = useRefresh();
+    // Only the pending override; empty means the select shows the assignment itself.
     const [choice, setChoice] = useState('');
     const [saving, setSaving] = useState(false);
 
@@ -72,6 +60,10 @@ const AssignedPresetPanel = () => {
     );
 
     if (!record) return null;
+
+    const current = record.assigned_preset_id ?? '';
+    const value = choice || current;
+    const known = (presets ?? []).some(preset => preset.id === current);
 
     const assign = async (presetId: string | null) => {
         setSaving(true);
@@ -91,25 +83,27 @@ const AssignedPresetPanel = () => {
 
     return (
         <Stack spacing={1}>
-            <Stack direction="row" spacing={2} useFlexGap sx={{ alignItems: 'center' }}>
-                <Typography variant="body2">
-                    {assigned
-                        ? `${assigned.name} v${assigned.version}`
-                        : record.assigned_preset_id
-                          ? 'Assigned preset no longer exists'
-                          : 'No preset assigned. The device follows its own default.'}
-                </Typography>
-                <AcknowledgementChip device={record} assigned={assigned ?? undefined} />
-            </Stack>
-            <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center' }}>
+            <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'flex-start' }}>
                 <MuiTextField
                     select
                     size="small"
-                    label="Assign a preset"
-                    value={choice}
+                    label="Assigned preset"
+                    value={value}
                     onChange={event => setChoice(event.target.value)}
+                    helperText={acknowledgement(record, assigned ?? undefined)}
                     sx={{ minWidth: 260 }}
                 >
+                    {/* Keeps the select valid while presets load, or when the assigned
+                        preset has been deleted since. */}
+                    {current && !known && (
+                        <MenuItem value={current} disabled>
+                            {assigned
+                                ? `${assigned.name} v${assigned.version}`
+                                : presets
+                                  ? 'Assigned preset no longer exists'
+                                  : '…'}
+                        </MenuItem>
+                    )}
                     {(presets ?? []).map(preset => (
                         <MenuItem key={preset.id} value={preset.id}>
                             {preset.name} v{preset.version}
@@ -119,7 +113,7 @@ const AssignedPresetPanel = () => {
                 <Button
                     variant="outlined"
                     size="small"
-                    disabled={saving || !choice}
+                    disabled={saving || !choice || choice === current}
                     onClick={() => assign(choice)}
                 >
                     Assign

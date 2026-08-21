@@ -420,6 +420,7 @@ export interface paths {
          *
          *     Additional sortable columns:
          *     - name
+         *     - versions_changed_at
          *     - profile_reported_at
          *     - assigned_at
          *     - active_preset_reported_at
@@ -1074,6 +1075,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/presets/{preset_id}/assign-all': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign a preset to every active device. Administrators only.
+         * @description Member semantics ("devices I enrolled") would make a bulk route mean a different
+         *     fleet per caller, so this one is admin-only. Each assignment travels in that
+         *     device's next heartbeat response, exactly as the single route's does.
+         */
+        post: operations['assign_all'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/run_artifacts': {
         parameters: {
             query?: never;
@@ -1690,6 +1713,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AssignAllResponse: {
+            /** Format: date-time */
+            assigned_at: string;
+            /**
+             * Format: int64
+             * @description Active devices reached. Revoked devices are skipped.
+             */
+            assigned_count: number;
+            /** Format: uuid */
+            preset_id: string;
+        };
         AssignPresetRequest: {
             /**
              * Format: uuid
@@ -2013,6 +2047,12 @@ export interface components {
              * @description Set to revoke. Kept, so a revoked device stays visible in the audit trail.
              */
             revoked_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When a heartbeat last reported a different `gui_version` or `library_version`.
+             *     Enrolment does not stamp it, so null reads as unchanged since enrolment.
+             */
+            versions_changed_at?: string | null;
         };
         DeviceResponse: {
             /**
@@ -2072,6 +2112,12 @@ export interface components {
              *     Detail view only.
              */
             system_profile?: unknown;
+            /**
+             * Format: date-time
+             * @description When a heartbeat last reported a different `gui_version` or `library_version`.
+             *     Enrolment does not stamp it, so null reads as unchanged since enrolment.
+             */
+            versions_changed_at?: string | null;
         };
         DownloadResponse: {
             /**
@@ -6565,6 +6611,43 @@ export interface operations {
             };
             /** @description Internal Server Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    assign_all: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Preset to assign fleet-wide */
+                preset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Assignment stored on every active device */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['AssignAllResponse'];
+                };
+            };
+            /** @description Requires the deepreefmap-admin role */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such preset */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

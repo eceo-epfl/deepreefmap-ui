@@ -7,6 +7,7 @@ import {
     ReferenceField,
     Show,
     TextField,
+    useGetOne,
     useRecordContext,
 } from 'react-admin';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -25,10 +26,12 @@ import {
 
 import ArchivedOutputs from '../archive/ArchivedOutputs';
 import { HashField, SyncFields } from '../components';
-import type { RunRecord } from '../contract';
+import type { Device, RunRecord } from '../contract';
 import RunCoverTable from '../cover/RunCoverTable';
+import { profileTotals } from '../devices/profile';
 import RunCloudTab from '../viewer/RunCloudTab';
 import ProvenanceTable, { hasEntries } from './ProvenanceTable';
+import { StageDurationsTable, StagePeaksTable } from './StageBreakdown';
 import StatusField from './StatusField';
 import { formatDuration, runDuration } from './duration';
 
@@ -96,7 +99,7 @@ const CloudSection = () => {
     );
 };
 
-const Provenance = ({ record }: { record: RunRecord }) => {
+const Provenance = ({ record, device }: { record: RunRecord; device?: Device }) => {
     const deviated = hasEntries(record.preset_deviations);
     return (
         <Accordion variant="outlined" disableGutters>
@@ -208,10 +211,9 @@ const Provenance = ({ record }: { record: RunRecord }) => {
                                     color: 'text.secondary',
                                 }}
                             >
-                                Wall-clock seconds per stage, so a slow run names its slow
-                                stage.
+                                Wall clock per stage, so a slow run names its slow stage.
                             </Typography>
-                            <ProvenanceTable value={record.stage_durations} emptyText="" />
+                            <StageDurationsTable value={record.stage_durations} emptyText="" />
                         </>
                     )}
 
@@ -227,7 +229,11 @@ const Provenance = ({ record }: { record: RunRecord }) => {
                                 Peak resource use per stage, so an out-of-memory run stays
                                 explicable.
                             </Typography>
-                            <ProvenanceTable value={record.stage_peaks} emptyText="" />
+                            <StagePeaksTable
+                                value={record.stage_peaks}
+                                totals={profileTotals(device?.system_profile)}
+                                emptyText=""
+                            />
                         </>
                     )}
                 </Stack>
@@ -238,8 +244,20 @@ const Provenance = ({ record }: { record: RunRecord }) => {
 
 const RunLayout = () => {
     const record = useRecordContext<RunRecord>();
+    // The device row carries the memory ceilings the stage peaks are scaled against.
+    const { data: device } = useGetOne<Device>(
+        'devices',
+        { id: record?.device_id ?? '' },
+        { enabled: Boolean(record?.device_id) },
+    );
     if (!record) return <Loading />;
     const seconds = runDuration(record.started_at, record.finished_at);
+    const versions = [
+        record.gui_version ? `GUI ${record.gui_version}` : null,
+        record.library_version ? `lib ${record.library_version}` : null,
+    ]
+        .filter(Boolean)
+        .join(' · ');
     return (
         <Stack spacing={2} sx={{ p: 2 }}>
             <Panel title="Run">
@@ -275,6 +293,39 @@ const RunLayout = () => {
                             {seconds == null ? '—' : formatDuration(seconds)}
                         </Typography>
                     </Labeled>
+                    <Labeled label="Device">
+                        <ReferenceField
+                            source="device_id"
+                            reference="devices"
+                            link="show"
+                            emptyText="—"
+                        >
+                            <TextField source="name" />
+                        </ReferenceField>
+                    </Labeled>
+                    <Labeled label="Preset">
+                        {hasEntries(record.preset_deviations) ? (
+                            <Chip
+                                size="small"
+                                color="warning"
+                                label="Deviations"
+                                variant="outlined"
+                            />
+                        ) : (
+                            <Typography variant="body2">
+                                {record.preset_name
+                                    ? `${record.preset_name}${
+                                          record.preset_version == null
+                                              ? ''
+                                              : ` v${record.preset_version}`
+                                      }`
+                                    : '—'}
+                            </Typography>
+                        )}
+                    </Labeled>
+                    <Labeled label="Versions">
+                        <Typography variant="body2">{versions || '—'}</Typography>
+                    </Labeled>
                 </Fields>
             </Panel>
 
@@ -299,7 +350,7 @@ const RunLayout = () => {
 
             <CloudSection />
 
-            <Provenance record={record} />
+            <Provenance record={record} device={device} />
 
             <SyncFields />
         </Stack>

@@ -15,6 +15,8 @@ import type {
     ArchiveInitiateRequest,
     ArchivePartReceipt,
     ArchiveProbe,
+    AssignAllResponse,
+    BatchProbe,
     ClassGroup,
     CompletedPart,
     ConnectCode,
@@ -24,6 +26,7 @@ import type {
     PresetAssignment,
     PooledCover,
     RunRecord,
+    RunsProbe,
 } from '../contract';
 
 type HttpClient = typeof fetchUtils.fetchJson;
@@ -50,7 +53,10 @@ export interface DrmDataProvider extends DataProvider {
     ) => Promise<ArchivePartReceipt>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
+    archiveProbe: (hashes: string[]) => Promise<BatchProbe>;
+    archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
     archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
+    assignPresetToAll: (presetId: string) => Promise<AssignAllResponse>;
 }
 
 const DEFAULT_PAGINATION: PaginationPayload = { page: 1, perPage: 25 };
@@ -302,10 +308,29 @@ const dataProvider = (
                 },
             ),
 
+        // One POST answers a whole page of rows, where by-hash would fire one per row.
+        archiveProbe: hashes =>
+            httpClient(`${apiUrl}/archive/probe`, {
+                method: 'POST',
+                body: JSON.stringify({ hashes }),
+            }).then(({ json }) => json as BatchProbe),
+
+        archiveRunsProbe: runIds =>
+            httpClient(`${apiUrl}/archive/runs-probe`, {
+                method: 'POST',
+                body: JSON.stringify({ run_ids: runIds }),
+            }).then(({ json }) => json as RunsProbe),
+
         archiveDownload: objectId =>
             httpClient(`${apiUrl}/archive/${objectId}/download`).then(
                 ({ json }) => json as ArchiveDownload,
             ),
+
+        // Admin-only on the registry. Devices adopt it at their next heartbeat.
+        assignPresetToAll: presetId =>
+            httpClient(`${apiUrl}/presets/${presetId}/assign-all`, {
+                method: 'POST',
+            }).then(({ json }) => json as AssignAllResponse),
     };
 };
 

@@ -116,6 +116,12 @@ const DeviceList = () => {
                     emptyText="—"
                     sortable={false}
                 />
+                <TextField
+                    source="library_version"
+                    label="Library version"
+                    emptyText="—"
+                    sortable={false}
+                />
                 <AccountField source="enrolled_by" label="Onboarded by" sortable={false} />
                 <DateField source="created_at" label="Enrolled" showTime />
                 <RelativeDateField

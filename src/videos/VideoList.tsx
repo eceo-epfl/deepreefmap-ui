@@ -7,9 +7,13 @@ import {
     TextField,
     TextInput,
     TopToolbar,
+    useListContext,
+    useRecordContext,
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 
+import { ArchiveStateChip } from '../archive/ArchiveChip';
+import { useArchiveProbeBatch } from '../archive/useBatchProbe';
 import {
     asColumn,
     DurationField,
@@ -17,6 +21,7 @@ import {
     TriStateField,
     triStateChoices,
 } from '../components';
+import type { VideoAsset } from '../contract';
 import { SizeField } from './VideoFields';
 
 const DurationColumn = asColumn(DurationField);
@@ -28,6 +33,30 @@ const videoFilters = [
     <SelectInput key="gravity" source="gravity" label="Gravity" choices={triStateChoices} />,
     <SelectInput key="gps" source="gps" label="GPS" choices={triStateChoices} />,
 ];
+
+// Every row asks with the whole page's hashes, so the batch hook collapses the
+// column into one probe.
+const ArchiveField = () => {
+    const { data } = useListContext<VideoAsset>();
+    const record = useRecordContext<VideoAsset>();
+    const { states, error } = useArchiveProbeBatch((data ?? []).map(video => video.hash));
+    if (!record?.hash) {
+        return (
+            <Typography
+                variant="body2"
+                component="span"
+                sx={{
+                    color: 'text.disabled',
+                }}
+            >
+                —
+            </Typography>
+        );
+    }
+    return <ArchiveStateChip state={states.get(record.hash)} error={error} />;
+};
+
+const ArchiveColumn = asColumn(ArchiveField);
 
 const VideoListActions = () => (
     <TopToolbar>
@@ -73,6 +102,7 @@ const VideoList = () => (
             <TextField source="codec" emptyText="—" sortable={false} />
             <TriStateColumn label="Gravity" source="gravity" sortable={false} />
             <TriStateColumn label="GPS" source="gps" sortable={false} />
+            <ArchiveColumn label="Archive" sortable={false} />
         </Datagrid>
     </List>
 );

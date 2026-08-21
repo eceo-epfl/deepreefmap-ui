@@ -95,3 +95,14 @@ export type ArchiveProbe = Omit<Schemas['ByHashResponse'], 'status'> & {
     status: StoredObjectStatus;
 };
 export type ArchiveDownload = Schemas['DownloadResponse'];
+
+export type BatchProbeState = Omit<Schemas['ProbeState'], 'status'> & {
+    status: StoredObjectStatus;
+};
+export type BatchProbe = Omit<Schemas['ProbeResponse'], 'states'> & {
+    states: { [hash: string]: BatchProbeState };
+};
+export type RunArchiveState = Schemas['RunArchiveState'];
+export type RunsProbe = Schemas['RunsProbeResponse'];
+
+export type AssignAllResponse = Schemas['AssignAllResponse'];

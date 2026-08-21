@@ -6,9 +6,13 @@ import {
     ReferenceField,
     SelectInput,
     TextField,
+    useListContext,
+    useRecordContext,
 } from 'react-admin';
-import { Chip, Typography } from '@mui/material';
+import { Chip, Tooltip, Typography } from '@mui/material';
 
+import { useRunsProbeBatch } from '../archive/useBatchProbe';
+import { asColumn } from '../components';
 import type { RunRecord } from '../contract';
 import StatusField, { statusChoices } from './StatusField';
 import { hasEntries } from './ProvenanceTable';
@@ -23,6 +27,55 @@ const runFilters = [
         alwaysOn
     />,
 ];
+
+// Every row asks with the whole page's ids, so the batch hook collapses the
+// column into one probe.
+const OutputsField = () => {
+    const { data } = useListContext<RunRecord>();
+    const record = useRecordContext<RunRecord>();
+    const { states, error } = useRunsProbeBatch((data ?? []).map(run => run.id));
+    if (!record) return null;
+    if (error) {
+        return (
+            <Tooltip title={error}>
+                <Chip size="small" label="Archive unavailable" variant="outlined" />
+            </Tooltip>
+        );
+    }
+    const state = states.get(record.id);
+    if (state === undefined) {
+        return <Chip size="small" label="Checking…" variant="outlined" />;
+    }
+    if (state === null) {
+        return (
+            <Typography
+                variant="body2"
+                component="span"
+                sx={{
+                    color: 'text.disabled',
+                }}
+            >
+                —
+            </Typography>
+        );
+    }
+    if (state.failed > 0) {
+        return <Chip size="small" color="error" label="Archive failed" />;
+    }
+    if (state.complete === state.artifacts) {
+        return <Chip size="small" color="success" label={`Archived ${state.artifacts}`} />;
+    }
+    return (
+        <Chip
+            size="small"
+            color="warning"
+            variant="outlined"
+            label={`${state.complete}/${state.artifacts} archived`}
+        />
+    );
+};
+
+const OutputsColumn = asColumn(OutputsField);
 
 const Empty = () => (
     <Typography
@@ -101,6 +154,7 @@ const RunList = () => (
                     )
                 }
             />
+            <OutputsColumn label="Outputs" sortable={false} />
         </Datagrid>
     </List>
 );

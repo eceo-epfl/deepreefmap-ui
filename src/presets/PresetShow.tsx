@@ -1,7 +1,10 @@
 import {
+    Datagrid,
     EditButton,
     Labeled,
     NumberField,
+    Pagination,
+    ReferenceManyField,
     Show,
     TextField,
     TopToolbar,
@@ -16,18 +19,22 @@ import {
     TableBody,
     TableCell,
     TableRow,
+    Tooltip,
     Typography,
 } from '@mui/material';
 
-import { SyncFields, TombstoneButton } from '../components';
+import { asColumn, SyncFields, TombstoneButton } from '../components';
+import DeviceStatusField from '../devices/DeviceStatusField';
 import { useCanAuthor } from '../permissions';
-import type { Preset } from '../contract';
+import type { Device, Preset } from '../contract';
+import AssignToAllButton from './AssignToAllButton';
 import { PRESET_FIELDS, PRESET_SCHEMA_VERSION, unknownKeys } from './schema';
 
 const PresetShowActions = () => {
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
+            <AssignToAllButton />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="preset" />
         </TopToolbar>
@@ -95,6 +102,64 @@ const SettingsBlock = () => {
     );
 };
 
+// Null or behind means the laptop would refuse or misread this document, which is
+// exactly what an assignment (or the fallback after clearing one) needs visible.
+const SchemaVersionField = () => {
+    const device = useRecordContext<Device>();
+    if (!device) return null;
+    const version = device.preset_schema_version;
+    if (version != null && version >= PRESET_SCHEMA_VERSION) return <span>{version}</span>;
+    return (
+        <Tooltip
+            title={
+                version == null
+                    ? 'This device has never reported a preset schema version.'
+                    : `This device understands schema v${version}; the console writes v${PRESET_SCHEMA_VERSION}.`
+            }
+        >
+            <Typography variant="body2" component="span" color="warning.main">
+                {version ?? '—'}
+            </Typography>
+        </Tooltip>
+    );
+};
+
+const SchemaVersionColumn = asColumn(SchemaVersionField);
+
+const NoAssignees = () => (
+    <Typography
+        variant="body2"
+        sx={{
+            color: 'text.secondary',
+            p: 1,
+        }}
+    >
+        No device is assigned this preset.
+    </Typography>
+);
+
+const AssignedDevices = () => (
+    <ReferenceManyField
+        reference="devices"
+        target="assigned_preset_id"
+        sort={{ field: 'name', order: 'ASC' }}
+        perPage={10}
+        pagination={<Pagination />}
+    >
+        <Datagrid rowClick="show" bulkActionButtons={false} empty={<NoAssignees />}>
+            <TextField source="name" label="Device name" />
+            <DeviceStatusField label="Status" />
+            <TextField
+                source="gui_version"
+                label="GUI version"
+                emptyText="—"
+                sortable={false}
+            />
+            <SchemaVersionColumn label="Preset schema" sortable={false} />
+        </Datagrid>
+    </ReferenceManyField>
+);
+
 const PresetShow = () => (
     <Show actions={<PresetShowActions />}>
         <Stack
@@ -135,8 +200,29 @@ const PresetShow = () => (
                     <Labeled label="Settings" sx={{ width: '100%' }}>
                         <SettingsBlock />
                     </Labeled>
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: 'text.secondary',
+                        }}
+                    >
+                        Console preset schema v{PRESET_SCHEMA_VERSION}
+                    </Typography>
                 </Grid>
             </Grid>
+
+            <Divider />
+            <Box>
+                <Typography
+                    variant="overline"
+                    sx={{
+                        color: 'text.secondary',
+                    }}
+                >
+                    Devices using this preset
+                </Typography>
+                <AssignedDevices />
+            </Box>
 
             <Divider />
             <SyncFields />

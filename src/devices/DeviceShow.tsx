@@ -10,9 +10,20 @@ import {
     SimpleShowLayout,
     TextField,
     TopToolbar,
+    useNotify,
     useRecordContext,
 } from 'react-admin';
-import { Alert, Box, Divider, Stack, Typography } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import {
+    Alert,
+    Box,
+    Divider,
+    IconButton,
+    LinearProgress,
+    Stack,
+    Tooltip,
+    Typography,
+} from '@mui/material';
 
 import { AccountField, asColumn, DurationField } from '../components';
 import { RunStatusChip } from '../runs/StatusField';
@@ -22,6 +33,8 @@ import RelativeDateField, { STALE_AFTER_SECONDS, relativeTime } from './Relative
 import AssignedPresetPanel from './AssignedPresetPanel';
 import RenameDeviceButton from './RenameDeviceButton';
 import RevokeDeviceButton from './RevokeDeviceButton';
+import { asObject, numberOf, profileTotals, textOf } from './profile';
+import { useDevicePeaks } from './useDevicePeaks';
 import type { Device } from '../contract';
 
 const DurationColumn = asColumn(DurationField);
@@ -55,30 +68,77 @@ const SectionHeading = ({ title }: { title: string }) => (
     </Typography>
 );
 
-// The profile is stored as sent, so every read below survives a device that
-// reported a different shape.
-const asObject = (value: unknown): Record<string, unknown> | null =>
-    value && typeof value === 'object' && !Array.isArray(value)
-        ? (value as Record<string, unknown>)
-        : null;
-
-const textOf = (profile: Record<string, unknown>, key: string): string | null => {
-    const value = profile[key];
-    return typeof value === 'string' && value ? value : null;
-};
-
-const numberOf = (profile: Record<string, unknown>, key: string): number | null => {
-    const value = profile[key];
-    return typeof value === 'number' && Number.isFinite(value) ? value : null;
-};
-
 const HardwareLine = ({ label, value }: { label: string; value: string | null }) => (
     <Labeled label={label}>
         <Typography variant="body2">{value ?? '—'}</Typography>
     </Labeled>
 );
 
-/** What the device says about itself. Static hardware only: no free space, no paths. */
+// Older heartbeats sent only the total, so the gauge degrades to a plain figure.
+const DiskLine = ({ profile }: { profile: Record<string, unknown> }) => {
+    const total = numberOf(profile, 'disk_total_bytes');
+    const free = numberOf(profile, 'disk_free_bytes');
+    if (total == null || free == null) {
+        return <HardwareLine label="Disk" value={total == null ? null : formatBytes(total)} />;
+    }
+    const used = Math.max(total - free, 0);
+    const fraction = total > 0 ? used / total : 0;
+    return (
+        <Labeled label="Disk">
+            <Box sx={{ minWidth: 240 }}>
+                <LinearProgress
+                    variant="determinate"
+                    value={Math.min(fraction, 1) * 100}
+                    color={fraction > 0.85 ? 'warning' : 'primary'}
+                    sx={{ height: 6, borderRadius: 1, mb: 0.5 }}
+                />
+                <Typography variant="body2">
+                    {formatBytes(used)} used of {formatBytes(total)} · {formatBytes(free)} free
+                </Typography>
+            </Box>
+        </Labeled>
+    );
+};
+
+const withShare = (bytes: number | null, total: number | null): string | null => {
+    if (bytes == null) return null;
+    if (!total) return formatBytes(bytes);
+    return `${formatBytes(bytes)} (${Math.round((bytes / total) * 100)}%)`;
+};
+
+/** Worst observed memory per model combination, from recent succeeded runs. */
+const ComboPeaksRows = () => {
+    const record = useRecordContext<Device>();
+    const combos = useDevicePeaks(record?.id);
+    if (!record || !combos.length) return null;
+    const totals = profileTotals(record.system_profile);
+    return (
+        <Stack spacing={0.25}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Peak memory by model combination, over recent succeeded runs:
+            </Typography>
+            {combos.map(peaks => (
+                <Typography
+                    key={peaks.combo}
+                    variant="caption"
+                    sx={{ color: 'text.secondary' }}
+                >
+                    {peaks.combo}:{' '}
+                    {[
+                        withShare(peaks.ram, totals.ram) &&
+                            `RAM ${withShare(peaks.ram, totals.ram)}`,
+                        peaks.swap ? `swap ${withShare(peaks.swap, totals.swap)}` : null,
+                        peaks.vram != null && `VRAM ${withShare(peaks.vram, totals.vram)}`,
+                    ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                </Typography>
+            ))}
+        </Stack>
+    );
+};
+
+/** What the device says about itself. Static hardware plus survey-disk headroom. */
 const HardwarePanel = () => {
     const record = useRecordContext<Device>();
     const profile = asObject(record?.system_profile);
@@ -103,45 +163,39 @@ const HardwarePanel = () => {
     const physical = numberOf(profile, 'cpu_physical');
     const ram = numberOf(profile, 'total_ram_bytes');
     const swap = numberOf(profile, 'total_swap_bytes');
-    const disk = numberOf(profile, 'disk_total_bytes');
     const gpu = asObject(profile.gpu);
     const gpuName = gpu && textOf(gpu, 'name');
     const vram = gpu && numberOf(gpu, 'total_vram_bytes');
 
     return (
-        <Stack
-            direction="row"
-            spacing={3}
-            useFlexGap
-            sx={{
-                flexWrap: 'wrap',
-            }}
-        >
-            <HardwareLine
-                label="Operating system"
-                value={os ? [os, osRelease].filter(Boolean).join(' ') : null}
-            />
-            <HardwareLine
-                label="CPU"
-                value={
-                    logical == null
-                        ? null
-                        : `${logical} logical / ${physical ?? '?'} physical cores`
-                }
-            />
-            <HardwareLine label="RAM" value={ram == null ? null : formatBytes(ram)} />
-            <HardwareLine label="Swap" value={swap == null ? null : formatBytes(swap)} />
-            <HardwareLine
-                label="GPU"
-                value={
-                    gpuName
-                        ? vram == null
-                            ? gpuName
-                            : `${gpuName} · ${formatBytes(vram)}`
-                        : null
-                }
-            />
-            <HardwareLine label="Disk" value={disk == null ? null : formatBytes(disk)} />
+        <Stack spacing={1}>
+            <Stack
+                direction="row"
+                spacing={3}
+                useFlexGap
+                sx={{
+                    flexWrap: 'wrap',
+                }}
+            >
+                <HardwareLine
+                    label="Operating system"
+                    value={os ? [os, osRelease].filter(Boolean).join(' ') : null}
+                />
+                <HardwareLine
+                    label="CPU"
+                    value={
+                        logical == null
+                            ? null
+                            : `${logical} logical / ${physical ?? '?'} physical cores`
+                    }
+                />
+                <HardwareLine label="RAM" value={ram == null ? null : formatBytes(ram)} />
+                <HardwareLine label="Swap" value={swap == null ? null : formatBytes(swap)} />
+                <HardwareLine label="GPU" value={gpuName} />
+                <HardwareLine label="VRAM" value={vram == null ? null : formatBytes(vram)} />
+                <DiskLine profile={profile} />
+            </Stack>
+            <ComboPeaksRows />
         </Stack>
     );
 };
@@ -169,16 +223,65 @@ const SoftwareLines = () => {
                     <TextField source="preset_schema_version" emptyText="—" />
                 </Labeled>
             </Stack>
-            {record.profile_reported_at && (
+            {(record.profile_reported_at || record.versions_changed_at) && (
                 <Typography
                     variant="caption"
                     sx={{
                         color: 'text.secondary',
                     }}
                 >
-                    reported {relativeTime(record.profile_reported_at)}
+                    {[
+                        record.profile_reported_at &&
+                            `reported ${relativeTime(record.profile_reported_at)}`,
+                        record.versions_changed_at &&
+                            `changed ${relativeTime(record.versions_changed_at)}`,
+                    ]
+                        .filter(Boolean)
+                        .join(' · ')}
                 </Typography>
             )}
+        </Stack>
+    );
+};
+
+const AuditPanel = () => {
+    const record = useRecordContext<Device>();
+    const notify = useNotify();
+    if (!record) return null;
+    return (
+        <Stack spacing={0.5}>
+            <Typography variant="body2">
+                Onboarded {new Date(record.created_at).toLocaleString()} by{' '}
+                <AccountField source="enrolled_by" />
+            </Typography>
+            <Typography
+                variant="caption"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                Who redeemed the connect code. Uploads are attributed to the device name above,
+                not to this account.
+            </Typography>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                <Typography
+                    variant="caption"
+                    sx={{ fontFamily: 'monospace', color: 'text.secondary' }}
+                >
+                    {record.id}
+                </Typography>
+                <Tooltip title="Copy device id">
+                    <IconButton
+                        size="small"
+                        onClick={() => {
+                            navigator.clipboard.writeText(String(record.id));
+                            notify('Device id copied.', { type: 'info' });
+                        }}
+                    >
+                        <ContentCopyIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                </Tooltip>
+            </Stack>
         </Stack>
     );
 };
@@ -300,9 +403,6 @@ const DeviceShow = () => (
                 <Labeled label="Revoked">
                     <DateField source="revoked_at" showTime emptyText="—" />
                 </Labeled>
-                <Labeled label="Device id">
-                    <TextField source="id" />
-                </Labeled>
             </Stack>
             <Divider />
             <Box>
@@ -315,18 +415,7 @@ const DeviceShow = () => (
             </Box>
             <Divider />
             <SectionHeading title="Audit" />
-            <Labeled label="Onboarded by">
-                <AccountField source="enrolled_by" />
-            </Labeled>
-            <Typography
-                variant="caption"
-                sx={{
-                    color: 'text.secondary',
-                }}
-            >
-                Who redeemed the connect code. Uploads are attributed to the device name above,
-                not to this account.
-            </Typography>
+            <AuditPanel />
         </SimpleShowLayout>
     </Show>
 );
