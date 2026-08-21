@@ -130,9 +130,54 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A short-lived download URL for a verified object. */
+        /**
+         * A short-lived download URL for a verified object.
+         * @description The URL points back at this registry's own `/archive/{id}/fetch` route with an
+         *     HMAC signature in the query, so a browser navigation needs no bearer header
+         *     while the object store stays unreachable.
+         */
         get: operations['download'];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/archive/{object_id}/fetch': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream a verified object against a signed fetch link. */
+        get: operations['fetch'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/archive/{object_id}/parts/{part_number}': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Store one part's raw bytes.
+         * @description The body streams through to the object store under the registry's own
+         *     credential: clients never reach the store themselves, so every byte arrives
+         *     under the caller's authenticated identity. Parts may arrive in any order and
+         *     re-sending one overwrites it, which is how a retry works.
+         */
+        put: operations['upload_part'];
         post?: never;
         delete?: never;
         options?: never;
@@ -2029,7 +2074,10 @@ export interface components {
             system_profile?: unknown;
         };
         DownloadResponse: {
-            /** @description Presigned `GetObject` URL, good for `PRESIGN_TTL_SECONDS`. */
+            /**
+             * @description A fetch link on this registry itself, signed for one object and a few
+             *     minutes. The object store is never addressed by a client.
+             */
             url: string;
         };
         EnrolRequest: {
@@ -2120,17 +2168,13 @@ export interface components {
             object_id: string;
             /** Format: int64 */
             part_size_bytes?: number | null;
-            part_urls: components['schemas']['PartUrl'][];
-            /** @description Part numbers already stored, which a resuming client skips. */
+            /**
+             * @description Part numbers already stored, which a resuming client skips. The rest are
+             *     PUT to `/archive/{object_id}/parts/{part_number}` in any order.
+             */
             parts_done: number[];
             /**
-             * Format: int64
-             * @description How long the part URLs stay valid. A client uploading for longer than this
-             *     re-initiates to mint fresh ones, so the lifetime is told, never guessed.
-             */
-            presign_ttl_seconds: number;
-            /**
-             * @description `pending` with URLs to upload, or `complete` when the content is already
+             * @description `pending` with parts to upload, or `complete` when the content is already
              *     archived and nothing need be sent.
              */
             status: string;
@@ -2170,12 +2214,6 @@ export interface components {
             code: string;
             /** Format: date-time */
             expires_at: string;
-        };
-        PartUrl: {
-            /** Format: int32 */
-            part_number: number;
-            /** @description Presigned `UploadPart` URL, good for `presign_ttl_seconds`. */
-            url: string;
         };
         PassCreate: {
             /** Format: double */
@@ -3203,6 +3241,15 @@ export interface components {
             /** Format: double */
             start_lon?: number | null;
         };
+        UploadPartResponse: {
+            /**
+             * @description The `ETag` the store recorded, which is the part's MD5 on every store this
+             *     registry deploys against, so the sender can verify what landed.
+             */
+            etag: string;
+            /** Format: int32 */
+            part_number: number;
+        };
         VideoList: {
             /** Format: date-time */
             captured_at?: string | null;
@@ -3590,7 +3637,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Presigned download URL */
+            /** @description Signed fetch URL on this registry */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3608,6 +3655,118 @@ export interface operations {
             };
             /** @description The object is not complete yet */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The archive is not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    fetch: {
+        parameters: {
+            query: {
+                /** @description Unix timestamp the signature lapses at. */
+                expires: number;
+                /** @description HMAC over the object id and expiry, from `/archive/{id}/download`. */
+                sig: string;
+            };
+            header?: never;
+            path: {
+                /** @description Object to stream */
+                object_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The object's bytes, as an attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The signature is wrong or has lapsed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such object */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The archive is not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    upload_part: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Pending object the part belongs to */
+                object_id: string;
+                /** @description 1-based part number */
+                part_number: number;
+            };
+            cookie?: never;
+        };
+        /** @description The part's raw bytes */
+        requestBody: {
+            content: {
+                'application/octet-stream': number[];
+            };
+        };
+        responses: {
+            /** @description Part stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['UploadPartResponse'];
+                };
+            };
+            /** @description Part number out of range */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The object is not pending */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Content-Length is required */
+            411: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Larger than the negotiated part size */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };

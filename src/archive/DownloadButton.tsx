@@ -4,7 +4,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 
 import type { DrmDataProvider } from '../dataProvider';
 
-/** Mints a short-lived presigned URL on click, so the link can never be stale. */
+/** Mints a short-lived signed fetch link on click, so the link can never be stale. */
 const DownloadButton = ({ objectId }: { objectId: string }) => {
     const dataProvider = useDataProvider<DrmDataProvider>();
     const notify = useNotify();

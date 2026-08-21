@@ -88,8 +88,8 @@ export type ArchiveInitiateRequest = Schemas['InitiateRequest'];
 export type ArchiveInitiate = Omit<Schemas['InitiateResponse'], 'status'> & {
     status: StoredObjectStatus;
 };
-export type ArchivePartUrl = Schemas['PartUrl'];
 export type CompletedPart = Schemas['CompletedPartBody'];
+export type ArchivePartReceipt = Schemas['UploadPartResponse'];
 export type ArchiveComplete = Schemas['CompleteResponse'];
 export type ArchiveProbe = Omit<Schemas['ByHashResponse'], 'status'> & {
     status: StoredObjectStatus;

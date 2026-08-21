@@ -13,6 +13,7 @@ import type {
     ArchiveDownload,
     ArchiveInitiate,
     ArchiveInitiateRequest,
+    ArchivePartReceipt,
     ArchiveProbe,
     ClassGroup,
     CompletedPart,
@@ -42,6 +43,11 @@ export interface DrmDataProvider extends DataProvider {
     renameDevice: (deviceId: string, name: string) => Promise<DeviceRename>;
     assignPreset: (deviceId: string, presetId: string | null) => Promise<PresetAssignment>;
     archiveInitiate: (body: ArchiveInitiateRequest) => Promise<ArchiveInitiate>;
+    archiveUploadPart: (
+        objectId: string,
+        partNumber: number,
+        body: Blob,
+    ) => Promise<ArchivePartReceipt>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
     archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
@@ -270,6 +276,15 @@ const dataProvider = (
                 method: 'POST',
                 body: JSON.stringify(body),
             }).then(({ json }) => json as ArchiveInitiate),
+
+        // The part's raw bytes, streamed by the registry into the store. The browser
+        // sets Content-Length from the blob itself.
+        archiveUploadPart: (objectId, partNumber, body) =>
+            httpClient(`${apiUrl}/archive/${objectId}/parts/${partNumber}`, {
+                method: 'PUT',
+                headers: new Headers({ 'Content-Type': 'application/octet-stream' }),
+                body,
+            }).then(({ json }) => json as ArchivePartReceipt),
 
         archiveComplete: (objectId, parts) =>
             httpClient(`${apiUrl}/archive/${objectId}/complete`, {

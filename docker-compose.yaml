@@ -56,10 +56,11 @@ services:
       - CORS_ALLOWED_ORIGINS=http://localhost:${TRAEFIK_HTTP_PORT:-88},http://localhost:5173
       - DISABLE_RATE_LIMITING=${DISABLE_RATE_LIMITING:-true}
       # The blob archive. In-network endpoint for the API's own bucket operations.
+      # Internal network only, matching the production constraint: the store is
+      # never reachable by a client, every byte flows through the API.
       - S3_URL=http://minio:9000
       # What presigned URLs are signed against: the browser is on the host and
       # cannot resolve the container name above. MinIO publishes this port.
-      - S3_PUBLIC_URL=http://localhost:${MINIO_EXTERNAL_PORT:-9000}
       - S3_BUCKET_ID=deepreefmap
       - S3_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
       - S3_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
@@ -157,14 +158,11 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-      # The console PUTs presigned parts cross-origin and must read each ETag
-      # response header, which MinIO only exposes with CORS enabled.
-      - MINIO_API_CORS_ALLOW_ORIGIN=${MINIO_API_CORS_ALLOW_ORIGIN:-*}
     ports:
-      # Published so presigned URLs signed against localhost work from the host,
-      # which is how the API's gated S3 tests run.
+      # Loopback only, for the API's gated S3 tests running on the host. No client
+      # in the stack reaches MinIO: the dev topology matches the intranet-only
+      # store in production.
       - "127.0.0.1:${MINIO_EXTERNAL_PORT:-9000}:9000"
-      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - deepreefmap-minio-data:/data
     healthcheck:
