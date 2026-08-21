@@ -194,7 +194,7 @@ services:
   #
   #   curl -X POST http://localhost:88/api/enrol \
   #     -H 'Content-Type: application/json' \
-  #     -d '{"code":"'$(printf 'ab%.0s' {1..32})'","device_name":"Dev laptop"}'
+  #     -d '{"code":"'$(printf 'ab%.0s' {1..32})'"}'
   #
   # Single use, like any connect code: re-run this service to get another.
   dev-seed-connect-code:
@@ -216,12 +216,12 @@ services:
           -- sha256 of the 64-hex secret 'abab...ab', matching the curl above. The
           -- server stores only this digest, so the seeded row is indistinguishable
           -- from one the mint endpoint wrote.
-          INSERT INTO connect_code (id, code_hash, created_by, note, expires_at, created_at)
+          INSERT INTO connect_code (id, code_hash, created_by, device_name, expires_at, created_at)
           VALUES (
             gen_random_uuid(),
             encode(digest(repeat('ab', 32), 'sha256'), 'hex'),
             'dev-local-admin',
-            'seeded by docker compose for local development',
+            'Dev laptop',
             now() + interval '15 minutes',
             now()
           )

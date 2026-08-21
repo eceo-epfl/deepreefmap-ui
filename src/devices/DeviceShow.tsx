@@ -19,6 +19,7 @@ import { RunStatusChip } from '../runs/StatusField';
 import { formatBytes } from '../videos/VideoFields';
 import DeviceStatusField from './DeviceStatusField';
 import RelativeDateField, { STALE_AFTER_SECONDS, relativeTime } from './RelativeDateField';
+import AssignedPresetPanel from './AssignedPresetPanel';
 import RenameDeviceButton from './RenameDeviceButton';
 import RevokeDeviceButton from './RevokeDeviceButton';
 import type { Device } from '../contract';
@@ -164,6 +165,9 @@ const SoftwareLines = () => {
                 <Labeled label="Library version">
                     <TextField source="library_version" emptyText="—" />
                 </Labeled>
+                <Labeled label="Preset schema">
+                    <TextField source="preset_schema_version" emptyText="—" />
+                </Labeled>
             </Stack>
             {record.profile_reported_at && (
                 <Typography
@@ -272,6 +276,8 @@ const DeviceShow = () => (
             <HardwarePanel />
             <SectionHeading title="Software" />
             <SoftwareLines />
+            <SectionHeading title="Assigned preset" />
+            <AssignedPresetPanel />
             <Divider />
             <SectionHeading title="Enrolment" />
             <Stack

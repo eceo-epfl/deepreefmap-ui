@@ -77,6 +77,7 @@ export type SeriesGroupCover = Schemas['SeriesGroupCover'];
 export type ConnectCode = Schemas['MintConnectCodeResponse'];
 export type DeviceRevocation = Schemas['RevokeResponse'];
 export type DeviceRename = Schemas['RenameDeviceResponse'];
+export type PresetAssignment = Schemas['AssignPresetResponse'];
 
 export type StoredObject = Omit<Schemas['StoredObjectResponse'], 'status'> & {
     status: StoredObjectStatus;

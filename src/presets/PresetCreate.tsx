@@ -1,12 +1,12 @@
 import { Create, SimpleForm } from 'react-admin';
 
-import PresetInputs, { parsePresetSettings, validatePreset } from './PresetInputs';
+import PresetInputs from './PresetInputs';
+import { defaultSettings } from './schema';
 
 const PresetCreate = () => (
-    <Create redirect="show" transform={parsePresetSettings}>
+    <Create redirect="show">
         <SimpleForm
-            defaultValues={{ description: '', version: 1, settings: '{}' }}
-            validate={validatePreset}
+            defaultValues={{ description: '', version: 1, settings: defaultSettings() }}
         >
             <PresetInputs />
         </SimpleForm>

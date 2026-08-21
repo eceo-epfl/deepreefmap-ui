@@ -107,9 +107,14 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Assemble the uploaded parts into the finished object.
+         * Assemble the uploaded parts into the finished object and verify them.
          * @description S3 checked every part against the `ETag` it answered as the part arrived, so an
-         *     assembly it accepts is the bytes the client sent.
+         *     assembly it accepts is the bytes the client sent. Whether those bytes are the
+         *     content the client claimed is checked here: the stored size must match the
+         *     initiated one, and the imohash re-computed from the stored object must match the
+         *     claimed hash, before the object counts as `complete`. A mismatch deletes the
+         *     object, fails the row and answers 409, so a wrong upload can never poison a
+         *     content-addressed key another device would dedup against.
          */
         post: operations['complete'];
         delete?: never;
@@ -371,6 +376,8 @@ export interface paths {
          *     Additional sortable columns:
          *     - name
          *     - profile_reported_at
+         *     - assigned_at
+         *     - active_preset_reported_at
          *     - created_at
          *     - last_seen_at
          *     - revoked_at.
@@ -382,6 +389,8 @@ export interface paths {
          *     - platform
          *     - gui_version
          *     - library_version
+         *     - preset_schema_version
+         *     - assigned_preset_id
          *     - revoked_at.
          */
         get: operations['get_all_devices'];
@@ -407,6 +416,29 @@ export interface paths {
          * @description Interactive login only, so a device cannot invite further devices.
          */
         post: operations['mint_code'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/devices/{device_id}/assign-preset': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Choose a device's default preset. Members may assign to their own, administrators
+         *     to anyone's.
+         * @description The assignment travels in the next heartbeat response, and the device reports the
+         *     preset it actually runs under in the request after that, so `active_preset_*` on
+         *     the device row says whether the assignment was acknowledged.
+         */
+        post: operations['assign_preset'];
         delete?: never;
         options?: never;
         head?: never;
@@ -1312,7 +1344,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Update the calling device's own record.
+         * Update the calling device's own record and learn its assigned preset.
          * @description Identity comes from the credential and never from the body, so a device cannot
          *     report on a sibling's behalf.
          */
@@ -1613,6 +1645,29 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AssignPresetRequest: {
+            /**
+             * Format: uuid
+             * @description Null clears the assignment.
+             */
+            preset_id?: string | null;
+        };
+        AssignPresetResponse: {
+            /** Format: date-time */
+            assigned_at?: string | null;
+            /** Format: uuid */
+            assigned_preset_id?: string | null;
+            /** Format: uuid */
+            device_id: string;
+        };
+        /** @description The server-chosen default preset, named well enough to select locally. */
+        AssignedPreset: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            version: number;
+        };
         /**
          * @description Wrapper type for batch update request items.
          *     Each item contains an `id` field and the update fields flattened into the same object.
@@ -1861,6 +1916,23 @@ export interface components {
             period_label?: string | null;
         };
         DeviceList: {
+            /**
+             * @description The preset the device says it runs under, from its heartbeat. Beside the
+             *     assignment, this is the acknowledgement.
+             */
+            active_preset_name?: string | null;
+            /** Format: date-time */
+            active_preset_reported_at?: string | null;
+            /** Format: int32 */
+            active_preset_version?: number | null;
+            /** Format: date-time */
+            assigned_at?: string | null;
+            /**
+             * Format: uuid
+             * @description The server-chosen default preset, set through `/api/devices/{id}/assign-preset`
+             *     and delivered in the heartbeat response.
+             */
+            assigned_preset_id?: string | null;
             /** Format: date-time */
             created_at: string;
             /**
@@ -1880,6 +1952,12 @@ export interface components {
              */
             name: string;
             platform?: string | null;
+            /**
+             * Format: int32
+             * @description Which `preset-schema.json` revision the installation understands, from its
+             *     heartbeat.
+             */
+            preset_schema_version?: number | null;
             /**
              * Format: date-time
              * @description When the device last reported on itself, so a stale profile reads as stale.
@@ -1892,6 +1970,23 @@ export interface components {
             revoked_at?: string | null;
         };
         DeviceResponse: {
+            /**
+             * @description The preset the device says it runs under, from its heartbeat. Beside the
+             *     assignment, this is the acknowledgement.
+             */
+            active_preset_name?: string | null;
+            /** Format: date-time */
+            active_preset_reported_at?: string | null;
+            /** Format: int32 */
+            active_preset_version?: number | null;
+            /** Format: date-time */
+            assigned_at?: string | null;
+            /**
+             * Format: uuid
+             * @description The server-chosen default preset, set through `/api/devices/{id}/assign-preset`
+             *     and delivered in the heartbeat response.
+             */
+            assigned_preset_id?: string | null;
             /** Format: date-time */
             created_at: string;
             /**
@@ -1911,6 +2006,12 @@ export interface components {
              */
             name: string;
             platform?: string | null;
+            /**
+             * Format: int32
+             * @description Which `preset-schema.json` revision the installation understands, from its
+             *     heartbeat.
+             */
+            preset_schema_version?: number | null;
             /**
              * Format: date-time
              * @description When the device last reported on itself, so a stale profile reads as stale.
@@ -1934,8 +2035,6 @@ export interface components {
         EnrolRequest: {
             /** @description The whole `drm1.…` string or its bare secret. */
             code: string;
-            /** @description This installation's durable name, shown as `uploaded_by` on what it pushes. */
-            device_name: string;
             gui_version?: string | null;
             library_version?: string | null;
             platform?: string | null;
@@ -1949,7 +2048,10 @@ export interface components {
             contract_version: number;
             /** Format: uuid */
             device_id: string;
-            /** @description The name accepted for this installation. */
+            /**
+             * @description This installation's durable name, chosen when its connect code was minted and
+             *     shown as `uploaded_by` on what it pushes.
+             */
             device_name: string;
             /** @description Bearer token for every later sync request. Returned once; only its hash is kept. */
             token: string;
@@ -1977,11 +2079,23 @@ export interface components {
             point_count: number;
         };
         HeartbeatRequest: {
+            /** @description The preset the device currently runs under, acknowledging an assignment. */
+            active_preset_name?: string | null;
+            /** Format: int32 */
+            active_preset_version?: number | null;
             gui_version?: string | null;
             library_version?: string | null;
             platform?: string | null;
+            /**
+             * Format: int32
+             * @description Which `preset-schema.json` revision this installation understands.
+             */
+            preset_schema_version?: number | null;
             /** @description Arbitrary JSON object describing the hardware, stored as sent. */
             system_profile?: unknown;
+        };
+        HeartbeatResponse: {
+            assigned_preset?: null | components['schemas']['AssignedPreset'];
         };
         InitiateRequest: {
             /**
@@ -2046,10 +2160,10 @@ export interface components {
         };
         MintConnectCodeRequest: {
             /**
-             * @description Label for the unredeemed code, so the operator knows who they handed it to.
-             *     Never attribution: the device names itself at enrolment.
+             * @description The name the redeeming device takes, so a device's name has one origin: the
+             *     person minting the code names the installation they are about to enrol.
              */
-            note?: string;
+            device_name: string;
         };
         MintConnectCodeResponse: {
             /** @description The string to paste into the desktop application. Shown once. */
@@ -3432,7 +3546,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Parts assembled into the object */
+            /** @description Parts assembled and verified against the claimed hash */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3448,7 +3562,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The object is not pending */
+            /** @description The object is not pending, or its content does not match the claimed size or hash */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4232,6 +4346,13 @@ export interface operations {
                     'application/json': components['schemas']['MintConnectCodeResponse'];
                 };
             };
+            /** @description Empty device name */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Requires an interactive login */
             403: {
                 headers: {
@@ -4241,6 +4362,47 @@ export interface operations {
             };
             /** @description PUBLIC_BASE_URL is not configured */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    assign_preset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Device to assign a preset to */
+                device_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['AssignPresetRequest'];
+            };
+        };
+        responses: {
+            /** @description Assignment stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['AssignPresetResponse'];
+                };
+            };
+            /** @description Not your device, or a device token */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such device, or no such preset */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7099,12 +7261,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Report stored against the calling device */
-            204: {
+            /** @description Report stored; the response names the assigned preset */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    'application/json': components['schemas']['HeartbeatResponse'];
+                };
             };
             /** @description system_profile is not a JSON object */
             400: {

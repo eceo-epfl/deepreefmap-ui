@@ -20,6 +20,7 @@ import type {
     CoverSeries,
     DeviceRename,
     DeviceRevocation,
+    PresetAssignment,
     PooledCover,
     RunRecord,
 } from '../contract';
@@ -36,9 +37,10 @@ export interface DrmDataProvider extends DataProvider {
     transectCoverSeries: (transectId: string, level: string) => Promise<CoverSeries>;
     videoRuns: (videoId: string) => Promise<RunRecord[]>;
     classGroups: () => Promise<ClassGroup[]>;
-    mintConnectCode: (codeLabel: string) => Promise<ConnectCode>;
+    mintConnectCode: (deviceName: string) => Promise<ConnectCode>;
     revokeDevice: (deviceId: string) => Promise<DeviceRevocation>;
     renameDevice: (deviceId: string, name: string) => Promise<DeviceRename>;
+    assignPreset: (deviceId: string, presetId: string | null) => Promise<PresetAssignment>;
     archiveInitiate: (body: ArchiveInitiateRequest) => Promise<ArchiveInitiate>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
@@ -236,11 +238,11 @@ const dataProvider = (
                 ({ json }) => json as ClassGroup[],
             ),
 
-        // The registry still calls the code's label `note`.
-        mintConnectCode: codeLabel =>
+        // Minting names the device: the code carries the name enrolment adopts.
+        mintConnectCode: deviceName =>
             httpClient(`${apiUrl}/devices/connect-codes`, {
                 method: 'POST',
-                body: JSON.stringify({ note: codeLabel }),
+                body: JSON.stringify({ device_name: deviceName }),
             }).then(({ json }) => json as ConnectCode),
 
         revokeDevice: deviceId =>
@@ -254,6 +256,14 @@ const dataProvider = (
                 method: 'POST',
                 body: JSON.stringify({ name }),
             }).then(({ json }) => json as DeviceRename),
+
+        // Null clears the assignment. Acknowledgement arrives via the device's
+        // next heartbeat, not this response.
+        assignPreset: (deviceId, presetId) =>
+            httpClient(`${apiUrl}/devices/${deviceId}/assign-preset`, {
+                method: 'POST',
+                body: JSON.stringify({ preset_id: presetId }),
+            }).then(({ json }) => json as PresetAssignment),
 
         archiveInitiate: body =>
             httpClient(`${apiUrl}/archive/initiate`, {

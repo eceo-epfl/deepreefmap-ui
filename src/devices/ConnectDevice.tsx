@@ -31,7 +31,7 @@ const mintMessage = (error: unknown): string => {
 const ConnectDevice = () => {
     const dataProvider = useDataProvider<DrmDataProvider>();
     const notify = useNotify();
-    const [codeLabel, setCodeLabel] = useState('');
+    const [deviceName, setDeviceName] = useState('');
     const [code, setCode] = useState<ConnectCode | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [minting, setMinting] = useState(false);
@@ -44,7 +44,7 @@ const ConnectDevice = () => {
         setError(null);
         setMinting(true);
         try {
-            setCode(await dataProvider.mintConnectCode(codeLabel.trim()));
+            setCode(await dataProvider.mintConnectCode(deviceName.trim()));
         } catch (failure) {
             setError(mintMessage(failure));
         } finally {
@@ -73,10 +73,10 @@ const ConnectDevice = () => {
                         <Typography variant="h6">Connect a device</Typography>
 
                         <TextField
-                            label="Code label"
-                            helperText="Your own record of an outstanding code."
-                            value={codeLabel}
-                            onChange={event => setCodeLabel(event.target.value)}
+                            label="Device name"
+                            helperText="Names the device that redeems this code."
+                            value={deviceName}
+                            onChange={event => setDeviceName(event.target.value)}
                             disabled={minting || code !== null}
                             fullWidth
                             size="small"
@@ -87,7 +87,7 @@ const ConnectDevice = () => {
                                 variant="contained"
                                 label={code ? 'Code minted' : 'Mint a connect code'}
                                 onClick={mint}
-                                disabled={minting || code !== null}
+                                disabled={minting || code !== null || !deviceName.trim()}
                             >
                                 <VpnKeyIcon />
                             </Button>
