@@ -23,6 +23,16 @@ yarn install
 yarn dev
 ```
 
+## Viewing a run
+
+The run page shows the reconstruction in five tabs. Cover draws the ortho in the class
+colours the registry publishes (`/api/config/classes`), reading the label grid from the
+run's archived `ortho.npz`, with the photograph behind a switch and a magnifier under
+the pointer. 3D cloud reads the archived `cloud_web.drmw` and draws it with three.js:
+classes by default, click a point to name its class and isolate it, double click to
+move the pivot, and a camera path where the file carries one. Outputs downloads any
+group, or the whole run, as one zip streamed by the registry.
+
 ## Types from the contract
 
 Every entity type is generated from the registry's published `OpenAPI` document, so a

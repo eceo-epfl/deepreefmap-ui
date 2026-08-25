@@ -7,11 +7,11 @@ import CoverDonut from '../cover/CoverDonut';
 import LevelToggle from '../cover/LevelToggle';
 import RunCoverTable from '../cover/RunCoverTable';
 import { useClassColours } from '../cover/useClassGroups';
-import OrthoImage from './OrthoImage';
+import OrthoView from './OrthoView';
 
 const ROW_PAGE = 200;
 
-/** The ortho image beside the run's cover at one level, table below. */
+/** The run's ortho beside the cover it reported, at one level. */
 const RunCover = () => {
     const run = useRecordContext<RunRecord>();
     const [level, setLevel] = useState<CoverLevel>('coarse');
@@ -34,30 +34,30 @@ const RunCover = () => {
     }));
     return (
         <Stack spacing={2} sx={{ width: '100%' }}>
-            <Grid container spacing={3} sx={{ alignItems: 'center' }}>
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <OrthoImage />
+            <LevelToggle value={level} onChange={setLevel} />
+            <Grid container spacing={3}>
+                <Grid size={{ xs: 12, lg: 7 }}>
+                    <OrthoView level={level} />
                 </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                    <Stack spacing={1.5}>
-                        <LevelToggle value={level} onChange={setLevel} />
+                <Grid size={{ xs: 12, lg: 5 }}>
+                    <Stack spacing={2}>
                         {isPending ? (
                             <Loading />
                         ) : rows.length === 0 ? (
                             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                This run reported no cover at this level.
+                                No cover reported at this level.
                             </Typography>
                         ) : (
-                            <CoverDonut slices={slices} />
+                            <>
+                                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                    <CoverDonut slices={slices} legend={false} />
+                                </Box>
+                                <RunCoverTable rows={rows} colours={colours} />
+                            </>
                         )}
                     </Stack>
                 </Grid>
             </Grid>
-            {rows.length > 0 && (
-                <Box>
-                    <RunCoverTable rows={rows} colours={colours} />
-                </Box>
-            )}
             {!isPending && rows.length === 0 && run.status !== 'succeeded' && (
                 <Alert severity="info">Cover is reported once a run succeeds.</Alert>
             )}

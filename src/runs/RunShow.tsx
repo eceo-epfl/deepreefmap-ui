@@ -10,21 +10,16 @@ import {
     useRecordContext,
 } from 'react-admin';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Alert, Box, Stack, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Paper, Stack, Tooltip, Typography } from '@mui/material';
 
 import ArchivedOutputs from '../archive/ArchivedOutputs';
 import { HashField, SyncFields } from '../components';
 import type { Device, RunRecord } from '../contract';
 import { profileTotals, type ProfileTotals } from '../devices/profile';
 import RunCloudTab from '../viewer/RunCloudTab';
-import ProvenanceTable, { hasEntries } from './ProvenanceTable';
+import ProvenanceTable from './ProvenanceTable';
 import RunCover from './RunCover';
-import {
-    RunPeakSummary,
-    STAGE_PEAK_NOTES,
-    StageDurationsTable,
-    StagePeaksTable,
-} from './StageBreakdown';
+import { RunPeakSummary, STAGE_PEAK_NOTES, StagesTable } from './StageBreakdown';
 import StatusField from './StatusField';
 import { formatDuration, runDuration } from './duration';
 import { presetLabel } from './preset';
@@ -63,12 +58,12 @@ const Term = ({ label, children }: { label: string; children: ReactNode }) => (
     </>
 );
 
-/** Two label/value pairs per row, values ellipsised rather than wrapped. */
-const Facts = ({ children }: { children: ReactNode }) => (
+/** Label/value pairs on a grid, values ellipsised rather than wrapped. */
+const Facts = ({ children, pairs = 2 }: { children: ReactNode; pairs?: number }) => (
     <Box
         sx={{
             display: 'grid',
-            gridTemplateColumns: 'max-content minmax(0, 1fr) max-content minmax(0, 1fr)',
+            gridTemplateColumns: `repeat(${pairs}, max-content minmax(0, 1fr))`,
             columnGap: 3,
             rowGap: 1,
             alignItems: 'baseline',
@@ -81,29 +76,6 @@ const Facts = ({ children }: { children: ReactNode }) => (
     >
         {children}
     </Box>
-);
-
-const Fields = ({ children }: { children: ReactNode }) => (
-    <Box
-        sx={{
-            display: 'grid',
-            gap: 2,
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        }}
-    >
-        {children}
-    </Box>
-);
-
-const Labeled = ({ label, children }: { label: string; children: ReactNode }) => (
-    <Stack spacing={0.25}>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {label}
-        </Typography>
-        <Typography variant="body2" component="div" sx={{ wordBreak: 'break-all' }}>
-            {children}
-        </Typography>
-    </Stack>
 );
 
 const deviationLine = (value: unknown): string => {
@@ -215,58 +187,90 @@ const Overview = ({ record }: { record: RunRecord }) => {
     );
 };
 
+/** One titled block of the performance tab, all the same width in the grid. */
+const Panel = ({
+    title,
+    tip,
+    children,
+}: {
+    title: string;
+    tip?: string | string[];
+    children: ReactNode;
+}) => (
+    <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }}>
+        <Heading title={title} tip={tip} />
+        <Box sx={{ mt: 1 }}>{children}</Box>
+    </Paper>
+);
+
+/** Columns that pack by height, so a short panel does not hold a gap open. */
+const Panels = ({ children }: { children: ReactNode }) => (
+    <Box
+        sx={{
+            width: '100%',
+            columnWidth: 440,
+            columnGap: 16,
+            '& > *': { breakInside: 'avoid', mb: 2 },
+        }}
+    >
+        {children}
+    </Box>
+);
+
 const Performance = ({ record, totals }: { record: RunRecord; totals: ProfileTotals }) => (
-    <Stack spacing={2} sx={{ width: '100%' }}>
-        <Heading title="Peak resource use" />
-        <RunPeakSummary value={record.stage_peaks} totals={totals} />
+    <Panels>
+        <Panel title="Peak resource use" tip="Highest across all stages.">
+            <RunPeakSummary value={record.stage_peaks} totals={totals} />
+        </Panel>
 
-        <Heading title="Stage durations" tip="Wall clock per stage." />
-        <StageDurationsTable
-            value={record.stage_durations}
-            emptyText="No stage durations recorded."
-        />
+        <Panel title="Stages" tip={STAGE_PEAK_NOTES}>
+            <StagesTable
+                durations={record.stage_durations}
+                peaks={record.stage_peaks}
+                totals={totals}
+                emptyText="No stages recorded."
+            />
+        </Panel>
 
-        <Heading title="Stage peaks" tip={STAGE_PEAK_NOTES} />
-        <StagePeaksTable
-            value={record.stage_peaks}
-            totals={totals}
-            emptyText="No stage peaks recorded."
-        />
-
-        <Heading
-            title="Model revisions"
-            tip="Upstream revision at launch, not proof it was loaded."
-        />
-        <ProvenanceTable value={record.model_revisions} emptyText="No revisions recorded." />
-
-        <Heading title="Preset deviations" tip="Settings that departed from the preset." />
-        {hasEntries(record.preset_deviations) ? (
-            <ProvenanceTable value={record.preset_deviations} emptyText="" />
-        ) : (
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                None recorded.
-            </Typography>
-        )}
-
-        <Heading
+        <Panel
             title="Provenance"
             tip="Two runs are comparable only where every value matches."
-        />
-        <Fields>
-            <Labeled label="Segmentation model">{record.segmentation_model || '—'}</Labeled>
-            <Labeled label="Mapping backend">{record.mapping_backend || '—'}</Labeled>
-            <Labeled label="Taxonomy version">{record.taxonomy_version ?? '—'}</Labeled>
-            <Labeled label="Taxonomy hash">
-                <HashField source="taxonomy_hash" emptyText="—" />
-            </Labeled>
-            <Labeled label="Preset hash">
-                <HashField source="preset_hash" emptyText="—" />
-            </Labeled>
-            <Labeled label="Run directory">
-                <span style={{ fontFamily: 'monospace' }}>{record.run_dir_name || '—'}</span>
-            </Labeled>
-        </Fields>
-    </Stack>
+        >
+            <Facts pairs={1}>
+                <Term label="Segmentation">
+                    <Typography variant="body2">{record.segmentation_model || '—'}</Typography>
+                </Term>
+                <Term label="Mapping">
+                    <Typography variant="body2">{record.mapping_backend || '—'}</Typography>
+                </Term>
+                <Term label="Taxonomy">
+                    <Typography variant="body2">{record.taxonomy_version ?? '—'}</Typography>
+                </Term>
+                <Term label="Taxonomy hash">
+                    <HashField source="taxonomy_hash" emptyText="—" />
+                </Term>
+                <Term label="Preset hash">
+                    <HashField source="preset_hash" emptyText="—" />
+                </Term>
+                <Term label="Run directory">
+                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                        {record.run_dir_name || '—'}
+                    </Typography>
+                </Term>
+            </Facts>
+        </Panel>
+
+        <Panel
+            title="Model revisions"
+            tip="Upstream revision at launch, not proof it was loaded."
+        >
+            <ProvenanceTable value={record.model_revisions} emptyText="None recorded." />
+        </Panel>
+
+        <Panel title="Preset deviations" tip="Settings that departed from the preset.">
+            <ProvenanceTable value={record.preset_deviations} emptyText="None recorded." />
+        </Panel>
+    </Panels>
 );
 
 const RunLayout = () => {

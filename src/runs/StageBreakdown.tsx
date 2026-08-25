@@ -5,6 +5,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TableRow,
     Tooltip,
@@ -163,7 +164,7 @@ const PeakCell = ({
             : `${formatBytes(bytes)} of ${formatBytes(total)}`;
     return (
         <Tooltip title={tip}>
-            <Box sx={{ minWidth: 96 }}>
+            <Box sx={{ minWidth: 72 }}>
                 <Typography variant="body2" color={hot ? 'warning.main' : 'text.primary'}>
                     {formatBytes(bytes)}
                 </Typography>
@@ -245,125 +246,110 @@ export const RunPeakSummary = ({
         );
     }
     return (
-        <Stack spacing={1}>
-            <Stack direction="row" spacing={3} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                {gauges.map(gauge => (
-                    <PeakGauge key={gauge.label} {...gauge} />
-                ))}
-            </Stack>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Highest across all stages.
-            </Typography>
+        <Stack direction="row" spacing={3} useFlexGap sx={{ flexWrap: 'wrap' }}>
+            {gauges.map(gauge => (
+                <PeakGauge key={gauge.label} {...gauge} />
+            ))}
         </Stack>
     );
 };
 
-/** Per-stage memory peaks as bars, scaled to the device's ceilings when known. */
-export const StagePeaksTable = ({
-    value,
-    totals,
-    emptyText,
-}: {
-    value: unknown;
-    totals: ProfileTotals;
-    emptyText: string;
-}) => {
-    const rows = parseStagePeaks(value);
-    if (!rows.length) {
-        return (
-            <Typography
-                variant="body2"
-                sx={{
-                    color: 'text.secondary',
-                }}
-            >
-                {emptyText}
-            </Typography>
-        );
-    }
-    const ramMax = peakOf(rows.map(([, peak]) => peak.ram_bytes)) ?? 0;
-    const swapMax = peakOf(rows.map(([, peak]) => peak.swap_bytes)) ?? 0;
-    const vramMax = peakOf(rows.map(([, peak]) => peak.vram_bytes)) ?? 0;
-    return (
-        <Table size="small" sx={{ maxWidth: 560 }}>
-            <TableHead>
-                <TableRow>
-                    <TableCell sx={{ pl: 0 }}>Stage</TableCell>
-                    <TableCell>RAM</TableCell>
-                    <TableCell>Swap</TableCell>
-                    <TableCell>VRAM</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {rows.map(([stage, peak]) => (
-                    <TableRow key={stage}>
-                        <TableCell sx={{ border: 0, pl: 0, color: 'text.secondary' }}>
-                            {stage}
-                        </TableCell>
-                        <TableCell sx={{ border: 0 }}>
-                            <PeakCell bytes={peak.ram_bytes} total={totals.ram} max={ramMax} />
-                        </TableCell>
-                        <TableCell sx={{ border: 0 }}>
-                            <PeakCell
-                                bytes={peak.swap_bytes}
-                                total={totals.swap}
-                                max={swapMax}
-                            />
-                        </TableCell>
-                        <TableCell sx={{ border: 0 }}>
-                            <PeakCell
-                                bytes={peak.vram_bytes}
-                                total={totals.vram}
-                                max={vramMax}
-                            />
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    );
-};
-
-/** Tooltip lines for the stage peaks heading. */
+/** Tooltip lines for the stages heading. */
 export const STAGE_PEAK_NOTES = [
-    'Peak memory per stage.',
+    'Wall clock and peak memory per stage.',
     'Solid bar: share of the device total.',
     "Striped bar: share of the run's largest stage.",
 ];
 
-/** Per-stage wall-clock durations in pipeline order. */
-export const StageDurationsTable = ({
-    value,
+/** One row per stage: how long it took and what it held, in pipeline order. */
+export const StagesTable = ({
+    durations,
+    peaks,
+    totals,
     emptyText,
 }: {
-    value: unknown;
+    durations: unknown;
+    peaks: unknown;
+    totals: ProfileTotals;
     emptyText: string;
 }) => {
-    const rows = parseStageDurations(value);
-    if (!rows.length) {
+    const peakRows = parseStagePeaks(peaks);
+    const seconds = new Map(parseStageDurations(durations));
+    const stages = inPipelineOrder(
+        [...new Set([...peakRows.map(([stage]) => stage), ...seconds.keys()])].map(
+            stage => [stage, stage] as [string, string],
+        ),
+    ).map(([stage]) => stage);
+    if (!stages.length) {
         return (
-            <Typography
-                variant="body2"
-                sx={{
-                    color: 'text.secondary',
-                }}
-            >
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 {emptyText}
             </Typography>
         );
     }
+    const byStage = new Map(peakRows);
+    const ramMax = peakOf(peakRows.map(([, peak]) => peak.ram_bytes)) ?? 0;
+    const swapMax = peakOf(peakRows.map(([, peak]) => peak.swap_bytes)) ?? 0;
+    const vramMax = peakOf(peakRows.map(([, peak]) => peak.vram_bytes)) ?? 0;
+    const anySwap = swapMax > 0;
+    const anyVram = vramMax > 0;
     return (
-        <Table size="small" sx={{ maxWidth: 360 }}>
-            <TableBody>
-                {rows.map(([stage, seconds]) => (
-                    <TableRow key={stage}>
-                        <TableCell sx={{ border: 0, pl: 0, color: 'text.secondary' }}>
-                            {stage}
-                        </TableCell>
-                        <TableCell sx={{ border: 0 }}>{formatDuration(seconds)}</TableCell>
+        <TableContainer>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell sx={{ pl: 0 }}>Stage</TableCell>
+                        <TableCell align="right">Time</TableCell>
+                        <TableCell>RAM</TableCell>
+                        {anySwap && <TableCell>Swap</TableCell>}
+                        {anyVram && <TableCell>VRAM</TableCell>}
                     </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+                </TableHead>
+                <TableBody>
+                    {stages.map(stage => {
+                        const peak = byStage.get(stage);
+                        const took = seconds.get(stage);
+                        return (
+                            <TableRow key={stage}>
+                                <TableCell sx={{ border: 0, pl: 0, color: 'text.secondary' }}>
+                                    {stage}
+                                </TableCell>
+                                <TableCell
+                                    align="right"
+                                    sx={{ border: 0, whiteSpace: 'nowrap' }}
+                                >
+                                    {took == null ? '—' : formatDuration(took)}
+                                </TableCell>
+                                <TableCell sx={{ border: 0 }}>
+                                    <PeakCell
+                                        bytes={peak?.ram_bytes ?? null}
+                                        total={totals.ram}
+                                        max={ramMax}
+                                    />
+                                </TableCell>
+                                {anySwap && (
+                                    <TableCell sx={{ border: 0 }}>
+                                        <PeakCell
+                                            bytes={peak?.swap_bytes ?? null}
+                                            total={totals.swap}
+                                            max={swapMax}
+                                        />
+                                    </TableCell>
+                                )}
+                                {anyVram && (
+                                    <TableCell sx={{ border: 0 }}>
+                                        <PeakCell
+                                            bytes={peak?.vram_bytes ?? null}
+                                            total={totals.vram}
+                                            max={vramMax}
+                                        />
+                                    </TableCell>
+                                )}
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </TableContainer>
     );
 };

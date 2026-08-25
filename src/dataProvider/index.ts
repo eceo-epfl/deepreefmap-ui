@@ -18,6 +18,8 @@ import type {
     ArchiveProbe,
     AssignAllResponse,
     BatchProbe,
+    BenthicClass,
+    BundleResponse,
     ClassGroup,
     CompletedPart,
     ConnectCode,
@@ -46,6 +48,8 @@ export interface DrmDataProvider extends DataProvider {
     transectCoverSeries: (transectId: string, level: string) => Promise<CoverSeries>;
     videoRuns: (videoId: string) => Promise<RunRecord[]>;
     classGroups: () => Promise<ClassGroup[]>;
+    benthicClasses: () => Promise<BenthicClass[]>;
+    runOutputsBundle: (runId: string, purpose?: string) => Promise<BundleResponse>;
     mintConnectCode: (deviceName: string) => Promise<ConnectCode>;
     revokeDevice: (deviceId: string) => Promise<DeviceRevocation>;
     renameDevice: (deviceId: string, name: string) => Promise<DeviceRename>;
@@ -264,6 +268,20 @@ const dataProvider = (
             httpClient(`${apiUrl}/config/class-groups`).then(
                 ({ json }) => json as ClassGroup[],
             ),
+
+        // Hundreds of objects make one download. The link is minted per click, like a
+        // single object's, and streams the zip from the registry.
+        runOutputsBundle: (runId, purpose) => {
+            const query = purpose ? `?purpose=${encodeURIComponent(purpose)}` : '';
+            return httpClient(`${apiUrl}/runs/${runId}/outputs/bundle${query}`).then(
+                ({ json }) => json as BundleResponse,
+            );
+        },
+
+        // Label ids as a run's ortho writes them, so the console paints a class ortho
+        // in the colours the cover figure already uses.
+        benthicClasses: () =>
+            httpClient(`${apiUrl}/config/classes`).then(({ json }) => json as BenthicClass[]),
 
         // Minting names the device: the code carries the name enrolment adopts.
         mintConnectCode: deviceName =>

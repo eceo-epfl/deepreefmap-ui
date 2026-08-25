@@ -12,11 +12,15 @@ test('run show has the five tabs', async ({ page }) => {
     }
 });
 
-test('cover tab shows the ortho image or the archive hint', async ({ page }) => {
+test('cover tab draws the classes, with the photo behind a switch', async ({ page }) => {
     await open(page, `/runs/${RUN}/show/cover`);
-    const image = page.getByRole('img', { name: 'Ortho image' });
-    const hint = page.getByText(/ortho image (appears|still uploading)/i);
-    await expect(image.or(hint)).toBeVisible();
+    const classes = page.getByRole('button', { name: 'classes', exact: true });
+    const hint = page.getByText(/ortho appears once/i);
+    await expect(classes.or(hint)).toBeVisible();
+    if (await classes.isVisible()) {
+        await expect(classes).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.getByRole('button', { name: 'photo', exact: true })).toBeVisible();
+    }
 });
 
 test('outputs tab expands results and collapses frames', async ({ page }) => {
@@ -28,4 +32,15 @@ test('outputs tab expands results and collapses frames', async ({ page }) => {
     const frames = page.getByRole('row').filter({ hasText: 'frames' });
     await expect(frames.getByRole('button', { name: 'Expand' })).toBeVisible();
     await expect(frames).toContainText(/\d+ files/);
+});
+
+test('outputs offer one zip for everything and one per group', async ({ page }) => {
+    await open(page, `/runs/${RUN}/show/outputs`);
+    await expect(page.getByRole('button', { name: 'Download all' })).toBeVisible();
+
+    const results = page.getByRole('row').filter({ hasText: 'Results' });
+    const minted = page.waitForRequest(request => request.url().includes('outputs/bundle'));
+    await results.getByRole('button', { name: 'Zip' }).click();
+    const request = await minted;
+    expect(request.url()).toContain('purpose=Results');
 });

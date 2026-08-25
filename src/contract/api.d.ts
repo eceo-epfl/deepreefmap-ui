@@ -118,6 +118,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/archive/runs/{run_id}/outputs.zip': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream one run's outputs as a zip against a signed bundle link. */
+        get: operations['bundle'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/archive/{object_id}/complete': {
         parameters: {
             query?: never;
@@ -471,6 +488,27 @@ export interface paths {
          * @description Served so the console colours a cover figure the same way the desktop viewer does.
          */
         get: operations['get_class_groups'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/config/classes': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The segmentation classes, their colours, and the group each rolls into.
+         * @description A label id in a run's `ortho.npz` is one of these ids, so a viewer can paint the
+         *     class ortho in the same colours the cover figure uses.
+         */
+        get: operations['get_classes'];
         put?: never;
         post?: never;
         delete?: never;
@@ -1325,6 +1363,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/runs/{run_id}/outputs/bundle': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A signed link that streams one run's outputs, or one group of them, as a zip. */
+        get: operations['bundle'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/sites': {
         parameters: {
             query?: never;
@@ -1942,6 +1997,38 @@ export interface components {
         BatchUpdateRequest: components['schemas']['SiteUpdate'] & {
             /** @description The ID of the resource to update */
             id: string;
+        };
+        /**
+         * @description One segmentation class: its colour, and the group it rolls into at each level.
+         *
+         *     `name` is also the class's own group at the `fine` level.
+         */
+        BenthicClass: {
+            coarse: string;
+            /** @description `#rrggbb`, so a browser can use it without conversion. */
+            colour: string;
+            /**
+             * Format: int32
+             * @description Label id the segmentation model writes, and the value in a run's `ortho.npz`.
+             */
+            id: number;
+            intermediate: string;
+            name: string;
+        };
+        BundleResponse: {
+            /**
+             * Format: int64
+             * @description Files the zip will hold.
+             */
+            file_count: number;
+            filename: string;
+            /**
+             * Format: int64
+             * @description Their total size, before zipping. Stored, not deflated, so this is close.
+             */
+            total_bytes: number;
+            /** @description A signed link on this registry that streams the zip. */
+            url: string;
         };
         ByHashResponse: {
             /** Format: date-time */
@@ -4296,6 +4383,55 @@ export interface operations {
             };
         };
     };
+    bundle: {
+        parameters: {
+            query: {
+                /** @description The group named when the link was signed. */
+                purpose: string;
+                /** @description Unix timestamp the signature lapses at. */
+                expires: number;
+                /** @description HMAC over the run, group and expiry, from `/runs/{id}/outputs/bundle`. */
+                sig: string;
+            };
+            header?: never;
+            path: {
+                /** @description Run whose outputs to stream */
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The zip, as an attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The signature is wrong or has lapsed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such run, or nothing archived in that group */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The archive is not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     complete: {
         parameters: {
             query?: never;
@@ -5221,6 +5357,26 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['ClassGroup'][];
+                };
+            };
+        };
+    };
+    get_classes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Classes by label id */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['BenthicClass'][];
                 };
             };
         };
@@ -7408,6 +7564,49 @@ export interface operations {
             };
             /** @description Internal Server Error */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    bundle: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Which group to pack: a purpose, a directory name, or `all`.
+                 * @example Results
+                 */
+                purpose?: string | null;
+            };
+            header?: never;
+            path: {
+                /** @description Run whose outputs to pack */
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Signed bundle URL on this registry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['BundleResponse'];
+                };
+            };
+            /** @description No such run, or nothing archived in that group */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The archive is not configured */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

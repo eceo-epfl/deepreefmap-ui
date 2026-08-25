@@ -93,6 +93,8 @@ export type ValidateResponse = Schemas['ValidateResponse'];
 
 export type PooledCover = Schemas['PooledCover'];
 export type ClassGroup = Schemas['ClassGroup'];
+export type BenthicClass = Schemas['BenthicClass'];
+export type BundleResponse = Schemas['BundleResponse'];
 export type GroupCover = Schemas['GroupCover'];
 export type CoverSeries = Schemas['CoverSeries'];
 export type CoverSeriesEntry = Schemas['CoverSeriesEntry'];

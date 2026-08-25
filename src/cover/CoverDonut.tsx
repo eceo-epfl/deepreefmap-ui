@@ -21,8 +21,15 @@ const arcPath = (start: number, end: number, radius: number) => {
     return `M${x1},${y1} A${radius},${radius} 0 ${large} 1 ${x2},${y2}`;
 };
 
-/** A ring of class-group fractions in the registry's colours, legend beside it. */
-const CoverDonut = ({ slices }: { slices: DonutSlice[] }) => {
+/** A ring of class-group fractions in the registry's colours. */
+const CoverDonut = ({
+    slices,
+    legend = true,
+}: {
+    slices: DonutSlice[];
+    /** Off where the figure sits beside a table that already names the groups. */
+    legend?: boolean;
+}) => {
     const theme = useTheme();
     const radius = SIZE / 2 - RING / 2;
     const total = slices.reduce((sum, slice) => sum + slice.fraction, 0);
@@ -90,32 +97,34 @@ const CoverDonut = ({ slices }: { slices: DonutSlice[] }) => {
                     {arcs.length} {arcs.length === 1 ? 'class' : 'classes'}
                 </text>
             </svg>
-            <Stack spacing={0.5} sx={{ minWidth: 160 }}>
-                {slices.map(slice => (
-                    <Stack
-                        key={slice.name}
-                        direction="row"
-                        spacing={1}
-                        sx={{ alignItems: 'center' }}
-                    >
-                        <Box
-                            sx={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: '2px',
-                                flexShrink: 0,
-                                backgroundColor: slice.colour ?? FALLBACK,
-                            }}
-                        />
-                        <Typography variant="body2" sx={{ flex: 1 }}>
-                            {slice.name}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {formatPercent(slice.fraction)}
-                        </Typography>
-                    </Stack>
-                ))}
-            </Stack>
+            {legend && (
+                <Stack spacing={0.5} sx={{ minWidth: 160 }}>
+                    {slices.map(slice => (
+                        <Stack
+                            key={slice.name}
+                            direction="row"
+                            spacing={1}
+                            sx={{ alignItems: 'center' }}
+                        >
+                            <Box
+                                sx={{
+                                    width: 10,
+                                    height: 10,
+                                    borderRadius: '2px',
+                                    flexShrink: 0,
+                                    backgroundColor: slice.colour ?? FALLBACK,
+                                }}
+                            />
+                            <Typography variant="body2" sx={{ flex: 1 }}>
+                                {slice.name}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                {formatPercent(slice.fraction)}
+                            </Typography>
+                        </Stack>
+                    ))}
+                </Stack>
+            )}
         </Stack>
     );
 };

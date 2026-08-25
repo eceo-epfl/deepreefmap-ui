@@ -1,8 +1,9 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { useDataProvider, useGetList, useGetOne, useRecordContext } from 'react-admin';
+import { useDataProvider, useRecordContext } from 'react-admin';
 import { Alert, Box, LinearProgress, Typography } from '@mui/material';
 
-import type { RunArtifact, RunRecord, StoredObject } from '../contract';
+import { useRunArtifactObject } from '../archive/useRunArtifactObject';
+import type { RunRecord } from '../contract';
 import type { DrmDataProvider } from '../dataProvider';
 import { formatBytes } from '../videos/VideoFields';
 import { fetchWebCloud, type DrmwCloud } from './drmw';
@@ -82,49 +83,14 @@ const CloudLoader = ({ objectId }: { objectId: string }) => {
 /** Finds the run's archived web cloud and mounts the viewer over it. */
 const RunCloudTab = () => {
     const record = useRecordContext<RunRecord>();
-    const {
-        data: artifacts,
-        isPending,
-        error,
-    } = useGetList<RunArtifact>(
-        'run_artifacts',
-        {
-            filter: { run_id: record?.id },
-            pagination: { page: 1, perPage: 1000 },
-            sort: { field: 'relpath', order: 'ASC' },
-        },
-        { enabled: !!record },
-    );
-    const artifact = artifacts?.find(candidate => candidate.relpath === CLOUD_RELPATH);
-    const { data: object } = useGetOne<StoredObject>(
-        'stored_objects',
-        { id: artifact?.stored_object_id ?? '' },
-        { enabled: !!artifact?.stored_object_id },
-    );
+    const state = useRunArtifactObject(record?.id, CLOUD_RELPATH);
 
-    if (!record || isPending) return <LinearProgress />;
-    if (error) {
-        return <Alert severity="error">The run&apos;s artefacts could not be listed.</Alert>;
-    }
-    if (!artifact) {
+    if (state.name === 'pending') return <LinearProgress />;
+    if (state.name === 'error') return <Alert severity="error">{state.message}</Alert>;
+    if (state.name === 'absent') {
         return <Muted>No web cloud archived yet. Archive the run from the desktop app.</Muted>;
     }
-    if (!artifact.stored_object_id) {
-        return (
-            <Muted>
-                Web cloud registered, bytes not archived yet. Archive the run from the desktop
-                app.
-            </Muted>
-        );
-    }
-    if (!object) return <LinearProgress />;
-    if (object.status === 'failed') {
-        return <Alert severity="error">The archived cloud upload is incomplete.</Alert>;
-    }
-    if (object.status !== 'complete') {
-        return <Muted>The web cloud is still uploading.</Muted>;
-    }
-    return <CloudLoader objectId={object.id} />;
+    return <CloudLoader objectId={state.objectId} />;
 };
 
 export default RunCloudTab;

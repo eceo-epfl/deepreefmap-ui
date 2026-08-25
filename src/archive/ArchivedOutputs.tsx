@@ -17,6 +17,7 @@ import {
 
 import type { RunArtifact, RunRecord, StoredObject } from '../contract';
 import { formatBytes } from '../videos/VideoFields';
+import BundleButton from './BundleButton';
 import DownloadButton from './DownloadButton';
 import { ObjectStatusChip } from './StatusField';
 import { expandedByDefault, groupByPurpose, type PurposeGroup } from './purpose';
@@ -50,7 +51,15 @@ const FileRow = ({ artifact, objects }: { artifact: RunArtifact; objects?: Objec
     );
 };
 
-const GroupRows = ({ group, objects }: { group: PurposeGroup; objects?: Objects }) => {
+const GroupRows = ({
+    group,
+    objects,
+    runId,
+}: {
+    group: PurposeGroup;
+    objects?: Objects;
+    runId: string;
+}) => {
     const [open, setOpen] = useState(expandedByDefault(group.name));
     const bytes = group.files.reduce((sum, file) => sum + (file.size_bytes ?? 0), 0);
     const complete = countByStatus(group.files, objects, 'complete');
@@ -95,7 +104,11 @@ const GroupRows = ({ group, objects }: { group: PurposeGroup; objects?: Objects 
                         )}
                     </Stack>
                 </TableCell>
-                <TableCell />
+                <TableCell align="right" sx={{ py: 0 }}>
+                    {complete > 0 && (
+                        <BundleButton runId={runId} purpose={group.name} label="Zip" />
+                    )}
+                </TableCell>
             </TableRow>
             {open &&
                 group.files.map(file => (
@@ -126,17 +139,29 @@ const ArchivedOutputs = () => {
         );
     }
     const groups = groupByPurpose(artifacts);
+    const bytes = artifacts.reduce((sum, file) => sum + (file.size_bytes ?? 0), 0);
     return (
         <Stack spacing={1}>
-            {total != null && total > ARTIFACT_PAGE && (
+            <Stack
+                direction="row"
+                spacing={2}
+                sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+            >
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Showing {ARTIFACT_PAGE} of {total} files.
+                    {total ?? artifacts.length} files, {formatBytes(bytes)}
+                    {total != null && total > ARTIFACT_PAGE && `, listing ${ARTIFACT_PAGE}`}
                 </Typography>
-            )}
+                <BundleButton runId={String(record.id)} label="Download all" />
+            </Stack>
             <Table size="small">
                 <TableBody>
                     {groups.map(group => (
-                        <GroupRows key={group.name} group={group} objects={objects} />
+                        <GroupRows
+                            key={group.name}
+                            group={group}
+                            objects={objects}
+                            runId={String(record.id)}
+                        />
                     ))}
                 </TableBody>
             </Table>

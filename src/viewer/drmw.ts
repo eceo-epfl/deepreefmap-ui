@@ -1,5 +1,5 @@
 // Reader for the pipeline's 'drmw' web cloud export. The layout is authored by
-// deepreefmap/io/web_cloud.py: 8-byte magic, uint32 header length, JSON header,
+// deepreefmap_gui/io/web_cloud.py: 8-byte magic, uint32 header length, JSON header,
 // then 4-byte-aligned buffers whose offsets are relative to the end of the header.
 
 export type DrmwClass = {
@@ -22,6 +22,16 @@ export type DrmwBuffer = {
     byte_length: number;
 };
 
+export type DrmwCameras = {
+    count: number;
+    fx: number;
+    fy: number;
+    cx: number;
+    cy: number;
+    width: number;
+    height: number;
+};
+
 export type DrmwHeader = {
     format: string;
     version: number;
@@ -32,6 +42,8 @@ export type DrmwHeader = {
     classes: DrmwClass[];
     per_class: DrmwPerClass[];
     buffers: DrmwBuffer[];
+    /** Present from version 2: the lens the poses were taken with. */
+    cameras?: DrmwCameras;
 };
 
 export type DrmwCloud = {
@@ -39,10 +51,13 @@ export type DrmwCloud = {
     xyz: Float32Array;
     rgb: Uint8Array;
     conf?: Float32Array;
+    /** One row-major world-from-camera matrix per frame, 16 floats each. */
+    cameraPoses?: Float32Array;
 };
 
 const MAGIC = 'DRMWEB01';
-const VERSION = 1;
+// Version 2 added the camera poses; a version 1 file simply has no path to draw.
+const VERSIONS = [1, 2];
 
 const namedBuffer = (
     header: DrmwHeader,
@@ -92,10 +107,10 @@ export const parseWebCloud = (raw: ArrayBuffer): DrmwCloud => {
     } catch {
         throw new Error('The drmw header is not valid JSON.');
     }
-    if (header.format !== 'drmw' || header.version !== VERSION) {
+    if (header.format !== 'drmw' || !VERSIONS.includes(header.version)) {
         throw new Error(
             `Unsupported drmw header (${header.format} v${header.version}). ` +
-                `This console reads drmw v${VERSION}.`,
+                `This console reads drmw v${VERSIONS.join(', v')}.`,
         );
     }
     const xyz = float32View(header, raw, dataStart, 'xyz');
@@ -116,7 +131,10 @@ export const parseWebCloud = (raw: ArrayBuffer): DrmwCloud => {
     const conf = header.has_confidence
         ? float32View(header, raw, dataStart, 'conf')
         : undefined;
-    return { header, xyz, rgb, conf };
+    const cameraPoses = header.cameras
+        ? float32View(header, raw, dataStart, 'camera_pose')
+        : undefined;
+    return { header, xyz, rgb, conf, cameraPoses };
 };
 
 const readBody = async (
