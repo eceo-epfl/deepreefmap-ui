@@ -102,7 +102,7 @@ export const TransectMapOne = ({ record }: { record: Transect }) => {
     if (!line) {
         return (
             <Typography variant="body2" sx={{ color: 'text.secondary', p: 2 }}>
-                No end points recorded, so there is nothing to draw.
+                No end points recorded.
             </Typography>
         );
     }

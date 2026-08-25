@@ -11,7 +11,8 @@ import {
     TextField,
     TopToolbar,
 } from 'react-admin';
-import { Box, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Divider, Grid, Stack, Tooltip, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import ProposedChangesPanel from '../changes/ProposedChangesPanel';
 import {
@@ -39,8 +40,8 @@ const PassShowActions = () => {
     );
 };
 
-const SectionHeading = ({ title, hint }: { title: string; hint?: string }) => (
-    <Box>
+const SectionHeading = ({ title, tip }: { title: string; tip?: string }) => (
+    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
         <Typography
             variant="overline"
             sx={{
@@ -49,18 +50,12 @@ const SectionHeading = ({ title, hint }: { title: string; hint?: string }) => (
         >
             {title}
         </Typography>
-        {hint && (
-            <Typography
-                variant="caption"
-                sx={{
-                    color: 'text.secondary',
-                    display: 'block',
-                }}
-            >
-                {hint}
-            </Typography>
+        {tip && (
+            <Tooltip title={tip}>
+                <InfoOutlinedIcon fontSize="inherit" sx={{ color: 'text.secondary' }} />
+            </Tooltip>
         )}
-    </Box>
+    </Stack>
 );
 
 const NoClips = () => (
@@ -71,7 +66,7 @@ const NoClips = () => (
             p: 1,
         }}
     >
-        No clips are linked to this pass, so it cannot be reconstructed.
+        No clips linked to this pass.
     </Typography>
 );
 
@@ -83,8 +78,7 @@ const NoRuns = () => (
             p: 1,
         }}
     >
-        This pass has not been processed yet. Runs appear once a desktop client reconstructs it
-        and syncs.
+        No runs yet. They appear when a laptop reconstructs this pass and syncs.
     </Typography>
 );
 
@@ -260,7 +254,7 @@ const PassShow = () => (
             <Divider />
             <SectionHeading
                 title="Clips, in playing order"
-                hint="The window above is an offset into these clips played end to end."
+                tip="The window is an offset into these clips played end to end."
             />
             <PassClips />
 

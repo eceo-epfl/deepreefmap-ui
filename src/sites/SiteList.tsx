@@ -44,8 +44,7 @@ const SiteEmpty = () => {
                 No sites yet
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                {GLOSSARY.sites} Define one here, then add the transects the divers will swim,
-                and the desktop clients will pick both up on their next sync.
+                {GLOSSARY.sites}
             </Typography>
             {canAuthor && <CreateButton label="Create the first site" />}
         </Box>

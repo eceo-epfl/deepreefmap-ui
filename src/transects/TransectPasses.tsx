@@ -15,14 +15,14 @@ const WindowColumn = asColumn(DurationField);
 
 const NoPasses = () => (
     <Stack spacing={1} sx={{ py: 4 }}>
-        <Typography variant="subtitle2">No passes on this line yet</Typography>
+        <Typography variant="subtitle2">No passes yet</Typography>
         <Typography
             variant="body2"
             sx={{
                 color: 'text.secondary',
             }}
         >
-            Passes arrive from the desktop application when a diver syncs.
+            They arrive when a laptop syncs.
         </Typography>
     </Stack>
 );

@@ -1,4 +1,4 @@
-import { AuthProvider, fetchUtils } from 'react-admin';
+import { AuthProvider, HttpError, fetchUtils } from 'react-admin';
 import Keycloak, { KeycloakTokenParsed } from 'keycloak-js';
 
 export type PermissionsFunction = (decoded: KeycloakTokenParsed) => unknown;
@@ -15,12 +15,26 @@ export const getKeycloakHeaders = (
     return headers;
 };
 
+// The registry refuses with `{"error": text}`; fetchJson only reads `message`, so the
+// thrown HttpError would otherwise carry the status text.
+const withRegistryMessage = (error: unknown): never => {
+    if (error instanceof HttpError) {
+        const body = error.body as { error?: unknown } | null;
+        if (typeof body?.error === 'string') {
+            throw new HttpError(body.error, error.status, error.body);
+        }
+    }
+    throw error;
+};
+
 export const httpClient =
     (keycloak: Keycloak) => (url: string, options?: fetchUtils.Options) =>
-        fetchUtils.fetchJson(url, {
-            ...options,
-            headers: getKeycloakHeaders(keycloak.token, options),
-        });
+        fetchUtils
+            .fetchJson(url, {
+                ...options,
+                headers: getKeycloakHeaders(keycloak.token, options),
+            })
+            .catch(withRegistryMessage);
 
 // Local rather than from `ra-keycloak`, whose own keycloak-js dependency would be a
 // second copy alongside the one the application constructs.

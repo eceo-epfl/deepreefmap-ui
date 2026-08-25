@@ -79,7 +79,7 @@ const VideoEmpty = () => (
         }}
     >
         <Typography variant="h6" gutterBottom>
-            No video assets registered
+            No clips registered
         </Typography>
         <Typography
             variant="body2"
@@ -87,7 +87,7 @@ const VideoEmpty = () => (
                 color: 'text.secondary',
             }}
         >
-            {GLOSSARY.videos} Clips are metadata only and appear once an enrolled laptop syncs.
+            {GLOSSARY.videos} Rows arrive when a laptop syncs.
         </Typography>
     </Box>
 );

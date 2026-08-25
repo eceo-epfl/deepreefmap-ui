@@ -11,7 +11,7 @@ import {
     TopToolbar,
     useRecordContext,
 } from 'react-admin';
-import { Box, Grid } from '@mui/material';
+import { Alert, Box, Grid, Stack } from '@mui/material';
 
 import ProposedChangesPanel from '../changes/ProposedChangesPanel';
 import { CoordinateField, SyncFields, TombstoneButton, ValidateButton } from '../components';
@@ -19,13 +19,18 @@ import { useCanAuthor } from '../permissions';
 import type { Transect } from '../contract';
 import Statistics from '../cover/Statistics';
 import { TransectMapOne } from '../maps/Transects';
+import { AssignSiteRecordButton } from './AssignSiteButton';
 import TransectPasses from './TransectPasses';
 
 const TransectShowActions = () => {
+    const record = useRecordContext<Transect>();
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
-            <ValidateButton section="transects" />
+            <ValidateButton
+                section="transects"
+                disabledReason={record?.site_id == null ? 'Assign a site first' : undefined}
+            />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="transect" />
         </TopToolbar>
@@ -40,10 +45,24 @@ const TransectMap = () => {
 
 const accuracy = (value: number | null | undefined) => (value == null ? '' : ` ±${value} m`);
 
+const NoSiteWarning = () => {
+    const record = useRecordContext<Transect>();
+    const canAuthor = useCanAuthor();
+    if (!record || record.site_id != null) return null;
+    return (
+        <Alert severity="warning" action={canAuthor ? <AssignSiteRecordButton /> : undefined}>
+            No site. Validation needs one.
+        </Alert>
+    );
+};
+
 const TransectHeader = () => (
     <Grid container spacing={2} sx={{ p: 2 }}>
         <Grid size={12}>
-            <ProposedChangesPanel section="transects" />
+            <Stack spacing={1}>
+                <NoSiteWarning />
+                <ProposedChangesPanel section="transects" />
+            </Stack>
         </Grid>
         <Grid
             size={{

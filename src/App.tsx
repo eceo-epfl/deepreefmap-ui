@@ -158,8 +158,8 @@ const App = () => {
                         <Resource name="passes" {...passes} />
                         <Resource name="videos" {...videos} />
                         <Resource name="runs" {...runs} />
-                        {/* A member enrols their own laptop, so the connect page is
-                            theirs too. Revoking somebody else's stays with an admin. */}
+                        {/* Members reach the connect page; revoking another's device is
+                            admin-only. */}
                         <Resource name="devices" {...devices} />
                         <Resource name="presets" {...presets} />
                         <Resource name="stored_objects" {...archive} />

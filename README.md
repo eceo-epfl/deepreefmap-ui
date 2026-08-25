@@ -42,6 +42,18 @@ yarn type-check
 yarn build
 ```
 
+## End-to-end tests
+
+Playwright drives the console at `http://localhost:88`, signed in as the dev realm's `admin`:
+
+```bash
+yarn install
+npx playwright install chromium
+yarn e2e
+```
+
+The catalogue flow creates a site and a transect named with a timestamp on each run.
+
 ## Licence
 
 MIT

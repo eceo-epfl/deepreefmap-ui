@@ -74,8 +74,7 @@ const PassEmpty = () => (
                 color: 'text.secondary',
             }}
         >
-            {GLOSSARY.passes} Passes are created by the desktop application and arrive when an
-            enrolled laptop syncs.
+            {GLOSSARY.passes} They arrive when a laptop syncs.
         </Typography>
     </Box>
 );

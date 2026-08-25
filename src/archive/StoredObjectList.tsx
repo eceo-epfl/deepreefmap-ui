@@ -56,28 +56,23 @@ export const UploaderField = ({
 };
 
 const ArchiveEmpty = () => (
-    <Box
-        sx={{
-            textAlign: 'center',
-            m: 4,
-        }}
-    >
-        <Typography variant="h6" gutterBottom>
-            Nothing archived
-        </Typography>
+    <Box sx={{ m: 4 }}>
         <Typography
             variant="body2"
             sx={{
                 color: 'text.secondary',
             }}
         >
-            Blobs appear here once a device or the upload page sends them.
+            No objects archived.
         </Typography>
     </Box>
 );
 
+// Rendered inside the overview's Objects tab; the tab is what the URL carries.
 const StoredObjectList = () => (
     <List
+        title={false}
+        disableSyncWithLocation
         filters={archiveFilters}
         sort={{ field: 'created_at', order: 'DESC' }}
         perPage={50}

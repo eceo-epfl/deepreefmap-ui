@@ -36,7 +36,7 @@ const RevokeDeviceButton = () => {
     const [pending, setPending] = useState(false);
 
     if (!record || record.revoked_at) return null;
-    // The registry allows self-or-admin, so anyone else is offered nothing to press.
+    // The registry allows self or admin.
     if (!admin && identity?.id !== record.enrolled_by) return null;
 
     const revoke = async () => {
@@ -67,10 +67,7 @@ const RevokeDeviceButton = () => {
                 isOpen={open}
                 loading={pending}
                 title={`Revoke ${record.name}?`}
-                content={
-                    'It stops syncing at its next attempt, and needs a new connect code ' +
-                    'to come back. Data it already sent is kept.'
-                }
+                content="Syncing stops at its next attempt. Uploaded data is kept."
                 confirm="Revoke"
                 confirmColor="warning"
                 onConfirm={revoke}

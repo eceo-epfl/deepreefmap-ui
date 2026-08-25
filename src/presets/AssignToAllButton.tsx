@@ -55,10 +55,7 @@ const AssignToAllButton = () => {
                 isOpen={open}
                 loading={pending}
                 title={`Assign ${record.name} v${record.version} to every device?`}
-                content={
-                    'Every active device adopts it at its next check-in. Revoked devices ' +
-                    'are skipped, and an explicit choice on a laptop still outranks it.'
-                }
+                content="Applies to every active device at its next check-in. A choice made on the laptop outranks it."
                 confirm="Assign"
                 onConfirm={assignAll}
                 onClose={() => setOpen(false)}

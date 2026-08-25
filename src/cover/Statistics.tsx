@@ -25,7 +25,7 @@ const FALLBACK = '#9e9e9e';
 const passCount = (entry: CoverSeriesEntry) =>
     `${entry.contributing_passes} ${entry.contributing_passes === 1 ? 'pass' : 'passes'}`;
 
-/** One entry's composition at a glance, in the stacked form the run pages use. */
+/** One entry as a stacked bar. */
 const EntryBar = ({ entry }: { entry: CoverSeriesEntry }) => (
     <Stack spacing={0.5}>
         <Typography variant="subtitle2">{entryLabel(entry)}</Typography>
@@ -36,7 +36,7 @@ const EntryBar = ({ entry }: { entry: CoverSeriesEntry }) => (
     </Stack>
 );
 
-/** The numbers behind one entry, in the layout of the desktop analysis table. */
+/** One entry's per-class table. */
 const EntryTable = ({
     entry,
     colours,
@@ -118,8 +118,7 @@ const Statistics = () => {
             {pending && <Loading />}
             {series && !pending && !entries.length && (
                 <Alert severity="info">
-                    No processed passes on this transect yet. The series fills in once a
-                    desktop client reconstructs a pass and syncs.
+                    No processed passes yet. The series fills in when a laptop syncs a run.
                 </Alert>
             )}
 

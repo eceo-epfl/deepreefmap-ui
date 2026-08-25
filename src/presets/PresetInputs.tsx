@@ -27,17 +27,12 @@ import type { PresetFieldDef } from './schema';
 
 const titled = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
 
-// The one relationship the flat field table cannot express: an explicit processing
-// size applies only under the `Custom` resolution preset. Native, Half and Quarter
-// divide the segmentation model's native size on the device
-// (`form/panel.py::_apply_resolution_preset`), so the console has no number to
-// publish. Disabled rather than read-only on purpose: react-hook-form leaves a
-// disabled field out of the submitted values, so a number typed under Custom stops
-// being published the moment the resolution moves off it.
+// An explicit processing size applies only under the `Custom` resolution preset; the
+// others derive it on the device (`form/panel.py::_apply_resolution_preset`).
+// react-hook-form leaves a disabled field out of the submitted values.
 const CUSTOM_SIZE_KEYS = ['processing_width', 'processing_height'];
 
-const DERIVED_SIZE_HELP =
-    'Native, Half and Quarter derive this from the segmentation model. Choose Custom to set it.';
+const DERIVED_SIZE_HELP = 'Set by the resolution preset. Choose Custom to edit.';
 
 const SettingInput = ({
     field,
@@ -110,8 +105,8 @@ const SettingsFields = () => {
     );
 };
 
-// The escape hatch the raw textarea used to be: paste a whole document, apply, and
-// the form fields take it. Keys the schema does not know survive a round trip.
+// Paste a whole settings document and apply it to the form fields. Keys the schema
+// does not know survive a round trip.
 const AdvancedJsonEditor = () => {
     const { getValues, setValue } = useFormContext();
     const [text, setText] = useState('');
@@ -188,8 +183,7 @@ const PresetInputs = () => (
         <Grid size={12}>
             <SettingsFields />
             <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-                Fields follow preset schema v{PRESET_SCHEMA_VERSION}. Devices ignore keys they
-                do not recognise.
+                Preset schema v{PRESET_SCHEMA_VERSION}. Devices ignore unknown keys.
             </Typography>
             <AdvancedJsonEditor />
         </Grid>

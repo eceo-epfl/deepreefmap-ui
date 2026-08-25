@@ -15,8 +15,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 import type { DrmwCloud } from './drmw';
 
-// The cloud's RGB bytes are sRGB. Pass-through rendering keeps them exact rather
-// than letting three's colour management brighten them on the way out.
+// The cloud's RGB bytes are sRGB. Pass-through rendering keeps them exact.
 THREE.ColorManagement.enabled = false;
 
 type ClassEntry = {
@@ -168,8 +167,7 @@ const CloudViewer = ({ cloud }: { cloud: DrmwCloud }) => {
     if (contextLost) {
         return (
             <Alert severity="error">
-                The browser dropped the WebGL context, usually under GPU memory pressure. Close
-                other 3D tabs and reopen this section.
+                WebGL context lost. Close other 3D tabs and reopen this section.
             </Alert>
         );
     }

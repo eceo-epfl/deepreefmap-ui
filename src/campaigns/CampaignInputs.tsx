@@ -26,7 +26,7 @@ const CampaignInputs = () => (
                 <TextInput
                     source="name"
                     validate={required()}
-                    helperText="Archive folder name, for example 2025_10_eritrea. Unique, ignoring case."
+                    helperText="Archive folder name, eg. 2025_10_eritrea. Unique, ignoring case."
                     fullWidth
                 />
             </Grid>

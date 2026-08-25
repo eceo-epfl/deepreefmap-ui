@@ -3,7 +3,7 @@ import { DeleteWithConfirmButton } from 'react-admin';
 import { useIsAdmin } from '../permissions';
 
 /**
- * Administrator-only delete, worded as the tombstone the registry actually writes.
+ * Administrator-only delete; the registry tombstones the row.
  *
  * `noun` names the row in the dialog title, e.g. `site`.
  */
@@ -13,11 +13,7 @@ const TombstoneButton = ({ noun }: { noun: string }) => {
     return (
         <DeleteWithConfirmButton
             confirmTitle={`Delete this ${noun}?`}
-            confirmContent={
-                `The ${noun} is not erased, it is tombstoned. It disappears from this ` +
-                'console at once, and every field laptop holding a copy drops it on its ' +
-                'next sync. Nothing here brings it back.'
-            }
+            confirmContent={`Removes the ${noun} from this console now and from every laptop at its next sync. Cannot be undone.`}
             confirmColor="warning"
         />
     );

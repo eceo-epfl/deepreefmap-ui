@@ -23,7 +23,7 @@ const mintMessage = (error: unknown): string => {
         return 'Minting needs an interactive login. Device tokens are refused.';
     }
     if (error instanceof HttpError && error.status === 500) {
-        return 'The server has no PUBLIC_BASE_URL set, so a code would point nowhere.';
+        return 'The server has no PUBLIC_BASE_URL set.';
     }
     return error instanceof Error ? error.message : 'Minting a connect code failed.';
 };
@@ -36,8 +36,7 @@ const ConnectDevice = () => {
     const [error, setError] = useState<string | null>(null);
     const [minting, setMinting] = useState(false);
 
-    // The address the code carries. An operator pastes this into a laptop, so they should
-    // see which host it will trust before they send it anywhere.
+    // The address the code carries, shown before it is sent anywhere.
     const serverUrl = code ? connectCodeUrl(code.code) : null;
 
     const mint = async () => {
@@ -99,8 +98,7 @@ const ConnectDevice = () => {
                             <>
                                 <Divider />
                                 <Alert severity="warning">
-                                    Single use and shown once. Anyone holding it can enrol a
-                                    device, so send it privately.
+                                    Single use, shown once. Send it privately.
                                 </Alert>
 
                                 <Box

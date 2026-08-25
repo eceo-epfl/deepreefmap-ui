@@ -37,15 +37,14 @@ const VideoMatch = ({ contentHash }: { contentHash: string }) => {
     if (!video) {
         return (
             <Typography variant="body2">
-                Stored, but no registered clip carries this hash. It attaches to one when a
-                device that holds the same file syncs.
+                No registered clip carries this hash yet. It attaches when a device holding the
+                file syncs.
             </Typography>
         );
     }
     return (
         <Typography variant="body2">
-            This content is registered as the clip{' '}
-            <Link to={`/videos/${video.id}/show`}>{video.file_name}</Link>.
+            Registered as clip <Link to={`/videos/${video.id}/show`}>{video.file_name}</Link>.
         </Typography>
     );
 };
@@ -74,8 +73,7 @@ const UploadPage = () => {
     const [file, setFile] = useState<File | null>(null);
     const [contentHash, setContentHash] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>({ name: 'idle' });
-    // The hash-upload-poll chain outlives renders, so state writes after unmount
-    // are gated on this rather than surfacing React warnings.
+    // Gates state writes from the hash-upload-poll chain after unmount.
     const alive = useRef(true);
     useEffect(() => {
         alive.current = true;
@@ -90,13 +88,13 @@ const UploadPage = () => {
         if (picked.size === 0) {
             setPhase({
                 name: 'error',
-                message: 'The file is empty, and the archive refuses empty content.',
+                message: 'The file is empty.',
                 unconfigured: false,
             });
             return;
         }
         try {
-            // Sampled, so this is instant even for a 4 GB chapter.
+            // The hash samples the file rather than reading it whole.
             const hash = await imohashOfFile(picked);
             if (!alive.current) return;
             setContentHash(hash);
@@ -161,9 +159,7 @@ const UploadPage = () => {
                         {phase.name === 'complete' && (
                             <>
                                 <Alert severity="success">
-                                    {phase.deduplicated
-                                        ? 'Already archived, so nothing was sent.'
-                                        : 'Stored.'}
+                                    {phase.deduplicated ? 'Already archived.' : 'Stored.'}
                                 </Alert>
                                 {contentHash && <VideoMatch contentHash={contentHash} />}
                             </>
@@ -172,9 +168,8 @@ const UploadPage = () => {
                         {phase.name === 'error' &&
                             (phase.unconfigured ? (
                                 <Alert severity="warning">
-                                    The archive is not configured on this registry, so nothing
-                                    can be uploaded. An administrator has to set the S3
-                                    environment on the server first.
+                                    Archive not configured on this registry: the S3 environment
+                                    is unset on the server.
                                 </Alert>
                             ) : (
                                 <Alert severity="error">{phase.message}</Alert>

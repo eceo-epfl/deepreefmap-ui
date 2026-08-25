@@ -129,6 +129,17 @@ export type BatchProbe = Omit<Schemas['ProbeResponse'], 'states'> & {
 export type RunArchiveState = Schemas['RunArchiveState'];
 export type RunsProbe = Schemas['RunsProbeResponse'];
 
+export type RunOverviewState = 'complete' | 'partial' | 'failed' | 'pending';
+export type RunOverview = Omit<Schemas['RunOverview'], 'state'> & { state: RunOverviewState };
+export type ClipOverview = Omit<Schemas['ClipOverview'], 'status'> & {
+    status: StoredObjectStatus;
+};
+export type UnlinkedOverview = Schemas['UnlinkedOverview'];
+export type ArchiveOverview = Omit<Schemas['ArchiveOverview'], 'runs' | 'clips'> & {
+    runs: RunOverview[];
+    clips: ClipOverview[];
+};
+
 export type AssignAllResponse = Schemas['AssignAllResponse'];
 
 export type PerformanceGroup = Schemas['PerformanceGroup'];

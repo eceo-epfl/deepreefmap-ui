@@ -51,8 +51,8 @@ const RevokedNotice = () => {
     if (!record?.revoked_at) return null;
     return (
         <Alert severity="error">
-            Revoked on {new Date(record.revoked_at).toLocaleString()}. This installation can no
-            longer sync, and needs a new connect code to come back.
+            Revoked on {new Date(record.revoked_at).toLocaleString()}. Re-enrol with a new
+            connect code.
         </Alert>
     );
 };
@@ -113,8 +113,7 @@ const HardwarePanel = () => {
                     color: 'text.secondary',
                 }}
             >
-                This device has not reported its hardware yet. A profile arrives the next time
-                it checks in.
+                No hardware profile yet. It arrives at the next check-in.
             </Typography>
         );
     }

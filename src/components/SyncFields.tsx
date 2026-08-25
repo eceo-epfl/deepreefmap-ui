@@ -7,8 +7,7 @@ import ValidatedField from './ValidatedField';
 /**
  * One caption line of provenance at the foot of a Show page, and the validation state.
  *
- * A pushed row names its device. A row authored here names nobody: the schema
- * deliberately records no person against survey rows, only the laptop.
+ * A pushed row names its device; a console-authored row names nobody.
  */
 const SyncFields = () => {
     const record = useRecordContext();

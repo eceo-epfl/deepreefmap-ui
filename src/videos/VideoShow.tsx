@@ -16,7 +16,8 @@ import {
     useList,
     useRecordContext,
 } from 'react-admin';
-import { Alert, Box, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Alert, Divider, Grid, Stack, Tooltip, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import ArchiveChip from '../archive/ArchiveChip';
 import ProposedChangesPanel from '../changes/ProposedChangesPanel';
@@ -57,8 +58,7 @@ const NoPasses = () => (
             p: 1,
         }}
     >
-        No pass covers this clip yet. Divers trim their passes on the laptop, and the windows
-        arrive with the next sync.
+        No pass uses this clip yet. Passes arrive when a laptop syncs.
     </Typography>
 );
 
@@ -70,8 +70,7 @@ const NoRuns = () => (
             p: 1,
         }}
     >
-        No run has consumed this clip yet. Runs appear once a desktop client reconstructs a
-        pass built on it and syncs.
+        No runs from this clip yet. They appear when a laptop reconstructs a pass and syncs.
     </Typography>
 );
 
@@ -320,7 +319,7 @@ const VideoShow = () => (
             </Grid>
 
             <Divider />
-            <Box>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Typography
                     variant="overline"
                     sx={{
@@ -329,38 +328,21 @@ const VideoShow = () => (
                 >
                     Passes using this clip
                 </Typography>
-                <Typography
-                    variant="caption"
-                    sx={{
-                        color: 'text.secondary',
-                        display: 'block',
-                    }}
-                >
-                    One clip often holds several passes, sometimes swum in both directions.
-                </Typography>
-            </Box>
+                <Tooltip title="One clip can hold several passes, in either direction.">
+                    <InfoOutlinedIcon fontSize="inherit" sx={{ color: 'text.secondary' }} />
+                </Tooltip>
+            </Stack>
             <VideoPasses />
 
             <Divider />
-            <Box>
-                <Typography
-                    variant="overline"
-                    sx={{
-                        color: 'text.secondary',
-                    }}
-                >
-                    Runs from this clip
-                </Typography>
-                <Typography
-                    variant="caption"
-                    sx={{
-                        color: 'text.secondary',
-                        display: 'block',
-                    }}
-                >
-                    Every reconstruction whose pass drew frames from this clip.
-                </Typography>
-            </Box>
+            <Typography
+                variant="overline"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                Runs from this clip
+            </Typography>
             <VideoRuns />
 
             <Divider />

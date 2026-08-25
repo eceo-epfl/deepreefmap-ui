@@ -4,15 +4,9 @@ import { presetLabel } from '../runs/preset';
 export const METRIC_KEYS = ['ram', 'swap', 'vram', 'duration'] as const;
 export type MetricKey = (typeof METRIC_KEYS)[number];
 
-/**
- * One metric across the runs in a group. Every run contributes its own peak, the
- * largest value across that run's stages, and these are the figures over those
- * per-run peaks: bytes for memory, seconds for duration.
- *
- * `std` is the sample standard deviation, null below two observations. `n` counts
- * the runs that observed this metric, so it sits below the group's run count when
- * a machine reports no VRAM or a run reported nothing usable.
- */
+/** Figures over the per-run peaks of one metric: bytes for memory, seconds for duration. */
+// `std` is the sample standard deviation, null below two observations. `n` counts the
+// runs that observed this metric and can sit below the group's run count.
 export type MetricStats = {
     mean: number | null;
     std: number | null;
@@ -24,15 +18,7 @@ export type MetricStats = {
 /** The memory ceilings a group's bars scale against. Swap has no reported total. */
 export type MetricTotals = { ram: number | null; vram: number | null };
 
-/**
- * The largest share of its own memory that any device in a pooled row reached.
- *
- * A row spanning several machines has no single ceiling, and one machine's peak
- * against another's total says nothing: a 40 GB peak on a 64 GB laptop is not 250%
- * of the 16 GB laptop beside it. Each machine's own peak over its own total is a
- * real figure, and the largest of those is the one that came closest to filling a
- * device, so that is what a pooled row warns against.
- */
+/** The largest share of its own memory that any device in a pooled row reached. */
 export type MetricUtilisation = { ram: number | null; vram: number | null };
 
 const NOTHING_OBSERVED: MetricStats = { mean: null, std: null, min: null, max: null, n: 0 };
@@ -86,17 +72,9 @@ const maxOf = (values: (number | null)[]): number | null =>
         null,
     );
 
-/**
- * Several groups' figures for one metric as a single figure.
- *
- * The mean weights each group by its own sample size, so a device with forty runs
- * does not count the same as one with two. The variance adds the spread *between*
- * the group means to the spread within them: two laptops each perfectly steady but
- * sitting 10 GB apart are not a fleet with zero deviation, and averaging their
- * deviations would claim exactly that.
- *
- * Min and max are the true observed extremes, so they pool by taking the extreme.
- */
+/** Several groups' figures for one metric pooled into one. */
+// The mean is weighted by sample size. The variance is the within-group spread plus
+// the spread between group means. Min and max take the extreme.
 export const poolStats = (parts: MetricStats[]): MetricStats => {
     const observed = parts.flatMap(part =>
         part.n > 0 && part.mean != null ? [{ ...part, mean: part.mean }] : [],
@@ -121,17 +99,70 @@ export const poolStats = (parts: MetricStats[]): MetricStats => {
 export const modelsLabel = (group: PerformanceGroup): string =>
     `${group.segmentation_model ?? 'no segmentation'} · ${group.mapping_backend ?? 'no mapping'}`;
 
-/** Legacy runs carry no config, so a group of only those reads as one dash. */
-export const configLabel = (group: PerformanceGroup): string => {
-    const resolution =
-        group.processing_width != null && group.processing_height != null
-            ? `${group.processing_width}×${group.processing_height}`
-            : '—';
-    const fps = group.fps != null ? `${group.fps}fps` : '—';
-    const batch =
-        group.preprocess_batch_size != null ? `batch ${group.preprocess_batch_size}` : '—';
-    if (resolution === '—' && fps === '—' && batch === '—') return '—';
-    return `${resolution} · ${fps} · ${batch}`;
+/** The processing settings a group ran under. Legacy runs carry none. */
+export type ProcessingConfig = {
+    width: number | null;
+    height: number | null;
+    fps: number | null;
+    batch: number | null;
+};
+
+export const processingConfig = (group: PerformanceGroup): ProcessingConfig => ({
+    width: group.processing_width ?? null,
+    height: group.processing_height ?? null,
+    fps: group.fps ?? null,
+    batch: group.preprocess_batch_size ?? null,
+});
+
+export const configKey = (config: ProcessingConfig): string =>
+    `${config.width ?? ''}x${config.height ?? ''}|${config.fps ?? ''}|${config.batch ?? ''}`;
+
+const sizeLabel = (width: number | null, height: number | null): string | null =>
+    width != null && height != null ? `${width}×${height}` : null;
+
+/** The processing keys of a preset's settings document. Absent keys read as null. */
+export type ProcessingSettings = ProcessingConfig;
+
+const numberOrNull = (value: unknown): number | null =>
+    typeof value === 'number' && Number.isFinite(value) ? value : null;
+
+export const processingSettings = (settings: unknown): ProcessingSettings => {
+    const doc = (settings ?? {}) as Record<string, unknown>;
+    return {
+        width: numberOrNull(doc.processing_width),
+        height: numberOrNull(doc.processing_height),
+        fps: numberOrNull(doc.fps),
+        batch: numberOrNull(doc.preprocess_batch_size),
+    };
+};
+
+const fullConfig = (config: ProcessingConfig): string | null => {
+    const parts = [
+        sizeLabel(config.width, config.height),
+        config.fps == null ? null : `${config.fps}fps`,
+        config.batch == null ? null : `batch ${config.batch}`,
+    ].filter(Boolean);
+    return parts.length ? parts.join(' · ') : null;
+};
+
+/** The keys on which a group's config departs from its preset; the whole config with no preset. */
+// A preset size of null is derived on the device and never counts as a departure.
+export const configNote = (
+    config: ProcessingConfig,
+    settings: ProcessingSettings | null,
+): string | null => {
+    if (settings == null) return fullConfig(config);
+    const parts: string[] = [];
+    const ran = sizeLabel(config.width, config.height);
+    const set = sizeLabel(settings.width, settings.height);
+    if (ran && set && ran !== set) parts.push(`${ran} (preset ${set})`);
+    if (config.fps != null && settings.fps != null && config.fps !== settings.fps) {
+        parts.push(`fps ${config.fps} (preset ${settings.fps})`);
+    }
+    if (config.batch != null && settings.batch != null && config.batch !== settings.batch) {
+        parts.push(`batch ${config.batch} (preset ${settings.batch})`);
+    }
+    return parts.length ? parts.join(' · ') : null;
 };
 
 /** One row per preset × models × config, pooled across the devices that ran it. */
@@ -140,7 +171,7 @@ export type PresetRollup = {
     preset_name: string | null;
     preset_version: number | null;
     models: string;
-    config: string;
+    config: ProcessingConfig;
     device_count: number;
     run_count: number;
     failed_count: number;
@@ -178,7 +209,7 @@ const rollUp = (key: string, members: PerformanceGroup[]): PresetRollup => {
         preset_name: members[0].preset_name ?? null,
         preset_version: members[0].preset_version ?? null,
         models: modelsLabel(members[0]),
-        config: configLabel(members[0]),
+        config: processingConfig(members[0]),
         // By device rather than by row: two rows whose labels collide are one laptop,
         // and the runs that carry no device at all count as one between them.
         device_count: new Set(members.map(member => member.device_id ?? '')).size,
@@ -209,15 +240,13 @@ const rollUp = (key: string, members: PerformanceGroup[]): PresetRollup => {
 // The hash is in the bucket key but not here, so two settings published under one
 // name and version still sort beside each other rather than by their hashes.
 const sortKey = (row: PresetRollup): string =>
-    `${presetLabel(row)}|${row.models}|${row.config}`;
+    `${presetLabel(row)}|${row.models}|${configKey(row.config)}`;
 
 export const rollUpByPreset = (groups: PerformanceGroup[]): PresetRollup[] => {
     const buckets = new Map<string, PerformanceGroup[]>();
     for (const group of groups) {
-        // Config is part of the key, so runs at 4K never blend into quarter-size ones,
-        // and so is the settings hash, because the console only warns against editing
-        // settings without a version bump. Both device-grain views key on it too.
-        const key = `${presetLabel(group)}|${group.preset_hash ?? ''}|${modelsLabel(group)}|${configLabel(group)}`;
+        // Keyed on config and settings hash as well, matching the device-grain rows.
+        const key = `${presetLabel(group)}|${group.preset_hash ?? ''}|${modelsLabel(group)}|${configKey(processingConfig(group))}`;
         buckets.set(key, [...(buckets.get(key) ?? []), group]);
     }
     return Array.from(buckets.entries(), ([key, members]) => rollUp(key, members)).sort(

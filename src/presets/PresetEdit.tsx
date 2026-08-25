@@ -1,5 +1,6 @@
 import { Edit, SaveButton, SimpleForm, Toolbar } from 'react-admin';
-import { Typography } from '@mui/material';
+import { Stack, Tooltip, Typography } from '@mui/material';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import PresetInputs from './PresetInputs';
 
@@ -13,11 +14,14 @@ const PresetEditToolbar = () => (
 const PresetEdit = () => (
     <Edit redirect="show" mutationMode="pessimistic">
         <SimpleForm toolbar={<PresetEditToolbar />}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1 }}>
-                Changing the settings warrants a version bump: devices label their runs with
-                the preset&apos;s name and version, and a silent change would leave two
-                different runs labelled identically.
-            </Typography>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', mb: 1 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    Bump the version when settings change.
+                </Typography>
+                <Tooltip title="Devices label runs with the preset name and version.">
+                    <InfoOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                </Tooltip>
+            </Stack>
             <PresetInputs />
         </SimpleForm>
     </Edit>

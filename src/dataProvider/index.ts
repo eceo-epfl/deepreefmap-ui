@@ -13,6 +13,7 @@ import type {
     ArchiveDownload,
     ArchiveInitiate,
     ArchiveInitiateRequest,
+    ArchiveOverview,
     ArchivePartReceipt,
     ArchiveProbe,
     AssignAllResponse,
@@ -57,6 +58,7 @@ export interface DrmDataProvider extends DataProvider {
     ) => Promise<ArchivePartReceipt>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
+    archiveOverview: () => Promise<ArchiveOverview>;
     performanceSummary: () => Promise<PerformanceSummary>;
     archiveProbe: (hashes: string[]) => Promise<BatchProbe>;
     archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
@@ -333,6 +335,11 @@ const dataProvider = (
                 method: 'POST',
                 body: JSON.stringify({ run_ids: runIds }),
             }).then(({ json }) => json as RunsProbe),
+
+        archiveOverview: () =>
+            httpClient(`${apiUrl}/archive/overview`).then(
+                ({ json }) => json as ArchiveOverview,
+            ),
 
         archiveDownload: objectId =>
             httpClient(`${apiUrl}/archive/${objectId}/download`).then(

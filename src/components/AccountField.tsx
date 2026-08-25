@@ -1,8 +1,7 @@
 import { useGetIdentity, useRecordContext } from 'react-admin';
 import { Tooltip, Typography } from '@mui/material';
 
-// The registry stores a Keycloak subject and no name, so the whole uuid would only imply
-// there is a person behind it to look up.
+// The registry stores a Keycloak subject id and no name.
 const AccountField = ({
     source,
     emptyText = '—',

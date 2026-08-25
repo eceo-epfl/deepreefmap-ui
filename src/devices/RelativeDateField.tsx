@@ -32,8 +32,7 @@ export const relativeTime = (iso: string): string => {
 /**
  * A timestamp as `3 days ago`, with the absolute value on hover.
  *
- * `staleAfter` turns the text a warning colour, so a laptop that stopped syncing
- * stands out in a list of otherwise healthy ones.
+ * `staleAfter` turns the text a warning colour past that many seconds.
  */
 const RelativeDateField = ({
     source,

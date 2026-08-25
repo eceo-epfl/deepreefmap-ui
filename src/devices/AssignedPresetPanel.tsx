@@ -38,8 +38,7 @@ const acknowledgement = (device: Device, assigned?: Preset): string => {
     }.`;
 };
 
-/** The server-chosen default preset for this device, with its acknowledgement state.
- * Sits beside the hardware panel: see a struggling laptop, hand it lighter settings. */
+/** The server-chosen default preset for this device, with its acknowledgement state. */
 const AssignedPresetPanel = () => {
     const record = useRecordContext<Device>();
     const dataProvider = useDataProvider<DrmDataProvider>();
@@ -126,8 +125,7 @@ const AssignedPresetPanel = () => {
             </Stack>
             <Box>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                    The device learns the assignment when it next checks in, then reports the
-                    preset it actually runs under.
+                    Applied at the device&apos;s next check-in.
                 </Typography>
             </Box>
         </Stack>

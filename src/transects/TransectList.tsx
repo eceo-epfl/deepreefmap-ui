@@ -71,7 +71,11 @@ const TransectListBody = () => {
                     canAuthor ? (
                         <>
                             <AssignSiteButton />
-                            <ValidateSelectedButton section="transects" />
+                            <ValidateSelectedButton
+                                section="transects"
+                                sendable={record => record.site_id != null}
+                                skipReason="no site"
+                            />
                         </>
                     ) : (
                         false

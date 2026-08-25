@@ -1,6 +1,6 @@
 import { Link, useRecordContext } from 'react-admin';
 
-/** A lat/lon pair as a Google Maps link, so an operator can check a position in one click. */
+/** A lat/lon pair as a Google Maps link. */
 const CoordinateField = ({
     latSource,
     lonSource,

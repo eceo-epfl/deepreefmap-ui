@@ -39,9 +39,7 @@ const CampaignEmpty = () => {
                 No campaigns yet
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                {GLOSSARY.campaigns} Named after its archive folder, for example
-                2025_10_eritrea. One trip visits many sites, and every pass the field team
-                records is filed against it.
+                {GLOSSARY.campaigns}
             </Typography>
             {canAuthor && <CreateButton label="Create the first campaign" />}
         </Box>

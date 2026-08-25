@@ -30,8 +30,8 @@ const ProposedChangesPanel = ({ section }: { section: string }) => {
         <Alert severity="warning" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
             <Typography variant="subtitle2" gutterBottom>
                 {data.length === 1
-                    ? 'A laptop proposed a change to this row'
-                    : `${data.length} laptops proposed changes to this row`}
+                    ? 'One proposal for this row'
+                    : `${data.length} proposals for this row`}
             </Typography>
             <Stack spacing={2}>
                 {data.map(change => (

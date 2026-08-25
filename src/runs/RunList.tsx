@@ -86,11 +86,11 @@ const Empty = () => (
             p: 3,
         }}
     >
-        Runs appear here after a desktop client processes a pass and syncs.
+        Runs appear once a desktop app syncs a processed pass.
     </Typography>
 );
 
-/** Runs are reported by the desktop app, so this list is read-only. */
+/** Read-only list of the runs desktop apps report. */
 const RunList = () => (
     <List
         filters={runFilters}
@@ -143,7 +143,6 @@ const RunList = () => (
             <FunctionField<RunRecord>
                 label="Preset"
                 render={record => (
-                    // Both facts: an overridden run is the one whose preset matters.
                     <Stack
                         direction="row"
                         spacing={1}

@@ -63,6 +63,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/archive/overview': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The archive grouped by what each object belongs to: runs, clips, and the rest.
+         * @description Unpaged: the whole archive comes back in one response. Deleted runs and clips are
+         *     left out, so an object linked only through them counts as unlinked.
+         */
+        get: operations['overview'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/archive/probe': {
         parameters: {
             query?: never;
@@ -1873,6 +1894,13 @@ export interface components {
             /** Format: int64 */
             seq: number;
         };
+        ArchiveOverview: {
+            /** @description Stored objects whose hash matches a clip, by `completed_at`. */
+            clips: components['schemas']['ClipOverview'][];
+            /** @description Runs with artefact rows, by last activity: `last_completed_at`, then `started_at`. */
+            runs: components['schemas']['RunOverview'][];
+            unlinked: components['schemas']['UnlinkedOverview'];
+        };
         AssignAllResponse: {
             /** Format: date-time */
             assigned_at: string;
@@ -2089,6 +2117,22 @@ export interface components {
             colour: string;
             level: string;
             name: string;
+        };
+        ClipOverview: {
+            /** Format: date-time */
+            completed_at?: string | null;
+            content_hash: string;
+            file_name: string;
+            /** Format: uuid */
+            object_id: string;
+            /** Format: int64 */
+            size_bytes: number;
+            status: string;
+            uploaded_by?: string | null;
+            /** Format: uuid */
+            uploaded_by_device_id?: string | null;
+            /** Format: uuid */
+            video_id: string;
         };
         CompleteRequest: {
             /**
@@ -3229,6 +3273,43 @@ export interface components {
             validated_at?: string | null;
             validated_by?: string | null;
         };
+        RunOverview: {
+            /**
+             * Format: int64
+             * @description How many artefact rows the run has.
+             */
+            artifacts: number;
+            /**
+             * Format: int64
+             * @description How many of them link a stored object in status `complete`, `failed`, `pending`.
+             */
+            complete: number;
+            /** Format: uuid */
+            device_id?: string | null;
+            /** Format: int64 */
+            failed: number;
+            /** Format: date-time */
+            last_completed_at?: string | null;
+            /** Format: uuid */
+            pass_id: string;
+            /** Format: int64 */
+            pending: number;
+            /** Format: uuid */
+            run_id: string;
+            run_status: string;
+            /**
+             * Format: int64
+             * @description Total size of the linked objects, whatever their status.
+             */
+            size_bytes: number;
+            /** Format: date-time */
+            started_at?: string | null;
+            /**
+             * @description `complete` when every artefact is, `failed` when any is, `partial` when some
+             *     are complete, `pending` otherwise.
+             */
+            state: string;
+        };
         RunResponse: {
             /**
              * @description The scale the cover was measured at: the camera profile, the tape length and
@@ -3745,6 +3826,15 @@ export interface components {
             /** Format: double */
             start_lon?: number | null;
         };
+        UnlinkedOverview: {
+            /**
+             * Format: int64
+             * @description Stored objects no artefact row and no clip refers to.
+             */
+            objects: number;
+            /** Format: int64 */
+            size_bytes: number;
+        };
         UploadPartResponse: {
             /**
              * @description The `ETag` the store recorded, which is the part's MD5 on every store this
@@ -4082,6 +4172,40 @@ export interface operations {
             };
             /** @description Conflicting concurrent initiate */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The archive is not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    overview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Runs, clips and unlinked objects */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ArchiveOverview'];
+                };
+            };
+            /** @description Called with a device token */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -97,13 +97,7 @@ const peakOf = (values: (number | null)[]): number | null =>
 /** Above this share of a ceiling, a peak is close enough to warn about. */
 export const HOT_FRACTION = 0.85;
 
-/**
- * The bar under a memory figure.
- *
- * A solid bar fills a ceiling the device reported. A striped one has no ceiling to
- * fill and only ranks its row against the widest figure beside it, which is a
- * weaker claim, so the two never look alike.
- */
+/** The bar under a memory figure: solid against a device ceiling, striped against the run's largest stage. */
 export const MeterBar = ({
     fraction,
     relative,
@@ -165,7 +159,7 @@ const PeakCell = ({
     const hot = total != null && total > 0 && bytes / total > HOT_FRACTION;
     const tip =
         total == null
-            ? `${formatBytes(bytes)}, ranked against the largest stage of this run`
+            ? `${formatBytes(bytes)}, ranked against the run's largest stage`
             : `${formatBytes(bytes)} of ${formatBytes(total)}`;
     return (
         <Tooltip title={tip}>
@@ -228,7 +222,7 @@ const PeakGauge = ({ label, bytes, total }: Gauge) => {
     );
 };
 
-/** What the run peaked at, as gauges, so the figures read without opening anything. */
+/** What the run peaked at, as gauges. */
 export const RunPeakSummary = ({
     value,
     totals,
@@ -246,8 +240,7 @@ export const RunPeakSummary = ({
     if (!gauges.length) {
         return (
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                This run reported no resource figures. A run that died early, or one from a
-                build that never sampled them, carries none.
+                This run reported no resource figures.
             </Typography>
         );
     }
@@ -259,8 +252,7 @@ export const RunPeakSummary = ({
                 ))}
             </Stack>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Highest across every stage of the run. Stage by stage is under Provenance and
-                resource use.
+                Highest across all stages.
             </Typography>
         </Stack>
     );
@@ -293,54 +285,51 @@ export const StagePeaksTable = ({
     const swapMax = peakOf(rows.map(([, peak]) => peak.swap_bytes)) ?? 0;
     const vramMax = peakOf(rows.map(([, peak]) => peak.vram_bytes)) ?? 0;
     return (
-        <Box>
-            <Table size="small" sx={{ maxWidth: 560 }}>
-                <TableHead>
-                    <TableRow>
-                        <TableCell sx={{ pl: 0 }}>Stage</TableCell>
-                        <TableCell>RAM</TableCell>
-                        <TableCell>Swap</TableCell>
-                        <TableCell>VRAM</TableCell>
+        <Table size="small" sx={{ maxWidth: 560 }}>
+            <TableHead>
+                <TableRow>
+                    <TableCell sx={{ pl: 0 }}>Stage</TableCell>
+                    <TableCell>RAM</TableCell>
+                    <TableCell>Swap</TableCell>
+                    <TableCell>VRAM</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {rows.map(([stage, peak]) => (
+                    <TableRow key={stage}>
+                        <TableCell sx={{ border: 0, pl: 0, color: 'text.secondary' }}>
+                            {stage}
+                        </TableCell>
+                        <TableCell sx={{ border: 0 }}>
+                            <PeakCell bytes={peak.ram_bytes} total={totals.ram} max={ramMax} />
+                        </TableCell>
+                        <TableCell sx={{ border: 0 }}>
+                            <PeakCell
+                                bytes={peak.swap_bytes}
+                                total={totals.swap}
+                                max={swapMax}
+                            />
+                        </TableCell>
+                        <TableCell sx={{ border: 0 }}>
+                            <PeakCell
+                                bytes={peak.vram_bytes}
+                                total={totals.vram}
+                                max={vramMax}
+                            />
+                        </TableCell>
                     </TableRow>
-                </TableHead>
-                <TableBody>
-                    {rows.map(([stage, peak]) => (
-                        <TableRow key={stage}>
-                            <TableCell sx={{ border: 0, pl: 0, color: 'text.secondary' }}>
-                                {stage}
-                            </TableCell>
-                            <TableCell sx={{ border: 0 }}>
-                                <PeakCell
-                                    bytes={peak.ram_bytes}
-                                    total={totals.ram}
-                                    max={ramMax}
-                                />
-                            </TableCell>
-                            <TableCell sx={{ border: 0 }}>
-                                <PeakCell
-                                    bytes={peak.swap_bytes}
-                                    total={totals.swap}
-                                    max={swapMax}
-                                />
-                            </TableCell>
-                            <TableCell sx={{ border: 0 }}>
-                                <PeakCell
-                                    bytes={peak.vram_bytes}
-                                    total={totals.vram}
-                                    max={vramMax}
-                                />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                A solid bar fills the total the device reported. A striped one ranks the stage
-                against the largest of this run, which is all there is without a total.
-            </Typography>
-        </Box>
+                ))}
+            </TableBody>
+        </Table>
     );
 };
+
+/** Tooltip lines for the stage peaks heading. */
+export const STAGE_PEAK_NOTES = [
+    'Peak memory per stage.',
+    'Solid bar: share of the device total.',
+    "Striped bar: share of the run's largest stage.",
+];
 
 /** Per-stage wall-clock durations in pipeline order. */
 export const StageDurationsTable = ({

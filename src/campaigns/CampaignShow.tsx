@@ -99,8 +99,7 @@ const NoPasses = () => (
             color: 'text.secondary',
         }}
     >
-        No passes recorded against this campaign. Passes arrive from the desktop clients when
-        they sync, so there is nothing to add here.
+        No passes yet. They arrive when a laptop syncs.
     </Typography>
 );
 

@@ -21,7 +21,7 @@ const ShowActions = () => (
     </TopToolbar>
 );
 
-/** The patch beside the row as it stands, so a curator sees what accepting would do. */
+/** The patch beside the row as it stands. */
 const Diff = () => {
     const record = useRecordContext<Change>();
     const { data: current } = useGetOne(

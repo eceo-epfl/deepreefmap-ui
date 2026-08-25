@@ -8,6 +8,7 @@ import {
     required,
     useListContext,
     useNotify,
+    useRecordContext,
     useRefresh,
     useUnselectAll,
     useUpdateMany,
@@ -15,24 +16,27 @@ import {
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 
-// A transect made in the field may arrive without a site. Validation refuses one until
-// it has a site, so this is the repair step.
-const AssignSiteButton = () => {
+import type { Transect } from '../contract';
+
+const AssignSiteDialog = ({ ids, onAssigned }: { ids: string[]; onAssigned?: () => void }) => {
     const [open, setOpen] = useState(false);
-    const { selectedIds } = useListContext();
     const [updateMany, { isPending }] = useUpdateMany();
-    const unselectAll = useUnselectAll('transects');
     const notify = useNotify();
     const refresh = useRefresh();
 
     const assign = async ({ site_id }: { site_id?: string }) => {
         await updateMany(
             'transects',
-            { ids: selectedIds, data: { site_id } },
+            { ids, data: { site_id } },
             {
                 onSuccess: () => {
-                    notify(`Assigned ${selectedIds.length} transects`, { type: 'info' });
-                    unselectAll();
+                    notify(
+                        ids.length === 1
+                            ? 'Assigned to site'
+                            : `Assigned ${ids.length} transects`,
+                        { type: 'info' },
+                    );
+                    onAssigned?.();
                     refresh();
                     setOpen(false);
                 },
@@ -72,6 +76,21 @@ const AssignSiteButton = () => {
             </Dialog>
         </>
     );
+};
+
+// A transect made in the field may arrive without a site. Validation refuses one until
+// it has a site, so this is the repair step.
+const AssignSiteButton = () => {
+    const { selectedIds } = useListContext();
+    const unselectAll = useUnselectAll('transects');
+    return <AssignSiteDialog ids={selectedIds.map(String)} onAssigned={unselectAll} />;
+};
+
+/** The same repair for the transect in record context. */
+export const AssignSiteRecordButton = () => {
+    const record = useRecordContext<Transect>();
+    if (!record) return null;
+    return <AssignSiteDialog ids={[String(record.id)]} />;
 };
 
 export default AssignSiteButton;

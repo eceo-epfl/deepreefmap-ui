@@ -51,7 +51,7 @@ const TransectFormFields = () => (
                         optionText="name"
                         label="Site"
                         validate={required()}
-                        helperText="A transect name only has to be unique within its site."
+                        helperText="Names are unique within a site."
                         fullWidth
                     />
                 </ReferenceInput>
@@ -70,10 +70,7 @@ const TransectFormFields = () => (
         </Grid>
 
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            End points
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-            Optional: many historical lines were never fixed by GPS.
+            End points (optional)
         </Typography>
         <Grid container spacing={2}>
             <Grid
@@ -171,7 +168,7 @@ const TransectFormFields = () => (
                     source="length_m"
                     label="Length (m)"
                     validate={nonNegative}
-                    helperText="The tape reading used to scale the reconstruction."
+                    helperText="Tape reading; scales the reconstruction."
                     fullWidth
                 />
             </Grid>

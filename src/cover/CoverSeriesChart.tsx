@@ -118,7 +118,7 @@ const CoverSeriesChart = ({
                     width={width}
                     height={height}
                     role="img"
-                    aria-label="Cover per survey event, one bar per class with its min to max spread"
+                    aria-label="Cover per survey event, one bar per class"
                 >
                     {ticks.map(tick => (
                         <g key={tick}>

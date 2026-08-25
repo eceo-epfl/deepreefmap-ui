@@ -1,35 +1,18 @@
-import { useGetList, useRecordContext } from 'react-admin';
+import { useRecordContext } from 'react-admin';
 import { Link } from 'react-router-dom';
 import { Box, Stack, Typography } from '@mui/material';
 
-import type { Device, Preset } from '../contract';
-import GroupTable from '../performance/GroupTable';
+import type { Device } from '../contract';
+import GroupTable, { CAPTION, Note } from '../performance/GroupTable';
 import { PresetCell } from '../performance/MetricCells';
-import { configLabel, modelsLabel } from '../performance/statistics';
+import { configKey, modelsLabel, processingConfig } from '../performance/statistics';
 import { usePerformanceSummary } from '../performance/usePerformanceSummary';
+import { matchNote, usePresetLookup } from '../performance/usePresetLookup';
 import { presetLabel } from '../runs/preset';
-
-const CAPTION =
-    'Mean and sample standard deviation across the runs this laptop reported, where ' +
-    'every run contributes its peak across stages. A failed run counts once it ' +
-    'recorded peaks, because an out-of-memory run is the one worth seeing.';
-
-const EMPTY =
-    'No runs from this device report performance data yet. Figures appear once it ' +
-    'syncs a run that recorded per-stage peaks.';
-
-const UNAVAILABLE =
-    'The registry did not answer the performance summary. It may predate this console.';
-
-const Note = ({ children }: { children: string }) => (
-    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-        {children}
-    </Typography>
-);
 
 const FleetLink = () => (
     <Typography variant="body2">
-        <Link to="/performance">Compare this laptop with the rest of the fleet</Link>
+        <Link to="/performance">Compare with the fleet</Link>
     </Typography>
 );
 
@@ -37,19 +20,19 @@ const FleetLink = () => (
 const DevicePerformance = () => {
     const record = useRecordContext<Device>();
     const { groups, error } = usePerformanceSummary();
-    // Same parameters as the assignment panel, so the page shares one fetch.
-    const { data: presets } = useGetList<Preset>('presets', {
-        pagination: { page: 1, perPage: 100 },
-        sort: { field: 'name', order: 'ASC' },
-    });
+    const rows = record ? (groups ?? []).filter(group => group.device_id === record.id) : [];
+    const lookup = usePresetLookup(rows);
     if (!record) return null;
-    if (error) return <Note>{UNAVAILABLE}</Note>;
+    if (error) {
+        return (
+            <Note>{`The registry did not answer the performance summary (${error}).`}</Note>
+        );
+    }
     if (!groups) return <Note>Loading…</Note>;
-    const rows = groups.filter(group => group.device_id === record.id);
     if (!rows.length) {
         return (
             <Stack spacing={1}>
-                <Note>{EMPTY}</Note>
+                <Note>No runs from this device report performance data yet.</Note>
                 <FleetLink />
             </Stack>
         );
@@ -61,12 +44,22 @@ const DevicePerformance = () => {
                 <GroupTable
                     groups={rows}
                     sortKey={group =>
-                        `${presetLabel(group)}|${modelsLabel(group)}|${configLabel(group)}`
+                        `${presetLabel(group)}|${modelsLabel(group)}|${configKey(processingConfig(group))}`
                     }
                     lead={[
                         {
                             header: 'Preset',
-                            cell: group => <PresetCell group={group} presets={presets} />,
+                            cell: group => {
+                                const match = lookup(group);
+                                return (
+                                    <PresetCell
+                                        label={group.preset_name ? presetLabel(group) : null}
+                                        presetId={match?.id}
+                                        models={modelsLabel(group)}
+                                        note={matchNote(match, processingConfig(group))}
+                                    />
+                                );
+                            },
                         },
                     ]}
                 />

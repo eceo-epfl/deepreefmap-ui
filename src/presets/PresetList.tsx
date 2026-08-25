@@ -14,6 +14,7 @@ import { Box, Typography } from '@mui/material';
 
 import { asColumn } from '../components';
 import type { Device, Preset } from '../contract';
+import { GLOSSARY } from '../contract/glossary';
 import { useCanAuthor } from '../permissions';
 
 // Every row runs the identical query, so react-admin's cache answers the whole
@@ -56,8 +57,7 @@ const PresetEmpty = () => {
                 No presets yet
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                A preset is a named, versioned settings document the desktop application pulls,
-                so every laptop reconstructs with the same parameters.
+                {GLOSSARY.presets}
             </Typography>
             {canAuthor && <CreateButton label="Create the first preset" />}
         </Box>

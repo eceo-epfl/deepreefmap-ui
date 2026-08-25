@@ -55,8 +55,7 @@ const DeviceListEmpty = () => (
                 color: 'text.secondary',
             }}
         >
-            Mint a connect code and paste it into the desktop app once. It names itself at
-            enrolment.
+            Mint a connect code and paste it into the desktop app.
         </Typography>
         <ConnectButton />
     </Stack>

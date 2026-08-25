@@ -33,7 +33,7 @@ const VideoEdit = () => (
                     <TextInput
                         source="camera_label"
                         label="Camera"
-                        helperText="As the field team labels it, eg. GoPro_3 or cam1."
+                        helperText="Field label, eg. GoPro_3 or cam1."
                         fullWidth
                     />
                 </Grid>

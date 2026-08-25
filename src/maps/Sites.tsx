@@ -62,8 +62,7 @@ export const SiteMapAll = () => {
     if (sites.length === 0) {
         return (
             <Alert severity="info" sx={{ mb: 2 }}>
-                No site has coordinates yet, so there is nothing to map. Add a latitude and
-                longitude when you create or edit a site.
+                No site has coordinates yet. Add them when editing a site.
             </Alert>
         );
     }

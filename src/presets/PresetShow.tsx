@@ -103,8 +103,7 @@ const SettingsBlock = () => {
     );
 };
 
-// Null or behind means the laptop would refuse or misread this document, which is
-// exactly what an assignment (or the fallback after clearing one) needs visible.
+// Null or behind: the laptop would refuse or misread this document.
 const SchemaVersionField = () => {
     const device = useRecordContext<Device>();
     if (!device) return null;
@@ -114,8 +113,8 @@ const SchemaVersionField = () => {
         <Tooltip
             title={
                 version == null
-                    ? 'This device has never reported a preset schema version.'
-                    : `This device understands schema v${version}; the console writes v${PRESET_SCHEMA_VERSION}.`
+                    ? 'No preset schema version reported.'
+                    : `Device reads schema v${version}, console writes v${PRESET_SCHEMA_VERSION}.`
             }
         >
             <Typography variant="body2" component="span" color="warning.main">

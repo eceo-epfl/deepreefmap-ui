@@ -2,7 +2,7 @@ import schema from '../contract/preset-schema.json';
 
 // The field table and model catalogue published by the registry as
 // contract/preset-schema.json, mirrored from the desktop application. The form is
-// generated from it, so the console offers exactly what a laptop accepts.
+// generated from it.
 
 export type PresetFieldKind = 'int' | 'float' | 'bool' | 'enum';
 

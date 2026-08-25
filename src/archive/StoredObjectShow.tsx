@@ -99,7 +99,7 @@ const ArtifactConsumers = ({ objectId }: { objectId: string }) => {
     );
 };
 
-/** The rows that reference this blob, so an object explains why it is kept. */
+/** The rows that reference this blob. */
 const UsedByPanel = () => {
     const record = useRecordContext<StoredObject>();
     if (!record) return null;

@@ -7,8 +7,7 @@ import type { DrmDataProvider } from '../dataProvider';
 import { formatBytes } from '../videos/VideoFields';
 import { fetchWebCloud, type DrmwCloud } from './drmw';
 
-// three.js is the app's largest optional dependency, so the viewer loads as its
-// own chunk only when a cloud is actually opened.
+// The viewer, with three.js, loads as its own chunk when a cloud is opened.
 const CloudViewer = lazy(() => import('./CloudViewer'));
 
 const CLOUD_RELPATH = 'cloud_web.drmw';
@@ -108,28 +107,19 @@ const RunCloudTab = () => {
         return <Alert severity="error">The run&apos;s artefacts could not be listed.</Alert>;
     }
     if (!artifact) {
-        return (
-            <Muted>
-                This run has not archived a web cloud yet. Archive the run from the desktop
-                app.
-            </Muted>
-        );
+        return <Muted>No web cloud archived yet. Archive the run from the desktop app.</Muted>;
     }
     if (!artifact.stored_object_id) {
         return (
             <Muted>
-                The web cloud is registered but its bytes have not been archived yet. Archive
-                the run from the desktop app.
+                Web cloud registered, bytes not archived yet. Archive the run from the desktop
+                app.
             </Muted>
         );
     }
     if (!object) return <LinearProgress />;
     if (object.status === 'failed') {
-        return (
-            <Alert severity="error">
-                The archived cloud did not upload completely, so it cannot be viewed.
-            </Alert>
-        );
+        return <Alert severity="error">The archived cloud upload is incomplete.</Alert>;
     }
     if (object.status !== 'complete') {
         return <Muted>The web cloud is still uploading.</Muted>;

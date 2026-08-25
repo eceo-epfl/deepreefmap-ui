@@ -16,8 +16,7 @@ import type { RunRecord, Transect } from './contract';
 import Overview from './maps/Overview';
 import StatusField from './runs/StatusField';
 
-// A Keycloak login without a deepreefmap realm role. The API answers every route with a
-// 403, so there is nothing to show and nothing worth requesting.
+// A Keycloak login without a deepreefmap realm role; the API answers 403 everywhere.
 const NoAccess = () => (
     <Card sx={{ mt: 2, maxWidth: 620 }}>
         <CardContent>
@@ -30,7 +29,7 @@ const NoAccess = () => (
                     color: 'text.secondary',
                 }}
             >
-                Ask an administrator for the member or administrator role, then sign in again.
+                Ask an administrator for a role, then sign in again.
             </Typography>
         </CardContent>
     </Card>
