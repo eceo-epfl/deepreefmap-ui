@@ -23,6 +23,7 @@ import type {
     CoverSeries,
     DeviceRename,
     DeviceRevocation,
+    PerformanceSummary,
     PresetAssignment,
     PooledCover,
     RunRecord,
@@ -53,6 +54,7 @@ export interface DrmDataProvider extends DataProvider {
     ) => Promise<ArchivePartReceipt>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
+    performanceSummary: () => Promise<PerformanceSummary>;
     archiveProbe: (hashes: string[]) => Promise<BatchProbe>;
     archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
     archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
@@ -324,6 +326,13 @@ const dataProvider = (
         archiveDownload: objectId =>
             httpClient(`${apiUrl}/archive/${objectId}/download`).then(
                 ({ json }) => json as ArchiveDownload,
+            ),
+
+        // The registry aggregates per device × preset × models, so peaks compare
+        // across the fleet without the console pulling every run.
+        performanceSummary: () =>
+            httpClient(`${apiUrl}/performance/summary`).then(
+                ({ json }) => json as PerformanceSummary,
             ),
 
         // Admin-only on the registry. Devices adopt it at their next heartbeat.

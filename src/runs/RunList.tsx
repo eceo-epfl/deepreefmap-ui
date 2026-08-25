@@ -9,7 +9,7 @@ import {
     useListContext,
     useRecordContext,
 } from 'react-admin';
-import { Chip, Tooltip, Typography } from '@mui/material';
+import { Chip, Stack, Tooltip, Typography } from '@mui/material';
 
 import { useRunsProbeBatch } from '../archive/useBatchProbe';
 import { asColumn } from '../components';
@@ -17,6 +17,7 @@ import type { RunRecord } from '../contract';
 import StatusField, { statusChoices } from './StatusField';
 import { hasEntries } from './ProvenanceTable';
 import { formatDuration, runDuration } from './duration';
+import { presetLabel } from './preset';
 
 const runFilters = [
     <SelectInput
@@ -141,18 +142,25 @@ const RunList = () => (
             />
             <FunctionField<RunRecord>
                 label="Preset"
-                render={record =>
-                    hasEntries(record.preset_deviations) ? (
-                        <Chip
-                            size="small"
-                            color="warning"
-                            label="Deviations"
-                            variant="outlined"
-                        />
-                    ) : (
-                        <span>{record.preset_name || '—'}</span>
-                    )
-                }
+                render={record => (
+                    // Both facts: an overridden run is the one whose preset matters.
+                    <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+                    >
+                        <span>{presetLabel(record)}</span>
+                        {hasEntries(record.preset_deviations) && (
+                            <Chip
+                                size="small"
+                                color="warning"
+                                label="Deviations"
+                                variant="outlined"
+                            />
+                        )}
+                    </Stack>
+                )}
             />
             <OutputsColumn label="Outputs" sortable={false} />
         </Datagrid>

@@ -123,7 +123,7 @@ const DeviceList = () => {
                     sortable={false}
                 />
                 <AccountField source="enrolled_by" label="Onboarded by" sortable={false} />
-                <DateField source="created_at" label="Enrolled" showTime />
+                <DateField source="created_at" label="Onboarded" showTime />
                 <RelativeDateField
                     source="last_seen_at"
                     label="Last seen"

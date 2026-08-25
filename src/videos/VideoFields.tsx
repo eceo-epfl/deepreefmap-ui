@@ -2,14 +2,21 @@ import { useRecordContext } from 'react-admin';
 
 const UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-export const formatBytes = (bytes: number) => {
-    let value = bytes;
-    let unit = 0;
-    while (value >= 1000 && unit < UNITS.length - 1) {
-        value /= 1000;
-        unit += 1;
+/** The unit a byte count reads best in, so several figures can share one. */
+export const byteScale = (bytes: number): { divisor: number; unit: string } => {
+    let divisor = 1;
+    let index = 0;
+    while (bytes / divisor >= 1000 && index < UNITS.length - 1) {
+        divisor *= 1000;
+        index += 1;
     }
-    return `${unit === 0 ? value : value.toFixed(1)} ${UNITS[unit]}`;
+    return { divisor, unit: UNITS[index] };
+};
+
+export const formatBytes = (bytes: number) => {
+    const { divisor, unit } = byteScale(bytes);
+    const value = bytes / divisor;
+    return `${divisor === 1 ? value : value.toFixed(1)} ${unit}`;
 };
 
 /** File size in the units a camera reports, so a 4 GB clip reads as one. */

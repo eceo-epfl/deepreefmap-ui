@@ -27,7 +27,25 @@ import type { PresetFieldDef } from './schema';
 
 const titled = (label: string) => label.charAt(0).toUpperCase() + label.slice(1);
 
-const SettingInput = ({ field }: { field: PresetFieldDef }) => {
+// The one relationship the flat field table cannot express: an explicit processing
+// size applies only under the `Custom` resolution preset. Native, Half and Quarter
+// divide the segmentation model's native size on the device
+// (`form/panel.py::_apply_resolution_preset`), so the console has no number to
+// publish. Disabled rather than read-only on purpose: react-hook-form leaves a
+// disabled field out of the submitted values, so a number typed under Custom stops
+// being published the moment the resolution moves off it.
+const CUSTOM_SIZE_KEYS = ['processing_width', 'processing_height'];
+
+const DERIVED_SIZE_HELP =
+    'Native, Half and Quarter derive this from the segmentation model. Choose Custom to set it.';
+
+const SettingInput = ({
+    field,
+    customSize,
+}: {
+    field: PresetFieldDef;
+    customSize: boolean;
+}) => {
     const source = `settings.${field.key}`;
     const label = field.unit ? `${titled(field.label)} (${field.unit})` : titled(field.label);
     if (field.kind === 'bool') {
@@ -45,6 +63,7 @@ const SettingInput = ({ field }: { field: PresetFieldDef }) => {
             />
         );
     }
+    const derived = !customSize && CUSTOM_SIZE_KEYS.includes(field.key);
     const validate = [
         ...(field.minimum === null ? [] : [minValue(field.minimum)]),
         ...(field.maximum === null ? [] : [maxValue(field.maximum)]),
@@ -58,7 +77,14 @@ const SettingInput = ({ field }: { field: PresetFieldDef }) => {
             step={field.step ?? undefined}
             validate={validate}
             fullWidth
-            helperText={field.nullable ? 'Empty follows the model.' : false}
+            disabled={derived}
+            helperText={
+                derived
+                    ? DERIVED_SIZE_HELP
+                    : field.nullable
+                      ? 'Empty follows the model.'
+                      : false
+            }
         />
     );
 };
@@ -67,6 +93,7 @@ const SettingInput = ({ field }: { field: PresetFieldDef }) => {
  * chosen processing method. */
 const SettingsFields = () => {
     const mapping = useWatch({ name: 'settings.mapping_name' }) as string | undefined;
+    const resolution = useWatch({ name: 'settings.resolution_preset' }) as string | undefined;
     const visible = PRESET_FIELDS.filter(
         field =>
             field.applies_when.length === 0 ||
@@ -76,7 +103,7 @@ const SettingsFields = () => {
         <Grid container spacing={2}>
             {visible.map(field => (
                 <Grid key={field.key} size={{ xs: 12, sm: field.kind === 'enum' ? 6 : 4 }}>
-                    <SettingInput field={field} />
+                    <SettingInput field={field} customSize={resolution === 'Custom'} />
                 </Grid>
             ))}
         </Grid>

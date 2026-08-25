@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react';
 import {
     Box,
+    Stack,
     Table,
     TableBody,
     TableCell,
@@ -7,6 +9,7 @@ import {
     TableRow,
     Tooltip,
     Typography,
+    useTheme,
 } from '@mui/material';
 
 import type { ProfileTotals } from '../devices/profile';
@@ -31,6 +34,13 @@ export type StagePeak = {
     vram_bytes: number | null;
 };
 
+/** The largest figure per metric across every stage of one run. */
+type RunPeaks = {
+    ram: number | null;
+    swap: number | null;
+    vram: number | null;
+};
+
 const asObject = (value: unknown): Record<string, unknown> | null =>
     value && typeof value === 'object' && !Array.isArray(value)
         ? (value as Record<string, unknown>)
@@ -48,7 +58,7 @@ const inPipelineOrder = <T,>(entries: [string, T][]): [string, T][] => {
 };
 
 /** A `stage_peaks` json column as ordered rows, dropping anything malformed. */
-export const parseStagePeaks = (value: unknown): [string, StagePeak][] => {
+const parseStagePeaks = (value: unknown): [string, StagePeak][] => {
     const stages = asObject(value);
     if (!stages) return [];
     const entries: [string, StagePeak][] = [];
@@ -78,7 +88,55 @@ const parseStageDurations = (value: unknown): [string, number][] => {
     return inPipelineOrder(entries);
 };
 
-const HOT_FRACTION = 0.85;
+const peakOf = (values: (number | null)[]): number | null =>
+    values.reduce<number | null>(
+        (peak, value) => (value == null ? peak : Math.max(peak ?? 0, value)),
+        null,
+    );
+
+/** Above this share of a ceiling, a peak is close enough to warn about. */
+export const HOT_FRACTION = 0.85;
+
+/**
+ * The bar under a memory figure.
+ *
+ * A solid bar fills a ceiling the device reported. A striped one has no ceiling to
+ * fill and only ranks its row against the widest figure beside it, which is a
+ * weaker claim, so the two never look alike.
+ */
+export const MeterBar = ({
+    fraction,
+    relative,
+    hot,
+    height = 4,
+    children,
+}: {
+    fraction: number;
+    relative: boolean;
+    hot: boolean;
+    height?: number;
+    children?: ReactNode;
+}) => {
+    const theme = useTheme();
+    const colour = hot ? theme.palette.warning.main : theme.palette.primary.main;
+    return (
+        <Box sx={{ position: 'relative', height, borderRadius: 2, bgcolor: 'action.hover' }}>
+            <Box
+                sx={{
+                    width: `${Math.min(Math.max(fraction, 0), 1) * 100}%`,
+                    height: '100%',
+                    borderRadius: 2,
+                    ...(relative
+                        ? {
+                              backgroundImage: `repeating-linear-gradient(115deg, ${colour} 0 3px, transparent 3px 6px)`,
+                          }
+                        : { backgroundColor: colour }),
+                }}
+            />
+            {children}
+        </Box>
+    );
+};
 
 /** A peak with a bar under it: against the device total when known, else `max`. */
 const PeakCell = ({
@@ -104,36 +162,109 @@ const PeakCell = ({
         );
     }
     const scale = total ?? max;
-    const fraction = scale > 0 ? Math.min(bytes / scale, 1) : 0;
     const hot = total != null && total > 0 && bytes / total > HOT_FRACTION;
-    const cell = (
-        <Box sx={{ minWidth: 96 }}>
-            <Typography variant="body2" color={hot ? 'warning.main' : 'text.primary'}>
-                {formatBytes(bytes)}
-            </Typography>
-            <Box sx={{ height: 4, borderRadius: 2, bgcolor: 'action.hover' }}>
-                <Box
-                    sx={{
-                        width: `${fraction * 100}%`,
-                        height: '100%',
-                        borderRadius: 2,
-                        bgcolor: hot ? 'warning.main' : 'primary.main',
-                    }}
+    const tip =
+        total == null
+            ? `${formatBytes(bytes)}, ranked against the largest stage of this run`
+            : `${formatBytes(bytes)} of ${formatBytes(total)}`;
+    return (
+        <Tooltip title={tip}>
+            <Box sx={{ minWidth: 96 }}>
+                <Typography variant="body2" color={hot ? 'warning.main' : 'text.primary'}>
+                    {formatBytes(bytes)}
+                </Typography>
+                <MeterBar
+                    fraction={scale > 0 ? bytes / scale : 0}
+                    relative={total == null}
+                    hot={hot}
                 />
             </Box>
-        </Box>
+        </Tooltip>
     );
-    if (total == null) return cell;
-    return <Tooltip title={`${formatBytes(bytes)} of ${formatBytes(total)}`}>{cell}</Tooltip>;
 };
 
-const maxOf = (values: (number | null)[]): number =>
-    values.reduce<number>((peak, value) => Math.max(peak, value ?? 0), 0);
+/** The peak each metric reached anywhere in the run. */
+const runPeaks = (value: unknown): RunPeaks => {
+    const rows = parseStagePeaks(value);
+    return {
+        ram: peakOf(rows.map(([, peak]) => peak.ram_bytes)),
+        swap: peakOf(rows.map(([, peak]) => peak.swap_bytes)),
+        vram: peakOf(rows.map(([, peak]) => peak.vram_bytes)),
+    };
+};
 
-const summarise = (label: string, bytes: number, total: number | null): string =>
-    total
-        ? `${label} ${formatBytes(bytes)} of ${formatBytes(total)}`
-        : `${label} ${formatBytes(bytes)}`;
+type Gauge = { label: string; bytes: number; total: number | null };
+
+const gaugeNote = (bytes: number, total: number | null): string => {
+    if (total == null || total <= 0) return 'this device reports no total';
+    // The total is the memory the device reports now, so an older run can sit above it.
+    if (bytes > total) return `above the ${formatBytes(total)} it reports now`;
+    return `${Math.round((bytes / total) * 100)}% of the device total`;
+};
+
+const PeakGauge = ({ label, bytes, total }: Gauge) => {
+    const hot = total != null && total > 0 && bytes / total > HOT_FRACTION;
+    return (
+        <Stack spacing={0.25} sx={{ flex: '1 1 200px', maxWidth: 300 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {label}
+            </Typography>
+            <Typography
+                variant="h6"
+                sx={{ lineHeight: 1.3 }}
+                color={hot ? 'warning.main' : 'text.primary'}
+            >
+                {total == null
+                    ? formatBytes(bytes)
+                    : `${formatBytes(bytes)} of ${formatBytes(total)}`}
+            </Typography>
+            {total != null && total > 0 && (
+                <MeterBar fraction={bytes / total} relative={false} hot={hot} height={6} />
+            )}
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {gaugeNote(bytes, total)}
+            </Typography>
+        </Stack>
+    );
+};
+
+/** What the run peaked at, as gauges, so the figures read without opening anything. */
+export const RunPeakSummary = ({
+    value,
+    totals,
+}: {
+    value: unknown;
+    totals: ProfileTotals;
+}) => {
+    const peaks = runPeaks(value);
+    const gauges: Gauge[] = [];
+    if (peaks.ram != null)
+        gauges.push({ label: 'Peak RAM', bytes: peaks.ram, total: totals.ram });
+    // Zero swap or VRAM says the run never touched them, which earns no gauge.
+    if (peaks.swap) gauges.push({ label: 'Peak swap', bytes: peaks.swap, total: totals.swap });
+    if (peaks.vram) gauges.push({ label: 'Peak VRAM', bytes: peaks.vram, total: totals.vram });
+    if (!gauges.length) {
+        return (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                This run reported no resource figures. A run that died early, or one from a
+                build that never sampled them, carries none.
+            </Typography>
+        );
+    }
+    return (
+        <Stack spacing={1}>
+            <Stack direction="row" spacing={3} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                {gauges.map(gauge => (
+                    <PeakGauge key={gauge.label} {...gauge} />
+                ))}
+            </Stack>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Highest across every stage of the run. Stage by stage is under Provenance and
+                resource use.
+            </Typography>
+        </Stack>
+    );
+};
 
 /** Per-stage memory peaks as bars, scaled to the device's ceilings when known. */
 export const StagePeaksTable = ({
@@ -158,16 +289,9 @@ export const StagePeaksTable = ({
             </Typography>
         );
     }
-    const ramMax = maxOf(rows.map(([, peak]) => peak.ram_bytes));
-    const swapMax = maxOf(rows.map(([, peak]) => peak.swap_bytes));
-    const vramMax = maxOf(rows.map(([, peak]) => peak.vram_bytes));
-    const summary = [
-        summarise('RAM', ramMax, totals.ram),
-        summarise('swap', swapMax, totals.swap),
-        vramMax > 0 ? summarise('VRAM', vramMax, totals.vram) : null,
-    ]
-        .filter(Boolean)
-        .join(' · ');
+    const ramMax = peakOf(rows.map(([, peak]) => peak.ram_bytes)) ?? 0;
+    const swapMax = peakOf(rows.map(([, peak]) => peak.swap_bytes)) ?? 0;
+    const vramMax = peakOf(rows.map(([, peak]) => peak.vram_bytes)) ?? 0;
     return (
         <Box>
             <Table size="small" sx={{ maxWidth: 560 }}>
@@ -211,7 +335,8 @@ export const StagePeaksTable = ({
                 </TableBody>
             </Table>
             <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Run peaks: {summary}
+                A solid bar fills the total the device reported. A striped one ranks the stage
+                against the largest of this run, which is all there is without a total.
             </Typography>
         </Box>
     );

@@ -958,6 +958,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/performance/summary': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resource statistics per device, preset, model combination and processing
+         *     configuration, the grain the desktop application keys its own history by.
+         * @description One run contributes one observation per metric: the largest value across that run's
+         *     stages. Mean, sample standard deviation, min, max and n are then taken across the
+         *     group's runs over those per-run peaks. The standard deviation is null below two
+         *     observations, and n is per metric, so a fleet of machines without discrete GPUs
+         *     reports a `vram_n` of zero beside a full `ram_n`.
+         *
+         *     Covers the non-deleted runs that recorded per-stage peaks, and only those. A failed
+         *     run counts once it recorded them, which is the point: an out-of-memory run's peaks are
+         *     exactly the interesting ones. A run that recorded none contributes nothing at all, not
+         *     even to `run_count`: a run synced by a build that never reported peaks, one that died
+         *     before a single stage finished, and one whose `stage_peaks` arrived empty or as
+         *     something other than a map of stages are all absent here rather than counted as runs
+         *     with nothing to show. Revoked devices keep their history for the same reason failed
+         *     runs do. Within a stage map `stage_peaks` is untrusted JSON, so a non-numeric or
+         *     absent value is ignored rather than refused, and the run still counts with that metric
+         *     unobserved.
+         *
+         *     The device hardware figures (`gpu_name`, `total_ram_bytes`, `total_vram_bytes`) come
+         *     from the device's current profile, not from its profile when the runs happened, so a
+         *     machine that has since been upgraded reports its new hardware against its old runs.
+         */
+        get: operations['performance_summary'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/presets': {
         parameters: {
             query?: never;
@@ -1187,6 +1227,10 @@ export interface paths {
          *     - library_version
          *     - segmentation_model
          *     - mapping_backend
+         *     - processing_width
+         *     - processing_height
+         *     - fps
+         *     - preprocess_batch_size
          *     - taxonomy_version
          *     - preset_name
          *     - preset_version
@@ -2545,6 +2589,117 @@ export interface components {
             /** Format: uuid */
             video_id?: string | null;
         };
+        PerformanceGroup: {
+            /**
+             * Format: uuid
+             * @description Null when the runs arrived under an interactive login rather than a device
+             *     token: provenance binds from the credential, and a human push carries no device.
+             */
+            device_id?: string | null;
+            device_name?: string | null;
+            /** Format: double */
+            duration_max_s?: number | null;
+            /**
+             * Format: double
+             * @description Wall-clock seconds, over the runs that report a duration.
+             */
+            duration_mean_s?: number | null;
+            /** Format: double */
+            duration_min_s?: number | null;
+            /** Format: int64 */
+            duration_n: number;
+            /** Format: double */
+            duration_std_s?: number | null;
+            /**
+             * Format: int64
+             * @description The failed subset of `run_count`.
+             */
+            failed_count: number;
+            /** Format: int32 */
+            fps?: number | null;
+            /**
+             * @description From the device's current profile, as are the two totals below: what the
+             *     hardware is now, not what it was when the runs happened.
+             */
+            gpu_name?: string | null;
+            /**
+             * Format: date-time
+             * @description Latest `started_at` in the group.
+             */
+            last_run_at?: string | null;
+            mapping_backend?: string | null;
+            /** Format: int32 */
+            preprocess_batch_size?: number | null;
+            preset_hash?: string | null;
+            preset_name?: string | null;
+            /** Format: int32 */
+            preset_version?: number | null;
+            /** Format: int32 */
+            processing_height?: number | null;
+            /**
+             * Format: int32
+             * @description Processing configuration, part of the group key: resolution and fps set the
+             *     memory regime, batch size gates VRAM. All null for a run pushed by a build that
+             *     did not report them.
+             */
+            processing_width?: number | null;
+            /** Format: int64 */
+            ram_max_bytes?: number | null;
+            /**
+             * Format: double
+             * @description Mean of the per-run RAM peaks. Every metric below carries the same five figures.
+             */
+            ram_mean_bytes?: number | null;
+            /** Format: int64 */
+            ram_min_bytes?: number | null;
+            /**
+             * Format: int64
+             * @description Runs that observed a RAM peak. Counted per metric rather than per group, so it
+             *     can sit below `run_count`: a machine with no discrete GPU reports no VRAM at all,
+             *     and a run that reported junk is a run with that metric unobserved.
+             */
+            ram_n: number;
+            /**
+             * Format: double
+             * @description Sample standard deviation, null below two observations.
+             */
+            ram_std_bytes?: number | null;
+            /**
+             * Format: int64
+             * @description Every run in the group that recorded peaks, whatever its status. A run whose
+             *     `stage_peaks` is absent, empty, or something other than a map of stages is not
+             *     in the group at all.
+             */
+            run_count: number;
+            segmentation_model?: string | null;
+            /** Format: int64 */
+            swap_max_bytes?: number | null;
+            /** Format: double */
+            swap_mean_bytes?: number | null;
+            /** Format: int64 */
+            swap_min_bytes?: number | null;
+            /** Format: int64 */
+            swap_n: number;
+            /** Format: double */
+            swap_std_bytes?: number | null;
+            /** Format: int64 */
+            total_ram_bytes?: number | null;
+            /** Format: int64 */
+            total_vram_bytes?: number | null;
+            /** Format: int64 */
+            vram_max_bytes?: number | null;
+            /** Format: double */
+            vram_mean_bytes?: number | null;
+            /** Format: int64 */
+            vram_min_bytes?: number | null;
+            /** Format: int64 */
+            vram_n: number;
+            /** Format: double */
+            vram_std_bytes?: number | null;
+        };
+        PerformanceSummary: {
+            groups: components['schemas']['PerformanceGroup'][];
+        };
         PooledCover: {
             /** Format: uuid */
             campaign_id?: string | null;
@@ -2797,6 +2952,8 @@ export interface components {
             error: string;
             /** Format: date-time */
             finished_at?: string | null;
+            /** Format: int32 */
+            fps?: number | null;
             gui_version?: string | null;
             /** Format: uuid */
             id: string;
@@ -2804,6 +2961,8 @@ export interface components {
             mapping_backend?: string | null;
             /** Format: uuid */
             pass_id: string;
+            /** Format: int32 */
+            preprocess_batch_size?: number | null;
             /** @description Settings that departed from the preset, separating "unchanged" from "unrecorded". */
             preset_deviations?: unknown;
             /** @description Digest of the preset definition, so a claimed version can be checked. */
@@ -2811,6 +2970,14 @@ export interface components {
             preset_name?: string | null;
             /** Format: int32 */
             preset_version?: number | null;
+            /** Format: int32 */
+            processing_height?: number | null;
+            /**
+             * Format: int32
+             * @description The processing configuration the run used: resolution and fps set the memory
+             *     regime, batch size gates VRAM. Integer fps, as the preset schema defines it.
+             */
+            processing_width?: number | null;
             /** @description Relative to the producing device's output root, not a server path. */
             run_dir_name: string;
             /**
@@ -2855,6 +3022,8 @@ export interface components {
             error: string;
             /** Format: date-time */
             finished_at?: string | null;
+            /** Format: int32 */
+            fps?: number | null;
             gui_version?: string | null;
             /** Format: uuid */
             id: string;
@@ -2867,6 +3036,8 @@ export interface components {
             model_revisions?: unknown;
             /** Format: uuid */
             pass_id: string;
+            /** Format: int32 */
+            preprocess_batch_size?: number | null;
             /** @description Settings that departed from the preset, separating "unchanged" from "unrecorded". */
             preset_deviations?: unknown;
             /** @description Digest of the preset definition, so a claimed version can be checked. */
@@ -2874,6 +3045,14 @@ export interface components {
             preset_name?: string | null;
             /** Format: int32 */
             preset_version?: number | null;
+            /** Format: int32 */
+            processing_height?: number | null;
+            /**
+             * Format: int32
+             * @description The processing configuration the run used: resolution and fps set the memory
+             *     regime, batch size gates VRAM. Integer fps, as the preset schema defines it.
+             */
+            processing_width?: number | null;
             /** @description Relative to the producing device's output root, not a server path. */
             run_dir_name: string;
             /**
@@ -6167,6 +6346,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    performance_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per device, preset, model combination and processing configuration */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['PerformanceSummary'];
+                };
             };
         };
     };

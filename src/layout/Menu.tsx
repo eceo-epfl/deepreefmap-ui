@@ -1,6 +1,7 @@
 import { Menu, useSidebarState } from 'react-admin';
 import { Typography } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 // Hidden while the sidebar is collapsed, where only the icons remain legible.
 const Section = ({ label }: { label: string }) => {
@@ -38,6 +39,7 @@ const DrmMenu = () => (
         <Section label="Operations" />
         <Menu.ResourceItem name="devices" />
         <Menu.ResourceItem name="presets" />
+        <Menu.Item to="/performance" primaryText="Performance" leftIcon={<SpeedIcon />} />
         <Menu.ResourceItem name="stored_objects" />
         <Menu.Item
             to="/stored_objects/upload"

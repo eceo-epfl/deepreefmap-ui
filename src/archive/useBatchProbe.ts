@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useDataProvider } from 'react-admin';
 
 import type { BatchProbeState, RunArchiveState } from '../contract';
@@ -7,12 +7,6 @@ import type { DrmDataProvider } from '../dataProvider';
 // The registry caps a probe body, so a larger page goes over in slices.
 const HASH_CHUNK = 500;
 const RUN_CHUNK = 200;
-
-// Module-level: every row of a datagrid calls the hook with the same page, and the
-// shared cache plus the in-flight dedupe is what turns that into exactly one POST.
-const hashCache = new Map<string, BatchProbeState | null>();
-const runCache = new Map<string, RunArchiveState | null>();
-const inFlight = new Map<string, Promise<void>>();
 
 const chunked = (keys: string[], size: number): string[][] => {
     const slices: string[][] = [];
@@ -23,77 +17,45 @@ const chunked = (keys: string[], size: number): string[][] => {
 };
 
 const useBatchProbe = <State>(
+    scope: string,
     keys: (string | null | undefined)[],
-    cache: Map<string, State | null>,
     chunk: number,
     fetchStates: (keys: string[]) => Promise<{ [key: string]: State }>,
 ) => {
-    const [, setSettled] = useState(0);
-    const [error, setError] = useState<string>();
+    // Rows hand in a fresh array every render. Sorted and deduplicated it is one query
+    // key, which is what turns a whole column into a single POST, and what lets the
+    // Refresh button re-probe rather than read a cache that never expires.
+    const wanted = Array.from(
+        new Set(keys.filter((key): key is string => Boolean(key))),
+    ).sort();
 
-    // Rows hand in a fresh array every render; the sorted joined form is the
-    // stable identity, and sorting also makes concurrent callers share one flight.
-    const wantedKey = useMemo(
-        () =>
-            Array.from(new Set(keys.filter((key): key is string => Boolean(key))))
-                .sort()
-                .join(','),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [keys.map(key => key ?? '').join(',')],
-    );
+    const { data, error } = useQuery({
+        queryKey: ['archiveProbe', scope, wanted],
+        queryFn: async () => {
+            const results = await Promise.all(chunked(wanted, chunk).map(fetchStates));
+            // Absent from the response means nothing archived, and saying so keeps a
+            // row from reading as still checking.
+            const states = new Map<string, State | null>(wanted.map(key => [key, null]));
+            for (const result of results) {
+                for (const [key, state] of Object.entries(result)) states.set(key, state);
+            }
+            return states;
+        },
+        enabled: wanted.length > 0,
+        staleTime: Infinity,
+        retry: false,
+    });
 
-    const dataProvider = useDataProvider<DrmDataProvider>();
-
-    useEffect(() => {
-        const missing = wantedKey.split(',').filter(key => key && !cache.has(key));
-        if (!missing.length) return;
-        const flightKey = missing.join(',');
-        let flight = inFlight.get(flightKey);
-        if (!flight) {
-            flight = Promise.all(chunked(missing, chunk).map(fetchStates))
-                .then(results => {
-                    for (const states of results) {
-                        for (const [key, state] of Object.entries(states)) {
-                            cache.set(key, state);
-                        }
-                    }
-                    // Absent from the response means nothing archived, and caching
-                    // that verdict stops the page re-asking on every render.
-                    for (const key of missing) {
-                        if (!cache.has(key)) cache.set(key, null);
-                    }
-                })
-                .finally(() => inFlight.delete(flightKey));
-            inFlight.set(flightKey, flight);
-        }
-        let current = true;
-        flight
-            .then(() => {
-                if (current) setSettled(count => count + 1);
-            })
-            .catch((e: unknown) => {
-                if (current) {
-                    setError(e instanceof Error ? e.message : 'Could not probe the archive');
-                }
-            });
-        return () => {
-            current = false;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dataProvider, wantedKey]);
-
-    const states = new Map<string, State | null>();
-    for (const key of wantedKey.split(',')) {
-        if (key && cache.has(key)) states.set(key, cache.get(key) ?? null);
-    }
-
-    return { states, error };
+    return {
+        states: data ?? new Map<string, State | null>(),
+        error: error ? error.message || 'Could not probe the archive' : undefined,
+    };
 };
 
 /** Archive state per content hash for a whole page, from one POST. */
 export const useArchiveProbeBatch = (hashes: (string | null | undefined)[]) => {
     const dataProvider = useDataProvider<DrmDataProvider>();
-    return useBatchProbe(hashes, hashCache, HASH_CHUNK, keys =>
+    return useBatchProbe<BatchProbeState>('hashes', hashes, HASH_CHUNK, keys =>
         dataProvider.archiveProbe(keys).then(response => response.states),
     );
 };
@@ -101,7 +63,7 @@ export const useArchiveProbeBatch = (hashes: (string | null | undefined)[]) => {
 /** Archived-output counts per run for a whole page, from one POST. */
 export const useRunsProbeBatch = (runIds: (string | null | undefined)[]) => {
     const dataProvider = useDataProvider<DrmDataProvider>();
-    return useBatchProbe(runIds, runCache, RUN_CHUNK, keys =>
+    return useBatchProbe<RunArchiveState>('runs', runIds, RUN_CHUNK, keys =>
         dataProvider.archiveRunsProbe(keys).then(response => response.states),
     );
 };

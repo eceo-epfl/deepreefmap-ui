@@ -25,6 +25,7 @@ import {
 
 import { asColumn, SyncFields, TombstoneButton } from '../components';
 import DeviceStatusField from '../devices/DeviceStatusField';
+import PresetPerformance from '../performance/PresetPerformance';
 import { useCanAuthor } from '../permissions';
 import type { Device, Preset } from '../contract';
 import AssignToAllButton from './AssignToAllButton';
@@ -222,6 +223,19 @@ const PresetShow = () => (
                     Devices using this preset
                 </Typography>
                 <AssignedDevices />
+            </Box>
+
+            <Divider />
+            <Box>
+                <Typography
+                    variant="overline"
+                    sx={{
+                        color: 'text.secondary',
+                    }}
+                >
+                    Performance
+                </Typography>
+                <PresetPerformance />
             </Box>
 
             <Divider />

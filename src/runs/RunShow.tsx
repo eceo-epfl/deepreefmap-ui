@@ -28,12 +28,13 @@ import ArchivedOutputs from '../archive/ArchivedOutputs';
 import { HashField, SyncFields } from '../components';
 import type { Device, RunRecord } from '../contract';
 import RunCoverTable from '../cover/RunCoverTable';
-import { profileTotals } from '../devices/profile';
+import { profileTotals, type ProfileTotals } from '../devices/profile';
 import RunCloudTab from '../viewer/RunCloudTab';
 import ProvenanceTable, { hasEntries } from './ProvenanceTable';
-import { StageDurationsTable, StagePeaksTable } from './StageBreakdown';
+import { RunPeakSummary, StageDurationsTable, StagePeaksTable } from './StageBreakdown';
 import StatusField from './StatusField';
 import { formatDuration, runDuration } from './duration';
+import { presetLabel } from './preset';
 
 const Heading = ({ title }: { title: string }) => (
     <Typography
@@ -99,13 +100,21 @@ const CloudSection = () => {
     );
 };
 
-const Provenance = ({ record, device }: { record: RunRecord; device?: Device }) => {
+const Provenance = ({ record, totals }: { record: RunRecord; totals: ProfileTotals }) => {
     const deviated = hasEntries(record.preset_deviations);
     return (
         <Accordion variant="outlined" disableGutters>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                    <Heading title="Provenance" />
+                <Stack
+                    direction="row"
+                    spacing={1.5}
+                    useFlexGap
+                    sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+                >
+                    <Heading title="Provenance and resource use" />
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        Versions, models, preset settings, and memory and time per stage
+                    </Typography>
                     {deviated && (
                         <Chip
                             size="small"
@@ -231,7 +240,7 @@ const Provenance = ({ record, device }: { record: RunRecord; device?: Device }) 
                             </Typography>
                             <StagePeaksTable
                                 value={record.stage_peaks}
-                                totals={profileTotals(device?.system_profile)}
+                                totals={totals}
                                 emptyText=""
                             />
                         </>
@@ -251,6 +260,7 @@ const RunLayout = () => {
         { enabled: Boolean(record?.device_id) },
     );
     if (!record) return <Loading />;
+    const totals = profileTotals(device?.system_profile);
     const seconds = runDuration(record.started_at, record.finished_at);
     const versions = [
         record.gui_version ? `GUI ${record.gui_version}` : null,
@@ -304,29 +314,30 @@ const RunLayout = () => {
                         </ReferenceField>
                     </Labeled>
                     <Labeled label="Preset">
-                        {hasEntries(record.preset_deviations) ? (
-                            <Chip
-                                size="small"
-                                color="warning"
-                                label="Deviations"
-                                variant="outlined"
-                            />
-                        ) : (
-                            <Typography variant="body2">
-                                {record.preset_name
-                                    ? `${record.preset_name}${
-                                          record.preset_version == null
-                                              ? ''
-                                              : ` v${record.preset_version}`
-                                      }`
-                                    : '—'}
-                            </Typography>
-                        )}
+                        {/* Both facts: an overridden run is the one whose preset matters. */}
+                        <Stack
+                            direction="row"
+                            spacing={1}
+                            useFlexGap
+                            sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+                        >
+                            <Typography variant="body2">{presetLabel(record)}</Typography>
+                            {hasEntries(record.preset_deviations) && (
+                                <Chip
+                                    size="small"
+                                    color="warning"
+                                    label="Deviations"
+                                    variant="outlined"
+                                />
+                            )}
+                        </Stack>
                     </Labeled>
                     <Labeled label="Versions">
                         <Typography variant="body2">{versions || '—'}</Typography>
                     </Labeled>
                 </Fields>
+                <Heading title="Peak resource use" />
+                <RunPeakSummary value={record.stage_peaks} totals={totals} />
             </Panel>
 
             {record.status === 'failed' && (
@@ -350,7 +361,7 @@ const RunLayout = () => {
 
             <CloudSection />
 
-            <Provenance record={record} device={device} />
+            <Provenance record={record} totals={totals} />
 
             <SyncFields />
         </Stack>

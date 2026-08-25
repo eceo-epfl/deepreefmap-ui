@@ -106,3 +106,6 @@ export type RunArchiveState = Schemas['RunArchiveState'];
 export type RunsProbe = Schemas['RunsProbeResponse'];
 
 export type AssignAllResponse = Schemas['AssignAllResponse'];
+
+export type PerformanceGroup = Schemas['PerformanceGroup'];
+export type PerformanceSummary = Schemas['PerformanceSummary'];

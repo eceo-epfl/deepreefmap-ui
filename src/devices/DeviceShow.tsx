@@ -28,13 +28,13 @@ import {
 import { AccountField, asColumn, DurationField } from '../components';
 import { RunStatusChip } from '../runs/StatusField';
 import { formatBytes } from '../videos/VideoFields';
+import DevicePerformance from './DevicePerformance';
 import DeviceStatusField from './DeviceStatusField';
 import RelativeDateField, { STALE_AFTER_SECONDS, relativeTime } from './RelativeDateField';
 import AssignedPresetPanel from './AssignedPresetPanel';
 import RenameDeviceButton from './RenameDeviceButton';
 import RevokeDeviceButton from './RevokeDeviceButton';
-import { asObject, numberOf, profileTotals, textOf } from './profile';
-import { useDevicePeaks } from './useDevicePeaks';
+import { asObject, numberOf, textOf } from './profile';
 import type { Device } from '../contract';
 
 const DurationColumn = asColumn(DurationField);
@@ -100,44 +100,6 @@ const DiskLine = ({ profile }: { profile: Record<string, unknown> }) => {
     );
 };
 
-const withShare = (bytes: number | null, total: number | null): string | null => {
-    if (bytes == null) return null;
-    if (!total) return formatBytes(bytes);
-    return `${formatBytes(bytes)} (${Math.round((bytes / total) * 100)}%)`;
-};
-
-/** Worst observed memory per model combination, from recent succeeded runs. */
-const ComboPeaksRows = () => {
-    const record = useRecordContext<Device>();
-    const combos = useDevicePeaks(record?.id);
-    if (!record || !combos.length) return null;
-    const totals = profileTotals(record.system_profile);
-    return (
-        <Stack spacing={0.25}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Peak memory by model combination, over recent succeeded runs:
-            </Typography>
-            {combos.map(peaks => (
-                <Typography
-                    key={peaks.combo}
-                    variant="caption"
-                    sx={{ color: 'text.secondary' }}
-                >
-                    {peaks.combo}:{' '}
-                    {[
-                        withShare(peaks.ram, totals.ram) &&
-                            `RAM ${withShare(peaks.ram, totals.ram)}`,
-                        peaks.swap ? `swap ${withShare(peaks.swap, totals.swap)}` : null,
-                        peaks.vram != null && `VRAM ${withShare(peaks.vram, totals.vram)}`,
-                    ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                </Typography>
-            ))}
-        </Stack>
-    );
-};
-
 /** What the device says about itself. Static hardware plus survey-disk headroom. */
 const HardwarePanel = () => {
     const record = useRecordContext<Device>();
@@ -168,34 +130,31 @@ const HardwarePanel = () => {
     const vram = gpu && numberOf(gpu, 'total_vram_bytes');
 
     return (
-        <Stack spacing={1}>
-            <Stack
-                direction="row"
-                spacing={3}
-                useFlexGap
-                sx={{
-                    flexWrap: 'wrap',
-                }}
-            >
-                <HardwareLine
-                    label="Operating system"
-                    value={os ? [os, osRelease].filter(Boolean).join(' ') : null}
-                />
-                <HardwareLine
-                    label="CPU"
-                    value={
-                        logical == null
-                            ? null
-                            : `${logical} logical / ${physical ?? '?'} physical cores`
-                    }
-                />
-                <HardwareLine label="RAM" value={ram == null ? null : formatBytes(ram)} />
-                <HardwareLine label="Swap" value={swap == null ? null : formatBytes(swap)} />
-                <HardwareLine label="GPU" value={gpuName} />
-                <HardwareLine label="VRAM" value={vram == null ? null : formatBytes(vram)} />
-                <DiskLine profile={profile} />
-            </Stack>
-            <ComboPeaksRows />
+        <Stack
+            direction="row"
+            spacing={3}
+            useFlexGap
+            sx={{
+                flexWrap: 'wrap',
+            }}
+        >
+            <HardwareLine
+                label="Operating system"
+                value={os ? [os, osRelease].filter(Boolean).join(' ') : null}
+            />
+            <HardwareLine
+                label="CPU"
+                value={
+                    logical == null
+                        ? null
+                        : `${logical} logical / ${physical ?? '?'} physical cores`
+                }
+            />
+            <HardwareLine label="RAM" value={ram == null ? null : formatBytes(ram)} />
+            <HardwareLine label="Swap" value={swap == null ? null : formatBytes(swap)} />
+            <HardwareLine label="GPU" value={gpuName} />
+            <HardwareLine label="VRAM" value={vram == null ? null : formatBytes(vram)} />
+            <DiskLine profile={profile} />
         </Stack>
     );
 };
@@ -250,19 +209,6 @@ const AuditPanel = () => {
     if (!record) return null;
     return (
         <Stack spacing={0.5}>
-            <Typography variant="body2">
-                Onboarded {new Date(record.created_at).toLocaleString()} by{' '}
-                <AccountField source="enrolled_by" />
-            </Typography>
-            <Typography
-                variant="caption"
-                sx={{
-                    color: 'text.secondary',
-                }}
-            >
-                Who redeemed the connect code. Uploads are attributed to the device name above,
-                not to this account.
-            </Typography>
             <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Typography
                     variant="caption"
@@ -282,6 +228,15 @@ const AuditPanel = () => {
                     </IconButton>
                 </Tooltip>
             </Stack>
+            <Typography
+                variant="caption"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                Connect code redeemed by{' '}
+                <AccountField source="enrolled_by" variant="caption" />
+            </Typography>
         </Stack>
     );
 };
@@ -382,6 +337,9 @@ const DeviceShow = () => (
             <SectionHeading title="Assigned preset" />
             <AssignedPresetPanel />
             <Divider />
+            <SectionHeading title="Performance" />
+            <DevicePerformance />
+            <Divider />
             <SectionHeading title="Enrolment" />
             <Stack
                 direction="row"
@@ -391,7 +349,7 @@ const DeviceShow = () => (
                     flexWrap: 'wrap',
                 }}
             >
-                <Labeled label="Enrolled">
+                <Labeled label="Onboarded">
                     <DateField source="created_at" showTime />
                 </Labeled>
                 <Labeled label="Last seen">

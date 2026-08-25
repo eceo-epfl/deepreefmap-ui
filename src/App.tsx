@@ -2,12 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 import {
     Admin,
+    CustomRoutes,
     Resource,
     AuthProvider,
     defaultLightTheme,
     defaultDarkTheme,
     fetchUtils,
 } from 'react-admin';
+import { Route } from 'react-router-dom';
 import { deepmerge } from '@mui/utils';
 import simpleRestProvider, { DrmDataProvider } from './dataProvider/index';
 import Keycloak, { KeycloakTokenParsed, KeycloakInitOptions } from 'keycloak-js';
@@ -26,6 +28,7 @@ import cover from './cover';
 import devices from './devices';
 import presets from './presets';
 import archive from './archive';
+import PerformancePage from './performance/PerformancePage';
 
 // MUI names Roboto by default, which nothing here ships or fetches.
 const SYSTEM_FONTS = [
@@ -169,6 +172,10 @@ const App = () => {
                         {/* Likewise, registered only for the run show page's
                             archived outputs panel. */}
                         <Resource name="run_artifacts" />
+                        {/* Not a resource: one aggregate the registry computes. */}
+                        <CustomRoutes>
+                            <Route path="/performance" element={<PerformancePage />} />
+                        </CustomRoutes>
                     </>
                 );
             }}
