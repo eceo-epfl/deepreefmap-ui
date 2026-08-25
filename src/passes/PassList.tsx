@@ -1,5 +1,7 @@
 import {
     Datagrid,
+    DateField,
+    DateInput,
     ExportButton,
     List,
     ReferenceField,
@@ -11,10 +13,17 @@ import {
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 
-import { asColumn, DurationField, QualityField, qualityChoices } from '../components';
+import {
+    asColumn,
+    DurationField,
+    QualityField,
+    qualityChoices,
+    ValidatedField,
+    ValidateSelectedButton,
+} from '../components';
+import { GLOSSARY } from '../contract/glossary';
 import { useCanAuthor } from '../permissions';
 import { DirectionField, directionChoices } from './DirectionField';
-import GroupPassesButton from './GroupPassesButton';
 
 const WindowColumn = asColumn(DurationField);
 const QualityColumn = asColumn(QualityField);
@@ -37,14 +46,7 @@ const passFilters = [
         sort={REFERENCE_SORT}
         alwaysOn
     />,
-    <ReferenceInput
-        key="survey_group_id"
-        source="survey_group_id"
-        reference="pass_groups"
-        sort={REFERENCE_SORT}
-    >
-        <SelectInput optionText="name" label="Group" />
-    </ReferenceInput>,
+    <DateInput key="surveyed_on" source="surveyed_on" label="Surveyed on" />,
     <SelectInput key="quality" source="quality" choices={qualityChoices} />,
     <SelectInput key="direction" source="direction" choices={directionChoices} />,
 ];
@@ -72,8 +74,8 @@ const PassEmpty = () => (
                 color: 'text.secondary',
             }}
         >
-            Passes are created by the desktop application and arrive when an enrolled laptop
-            syncs.
+            {GLOSSARY.passes} Passes are created by the desktop application and arrive when an
+            enrolled laptop syncs.
         </Typography>
     </Box>
 );
@@ -90,7 +92,9 @@ const PassList = () => {
         >
             <Datagrid
                 rowClick="show"
-                bulkActionButtons={canAuthor ? <GroupPassesButton /> : false}
+                bulkActionButtons={
+                    canAuthor ? <ValidateSelectedButton section="passes" /> : false
+                }
             >
                 <ReferenceField
                     source="transect_id"
@@ -108,16 +112,7 @@ const PassList = () => {
                 >
                     <TextField source="name" />
                 </ReferenceField>
-                <ReferenceField
-                    source="survey_group_id"
-                    reference="pass_groups"
-                    link="edit"
-                    label="Group"
-                    sortable={false}
-                    emptyText="—"
-                >
-                    <TextField source="name" />
-                </ReferenceField>
+                <DateField source="surveyed_on" label="Surveyed on" emptyText="—" />
                 <TextField source="label" emptyText="Unnamed" sortable={false} />
                 <DirectionField label="Direction" />
                 <QualityColumn label="Quality" source="quality" />
@@ -128,6 +123,7 @@ const PassList = () => {
                     endSource="end_s"
                     sortable={false}
                 />
+                <ValidatedField label="Validated" sortable={false} />
             </Datagrid>
         </List>
     );

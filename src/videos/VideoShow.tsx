@@ -1,4 +1,5 @@
 import {
+    BooleanField,
     Datagrid,
     DateField,
     EditButton,
@@ -18,6 +19,7 @@ import {
 import { Alert, Box, Divider, Grid, Stack, Typography } from '@mui/material';
 
 import ArchiveChip from '../archive/ArchiveChip';
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
 import {
     asColumn,
     DurationField,
@@ -25,20 +27,23 @@ import {
     SyncFields,
     TombstoneButton,
     TriStateField,
+    ValidateButton,
 } from '../components';
 import type { VideoAsset } from '../contract';
-import { useIsAdmin } from '../permissions';
+import { useCanAuthor } from '../permissions';
 import { RunStatusChip } from '../runs/StatusField';
+import { ReviewField, RigPositionField } from './ReviewField';
 import { ResolutionField, SizeField } from './VideoFields';
 import { useVideoRuns } from './useVideoRuns';
 
 const DurationColumn = asColumn(DurationField);
 
 const VideoShowActions = () => {
-    const admin = useIsAdmin();
+    const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
-            {admin && <EditButton />}
+            <ValidateButton section="videos" />
+            {canAuthor && <EditButton />}
             <TombstoneButton noun="video" />
         </TopToolbar>
     );
@@ -162,6 +167,7 @@ const VideoShow = () => (
                 p: 2,
             }}
         >
+            <ProposedChangesPanel section="videos" />
             <Grid container spacing={2}>
                 <Grid
                     size={{
@@ -285,6 +291,31 @@ const VideoShow = () => (
                             <TriStateField source="gps" />
                         </Labeled>
                     </Stack>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Labeled label="Camera">
+                        <TextField source="camera_label" emptyText="—" />
+                    </Labeled>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Labeled label="Rig position">
+                        <RigPositionField />
+                    </Labeled>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Labeled label="Upside down">
+                        <BooleanField source="upside_down" />
+                    </Labeled>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Labeled label="Review">
+                        <ReviewField />
+                    </Labeled>
+                </Grid>
+                <Grid size={12}>
+                    <Labeled label="Notes">
+                        <TextField source="notes" emptyText="—" />
+                    </Labeled>
                 </Grid>
             </Grid>
 

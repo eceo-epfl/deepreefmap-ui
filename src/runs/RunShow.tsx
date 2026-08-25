@@ -351,6 +351,34 @@ const RunLayout = () => {
                 </Alert>
             )}
 
+            <Panel title="Scale">
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    What the cover was measured at. A run scaled from a tape length that has
+                    since been corrected keeps the length it used.
+                </Typography>
+                <Fields>
+                    <Labeled label="Camera profile">
+                        <TextField source="camera_profile" emptyText="—" />
+                    </Labeled>
+                    <Labeled label="Scale">
+                        <TextField source="scale_type" emptyText="—" />
+                    </Labeled>
+                    <Labeled label="Tape length used (m)">
+                        <NumberField source="transect_length_m" emptyText="—" />
+                    </Labeled>
+                    <Labeled label="Crop width (m)">
+                        <NumberField source="crop_width_m" emptyText="—" />
+                    </Labeled>
+                    <Labeled label="Metres per pixel">
+                        <NumberField
+                            source="pixel_size_m"
+                            emptyText="—"
+                            options={{ maximumFractionDigits: 5 }}
+                        />
+                    </Labeled>
+                </Fields>
+            </Panel>
+
             <Panel title="Cover">
                 <RunCoverTable />
             </Panel>

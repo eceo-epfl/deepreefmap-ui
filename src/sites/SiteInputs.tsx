@@ -30,7 +30,7 @@ const SiteInputs = () => (
                 <TextInput
                     source="name"
                     validate={required()}
-                    helperText="Unique across the registry, ignoring case."
+                    helperText="Unique within its country, ignoring case."
                     fullWidth
                 />
             </Grid>
@@ -40,7 +40,7 @@ const SiteInputs = () => (
                     sm: 3,
                 }}
             >
-                <TextInput source="country" fullWidth />
+                <TextInput source="country" validate={required()} fullWidth />
             </Grid>
             <Grid
                 size={{

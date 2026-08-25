@@ -4,8 +4,9 @@ import PassEdit from './PassEdit';
 import PassList from './PassList';
 import PassShow from './PassShow';
 
-// No create: the desktop application is what records a pass. Edit is the correction
-// path for one already synced.
+// No create: the desktop application is what records a pass. Edit is the curation
+// path for one already synced; a laptop's later change to a validated pass is a
+// proposal.
 export default {
     list: PassList,
     show: PassShow,

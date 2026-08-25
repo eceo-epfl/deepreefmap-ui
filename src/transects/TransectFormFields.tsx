@@ -9,9 +9,30 @@ import {
 } from 'react-admin';
 import { Grid, Typography } from '@mui/material';
 
-const latitude = [required(), minValue(-90), maxValue(90)];
-const longitude = [required(), minValue(-180), maxValue(180)];
+const latitude = [minValue(-90), maxValue(90)];
+const longitude = [minValue(-180), maxValue(180)];
 const nonNegative = [minValue(0)];
+
+type EndPoints = {
+    start_lat?: number | null;
+    start_lon?: number | null;
+    end_lat?: number | null;
+    end_lon?: number | null;
+};
+
+/** An end point is both coordinates or neither; the line as a whole may have none. */
+export const validateEndPoints = (values: EndPoints) => {
+    const errors: Record<string, string> = {};
+    if ((values.start_lat == null) !== (values.start_lon == null)) {
+        errors[values.start_lat == null ? 'start_lat' : 'start_lon'] =
+            'Both start coordinates, or neither';
+    }
+    if ((values.end_lat == null) !== (values.end_lon == null)) {
+        errors[values.end_lat == null ? 'end_lat' : 'end_lon'] =
+            'Both end coordinates, or neither';
+    }
+    return errors;
+};
 
 const TransectFormFields = () => (
     <>
@@ -29,6 +50,7 @@ const TransectFormFields = () => (
                     <SelectInput
                         optionText="name"
                         label="Site"
+                        validate={required()}
                         helperText="A transect name only has to be unique within its site."
                         fullWidth
                     />
@@ -49,6 +71,9 @@ const TransectFormFields = () => (
 
         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             End points
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+            Optional: many historical lines were never fixed by GPS.
         </Typography>
         <Grid container spacing={2}>
             <Grid

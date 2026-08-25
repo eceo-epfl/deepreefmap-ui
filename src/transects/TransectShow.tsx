@@ -13,7 +13,8 @@ import {
 } from 'react-admin';
 import { Box, Grid } from '@mui/material';
 
-import { CoordinateField, SyncFields, TombstoneButton } from '../components';
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
+import { CoordinateField, SyncFields, TombstoneButton, ValidateButton } from '../components';
 import { useCanAuthor } from '../permissions';
 import type { Transect } from '../contract';
 import Statistics from '../cover/Statistics';
@@ -24,6 +25,7 @@ const TransectShowActions = () => {
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
+            <ValidateButton section="transects" />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="transect" />
         </TopToolbar>
@@ -40,6 +42,9 @@ const accuracy = (value: number | null | undefined) => (value == null ? '' : ` Â
 
 const TransectHeader = () => (
     <Grid container spacing={2} sx={{ p: 2 }}>
+        <Grid size={12}>
+            <ProposedChangesPanel section="transects" />
+        </Grid>
         <Grid
             size={{
                 xs: 12,

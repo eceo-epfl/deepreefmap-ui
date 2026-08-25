@@ -14,9 +14,9 @@ export const useCanAuthor = (): boolean => {
 /**
  * True only for `deepreefmap-admin`.
  *
- * The registry needs the role for two things: deleting anything, since a tombstone
- * reaches every laptop that already pulled the row, and writing the rows devices
- * report rather than humans author (videos, runs, cover rows).
+ * The registry needs the role for deleting anything, since a tombstone reaches every
+ * laptop that already pulled the row. Runs and cover rows are device-reported and
+ * nobody writes them here; a clip's review is the one thing a person edits on it.
  */
 export const useIsAdmin = (): boolean => {
     const { permissions } = usePermissions();

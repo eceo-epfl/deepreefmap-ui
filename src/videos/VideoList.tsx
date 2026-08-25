@@ -20,15 +20,22 @@ import {
     HashField,
     TriStateField,
     triStateChoices,
+    ValidatedField,
+    ValidateSelectedButton,
 } from '../components';
 import type { VideoAsset } from '../contract';
+import { GLOSSARY } from '../contract/glossary';
+import { useCanAuthor } from '../permissions';
+import { ReviewField, reviewChoices } from './ReviewField';
 import { SizeField } from './VideoFields';
 
 const DurationColumn = asColumn(DurationField);
 const TriStateColumn = asColumn(TriStateField);
 
 const videoFilters = [
-    <TextInput key="q" source="q" label="Search file name" alwaysOn />,
+    <TextInput key="q" source="q" label="Search file name or notes" alwaysOn />,
+    <SelectInput key="review" source="review" label="Review" choices={reviewChoices} />,
+    <TextInput key="camera_label" source="camera_label" label="Camera" />,
     <TextInput key="codec" source="codec" label="Codec" helperText="Exact match, eg. hvc1" />,
     <SelectInput key="gravity" source="gravity" label="Gravity" choices={triStateChoices} />,
     <SelectInput key="gps" source="gps" label="GPS" choices={triStateChoices} />,
@@ -80,31 +87,41 @@ const VideoEmpty = () => (
                 color: 'text.secondary',
             }}
         >
-            Clips are metadata only and appear once an enrolled laptop syncs.
+            {GLOSSARY.videos} Clips are metadata only and appear once an enrolled laptop syncs.
         </Typography>
     </Box>
 );
 
-const VideoList = () => (
-    <List
-        actions={<VideoListActions />}
-        filters={videoFilters}
-        sort={{ field: 'captured_at', order: 'DESC' }}
-        perPage={50}
-        empty={<VideoEmpty />}
-    >
-        <Datagrid rowClick="show" bulkActionButtons={false}>
-            <TextField source="file_name" label="File name" />
-            <HashField label="Quick hash" />
-            <DurationColumn label="Duration" source="duration_s" />
-            <SizeField label="Size" source="size_bytes" />
-            <DateField source="captured_at" label="Captured" showTime emptyText="—" />
-            <TextField source="codec" emptyText="—" sortable={false} />
-            <TriStateColumn label="Gravity" source="gravity" sortable={false} />
-            <TriStateColumn label="GPS" source="gps" sortable={false} />
-            <ArchiveColumn label="Archive" sortable={false} />
-        </Datagrid>
-    </List>
-);
+const VideoList = () => {
+    const canAuthor = useCanAuthor();
+    return (
+        <List
+            actions={<VideoListActions />}
+            filters={videoFilters}
+            sort={{ field: 'captured_at', order: 'DESC' }}
+            perPage={50}
+            empty={<VideoEmpty />}
+        >
+            <Datagrid
+                rowClick="show"
+                bulkActionButtons={
+                    canAuthor ? <ValidateSelectedButton section="videos" /> : false
+                }
+            >
+                <TextField source="file_name" label="File name" />
+                <TextField source="camera_label" label="Camera" emptyText="—" />
+                <ReviewField label="Review" />
+                <HashField label="Quick hash" />
+                <DurationColumn label="Duration" source="duration_s" />
+                <SizeField label="Size" source="size_bytes" />
+                <DateField source="captured_at" label="Captured" showTime emptyText="—" />
+                <TriStateColumn label="Gravity" source="gravity" sortable={false} />
+                <TriStateColumn label="GPS" source="gps" sortable={false} />
+                <ArchiveColumn label="Archive" sortable={false} />
+                <ValidatedField label="Validated" sortable={false} />
+            </Datagrid>
+        </List>
+    );
+};
 
 export default VideoList;

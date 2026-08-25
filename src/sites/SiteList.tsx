@@ -10,6 +10,8 @@ import {
 } from 'react-admin';
 import { Box, Typography } from '@mui/material';
 
+import { ValidatedField, ValidateSelectedButton } from '../components';
+import { GLOSSARY } from '../contract/glossary';
 import { SiteMapAll } from '../maps/Sites';
 import { useCanAuthor } from '../permissions';
 
@@ -42,29 +44,38 @@ const SiteEmpty = () => {
                 No sites yet
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                A site is a named reef location. Define one here, then add the transects the
-                divers will swim, and the desktop clients will pick both up on their next sync.
+                {GLOSSARY.sites} Define one here, then add the transects the divers will swim,
+                and the desktop clients will pick both up on their next sync.
             </Typography>
             {canAuthor && <CreateButton label="Create the first site" />}
         </Box>
     );
 };
 
-const SiteList = () => (
-    <List
-        actions={<SiteListActions />}
-        filters={siteFilters}
-        sort={{ field: 'name', order: 'ASC' }}
-        perPage={25}
-        empty={<SiteEmpty />}
-    >
-        <SiteMapAll />
-        <Datagrid rowClick="show" bulkActionButtons={false}>
-            <TextField source="name" />
-            <TextField source="country" emptyText="—" />
-            <TextField source="region" emptyText="—" sortable={false} />
-        </Datagrid>
-    </List>
-);
+const SiteList = () => {
+    const canAuthor = useCanAuthor();
+    return (
+        <List
+            actions={<SiteListActions />}
+            filters={siteFilters}
+            sort={{ field: 'name', order: 'ASC' }}
+            perPage={25}
+            empty={<SiteEmpty />}
+        >
+            <SiteMapAll />
+            <Datagrid
+                rowClick="show"
+                bulkActionButtons={
+                    canAuthor ? <ValidateSelectedButton section="sites" /> : false
+                }
+            >
+                <TextField source="name" />
+                <TextField source="country" emptyText="—" />
+                <TextField source="region" emptyText="—" sortable={false} />
+                <ValidatedField label="Validated" sortable={false} />
+            </Datagrid>
+        </List>
+    );
+};
 
 export default SiteList;

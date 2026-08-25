@@ -21,6 +21,7 @@ import type {
     CompletedPart,
     ConnectCode,
     CoverSeries,
+    DecisionResponse,
     DeviceRename,
     DeviceRevocation,
     PerformanceSummary,
@@ -28,6 +29,8 @@ import type {
     PooledCover,
     RunRecord,
     RunsProbe,
+    Transect,
+    ValidateResponse,
 } from '../contract';
 
 type HttpClient = typeof fetchUtils.fetchJson;
@@ -59,7 +62,18 @@ export interface DrmDataProvider extends DataProvider {
     archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
     archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
     assignPresetToAll: (presetId: string) => Promise<AssignAllResponse>;
+    campaignTransects: (campaignId: string) => Promise<Transect[]>;
+    validate: (section: string, ids: string[]) => Promise<ValidateResponse>;
+    acceptChange: (seq: number) => Promise<DecisionResponse>;
+    dismissChange: (seq: number) => Promise<DecisionResponse>;
 }
+
+// The ledger is keyed by `seq`; react-admin needs an `id` on every record.
+const withId = <T extends Record<string, unknown>>(record: T): T =>
+    'id' in record ? record : { ...record, id: record.seq };
+
+const keyed = <T extends Record<string, unknown>>(resource: string, rows: T[]): T[] =>
+    resource === 'changes' ? rows.map(withId) : rows;
 
 const DEFAULT_PAGINATION: PaginationPayload = { page: 1, perPage: 25 };
 const DEFAULT_SORT: SortPayload = { field: 'id', order: 'ASC' };
@@ -80,6 +94,8 @@ const SERVER_OWNED_KEYS = [
     'deleted_at',
     'device_id',
     'server_seq',
+    'validated_at',
+    'validated_by',
 ];
 
 const stripServerOwned = (data: Record<string, unknown>) =>
@@ -137,7 +153,7 @@ const dataProvider = (
             const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
             return httpClient(url, rangeOptions(resource, rangeStart, rangeEnd)).then(
                 ({ headers, json }) => ({
-                    data: json,
+                    data: keyed(resource, json),
                     total: parseTotal(headers, countHeader),
                 }),
             );
@@ -145,7 +161,7 @@ const dataProvider = (
 
         getOne: (resource, params) =>
             httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
-                data: json,
+                data: resource === 'changes' ? withId(json) : json,
             })),
 
         // Every ReferenceField on a page batches into one getMany. Without a range the
@@ -159,7 +175,7 @@ const dataProvider = (
             };
             const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
             return httpClient(url, rangeOptions(resource, 0, last)).then(({ json }) => ({
-                data: json,
+                data: keyed(resource, json),
             }));
         },
 
@@ -171,7 +187,7 @@ const dataProvider = (
             const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
             return httpClient(url, rangeOptions(resource, rangeStart, rangeEnd)).then(
                 ({ headers, json }) => ({
-                    data: json,
+                    data: keyed(resource, json),
                     total: parseTotal(headers, countHeader),
                 }),
             );
@@ -183,16 +199,16 @@ const dataProvider = (
                 body: JSON.stringify(stripServerOwned(params.data)),
             }).then(({ json }) => ({ data: json })),
 
-        // simple-rest has no updateMany route, so fall back to n updates.
+        // One PATCH over the registry's batch route, so a selection lands in one transaction.
         updateMany: (resource, params) =>
-            Promise.all(
-                params.ids.map(id =>
-                    httpClient(`${apiUrl}/${resource}/${id}`, {
-                        method: 'PUT',
-                        body: JSON.stringify(stripServerOwned(params.data)),
-                    }),
+            httpClient(`${apiUrl}/${resource}/batch`, {
+                method: 'PATCH',
+                body: JSON.stringify(
+                    params.ids.map(id => ({ id, ...stripServerOwned(params.data) })),
                 ),
-            ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
+            }).then(({ json }) => ({
+                data: (json as { id: string }[]).map(row => row.id),
+            })),
 
         create: (resource, params) =>
             httpClient(`${apiUrl}/${resource}`, {
@@ -208,16 +224,11 @@ const dataProvider = (
                 headers: new Headers({ 'Content-Type': 'text/plain' }),
             }).then(({ json }) => ({ data: json })),
 
-        // simple-rest has no filtered DELETE route, so fall back to n deletes.
         deleteMany: (resource, params) =>
-            Promise.all(
-                params.ids.map(id =>
-                    httpClient(`${apiUrl}/${resource}/${id}`, {
-                        method: 'DELETE',
-                        headers: new Headers({ 'Content-Type': 'text/plain' }),
-                    }),
-                ),
-            ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
+            httpClient(`${apiUrl}/${resource}/batch`, {
+                method: 'DELETE',
+                body: JSON.stringify(params.ids),
+            }).then(({ json }) => ({ data: json as string[] })),
 
         // The registry pools the figure, so the console and the desktop application cannot
         // report different numbers from the same rows.
@@ -340,6 +351,29 @@ const dataProvider = (
             httpClient(`${apiUrl}/presets/${presetId}/assign-all`, {
                 method: 'POST',
             }).then(({ json }) => json as AssignAllResponse),
+
+        // The registry keeps no campaign-to-transect table: the join goes through passes.
+        campaignTransects: campaignId =>
+            httpClient(`${apiUrl}/campaigns/${campaignId}/transects`).then(
+                ({ json }) => json as Transect[],
+            ),
+
+        // From here on a laptop's change to these rows is a proposal.
+        validate: (section, ids) =>
+            httpClient(`${apiUrl}/changes/validate`, {
+                method: 'POST',
+                body: JSON.stringify({ section, ids }),
+            }).then(({ json }) => json as ValidateResponse),
+
+        acceptChange: seq =>
+            httpClient(`${apiUrl}/changes/${seq}/accept`, { method: 'POST' }).then(
+                ({ json }) => json as DecisionResponse,
+            ),
+
+        dismissChange: seq =>
+            httpClient(`${apiUrl}/changes/${seq}/dismiss`, { method: 'POST' }).then(
+                ({ json }) => json as DecisionResponse,
+            ),
     };
 };
 

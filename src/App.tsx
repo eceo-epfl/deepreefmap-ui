@@ -21,10 +21,9 @@ import sites from './sites';
 import campaigns from './campaigns';
 import transects from './transects';
 import passes from './passes';
-import passGroups from './passGroups';
 import videos from './videos';
 import runs from './runs';
-import cover from './cover';
+import changes from './changes';
 import devices from './devices';
 import presets from './presets';
 import archive from './archive';
@@ -157,15 +156,14 @@ const App = () => {
                         <Resource name="campaigns" {...campaigns} />
                         <Resource name="transects" {...transects} />
                         <Resource name="passes" {...passes} />
-                        <Resource name="pass_groups" {...passGroups} />
                         <Resource name="videos" {...videos} />
                         <Resource name="runs" {...runs} />
-                        <Resource name="cover_rows" {...cover} />
                         {/* A member enrols their own laptop, so the connect page is
                             theirs too. Revoking somebody else's stays with an admin. */}
                         <Resource name="devices" {...devices} />
                         <Resource name="presets" {...presets} />
                         <Resource name="stored_objects" {...archive} />
+                        <Resource name="changes" {...changes} />
                         {/* No list view, so no menu entry: registered only for the
                             passes views to resolve their video references. */}
                         <Resource name="pass_videos" />

@@ -14,7 +14,9 @@ import {
 } from 'react-admin';
 import { Stack, Typography } from '@mui/material';
 
+import { ValidatedField, ValidateSelectedButton } from '../components';
 import type { Transect } from '../contract';
+import { GLOSSARY } from '../contract/glossary';
 import { TransectMapAll } from '../maps/Transects';
 import { useCanAuthor } from '../permissions';
 import AssignSiteButton from './AssignSiteButton';
@@ -48,6 +50,9 @@ const TransectListEmpty = () => {
             }}
         >
             <Typography variant="h6">No transects yet</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {GLOSSARY.transects}
+            </Typography>
             {canAuthor && <CreateButton label="Create transect" />}
         </Stack>
     );
@@ -62,7 +67,16 @@ const TransectListBody = () => {
             <TransectMapAll filter={filterValues} />
             <Datagrid
                 rowClick="show"
-                bulkActionButtons={canAuthor ? <AssignSiteButton /> : false}
+                bulkActionButtons={
+                    canAuthor ? (
+                        <>
+                            <AssignSiteButton />
+                            <ValidateSelectedButton section="transects" />
+                        </>
+                    ) : (
+                        false
+                    )
+                }
             >
                 <TextField source="name" />
                 <ReferenceField
@@ -76,6 +90,7 @@ const TransectListBody = () => {
                 </ReferenceField>
                 <NumberField source="length_m" label="Length (m)" />
                 <NumberField source="depth_m" label="Depth (m)" />
+                <ValidatedField label="Validated" sortable={false} />
             </Datagrid>
         </>
     );

@@ -13,54 +13,48 @@ import {
     TextField,
     TopToolbar,
     useCreatePath,
-    useGetList,
-    useGetMany,
+    useDataProvider,
     useRecordContext,
 } from 'react-admin';
+import { useQuery } from '@tanstack/react-query';
 import { Box, Chip, Divider, Grid, Stack, Typography } from '@mui/material';
 
-import { formatSeconds, QualityField, SyncFields, TombstoneButton } from '../components';
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
+import {
+    formatSeconds,
+    QualityField,
+    SyncFields,
+    TombstoneButton,
+    ValidateButton,
+} from '../components';
+import type { DrmDataProvider } from '../dataProvider';
 import { useCanAuthor } from '../permissions';
-import type { Campaign, Transect, TransectPass } from '../contract';
+import type { Campaign, TransectPass } from '../contract';
 
 const CampaignShowActions = () => {
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
+            <ValidateButton section="campaigns" />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="campaign" />
         </TopToolbar>
     );
 };
 
-const PASS_PAGE = 500;
-
-/**
- * The distinct lines this expedition swam, as links. Derived from the passes
- * client-side because the registry keeps no campaign-to-transect table.
- */
+/** The lines this trip swam, as links. The registry resolves the join through the passes. */
 const TransectsSurveyed = () => {
     const record = useRecordContext<Campaign>();
     const createPath = useCreatePath();
-    const { data: passes } = useGetList<TransectPass>('passes', {
-        filter: { campaign_id: record?.id },
-        pagination: { page: 1, perPage: PASS_PAGE },
-        sort: { field: 'created_at', order: 'DESC' },
+    const dataProvider = useDataProvider<DrmDataProvider>();
+    const { data: transects } = useQuery({
+        queryKey: ['campaigns', record?.id, 'transects'],
+        queryFn: () => dataProvider.campaignTransects(record?.id ?? ''),
+        enabled: Boolean(record?.id),
     });
 
-    const transectIds = Array.from(
-        new Set(
-            (passes ?? []).map(pass => pass.transect_id).filter((id): id is string => !!id),
-        ),
-    );
-    const { data: transects } = useGetMany<Transect>(
-        'transects',
-        { ids: transectIds },
-        { enabled: transectIds.length > 0 },
-    );
-
     if (!transects?.length) return null;
-    const named = [...transects].sort((a, b) => a.name.localeCompare(b.name));
+    const named = transects;
     return (
         <Box>
             <Typography
@@ -153,6 +147,7 @@ const CampaignPasses = () => (
 const CampaignShow = () => (
     <Show actions={<CampaignShowActions />}>
         <SimpleShowLayout>
+            <ProposedChangesPanel section="campaigns" />
             <Grid container spacing={2}>
                 <Grid
                     size={{

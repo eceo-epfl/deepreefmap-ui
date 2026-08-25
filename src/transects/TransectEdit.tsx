@@ -1,6 +1,6 @@
 import { Edit, SaveButton, SimpleForm, Toolbar } from 'react-admin';
 
-import TransectFormFields from './TransectFormFields';
+import TransectFormFields, { validateEndPoints } from './TransectFormFields';
 
 // Rows are tombstoned by the sync protocol, never removed, so no delete is offered.
 const TransectEditToolbar = () => (
@@ -11,7 +11,7 @@ const TransectEditToolbar = () => (
 
 const TransectEdit = () => (
     <Edit redirect="show" mutationMode="pessimistic">
-        <SimpleForm toolbar={<TransectEditToolbar />}>
+        <SimpleForm validate={validateEndPoints} toolbar={<TransectEditToolbar />}>
             <TransectFormFields />
         </SimpleForm>
     </Edit>

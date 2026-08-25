@@ -205,7 +205,8 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -213,7 +214,9 @@ export interface paths {
          *     - begin_date
          *     - end_date
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_campaigns'];
         put?: never;
@@ -304,6 +307,137 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/campaigns/{id}/transects': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transects with a live pass in the campaign, by name. */
+        get: operations['transects_for_campaign'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/changes': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all changes
+         * @description Retrieves all changes.
+         *
+         *     This resource manages change items
+         *
+         *     Additional sortable columns:
+         *     - seq
+         *     - table_key
+         *     - status
+         *     - projected_seq
+         *     - created_at
+         *     - decided_at.
+         *
+         *     Additional filterable columns:
+         *     - seq
+         *     - table_key
+         *     - row_id
+         *     - device_id
+         *     - author
+         *     - status
+         *     - reason
+         *     - validate
+         *     - decided_by.
+         */
+        get: operations['get_all_changes'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/changes/validate': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate rows: from here on a laptop's change to them is a proposal. */
+        post: operations['validate'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/changes/{id}': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one change
+         * @description Retrieves one change by its ID.
+         *
+         *     This resource manages change items
+         */
+        get: operations['get_one_change'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/changes/{seq}/accept': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept a proposal: its fields land on the row as a console write. */
+        post: operations['accept'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/changes/{seq}/dismiss': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss a proposal: the row stands, the values stay in the ledger. */
+        post: operations['dismiss'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/config/class-groups': {
         parameters: {
             query?: never;
@@ -362,7 +496,8 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -372,7 +507,9 @@ export interface paths {
          *     - estimator
          *     - metric_source
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_cover_rows'];
         put?: never;
@@ -606,121 +743,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/pass_groups': {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get all pass_groups
-         * @description Retrieves all pass_groups.
-         *
-         *     This resource manages pass_group items
-         *
-         *     Additional sortable columns:
-         *     - name
-         *     - period_label
-         *     - created_at
-         *     - updated_at
-         *     - deleted_at.
-         *
-         *     Additional filterable columns:
-         *     - id
-         *     - name
-         *     - period_label
-         *     - deleted_at.
-         */
-        get: operations['get_all_pass_groups'];
-        put?: never;
-        /**
-         * Create one pass_group
-         * @description Creates a new pass_group.
-         *
-         *     This resource manages pass_group items
-         */
-        post: operations['create_one_pass_group'];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    '/pass_groups/batch': {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create many pass_groups
-         * @description Creates multiple pass_groups in a batch. Limited to 100 items per request.
-         *
-         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
-         *
-         *     This resource manages pass_group items
-         */
-        post: operations['create_many_pass_groups'];
-        /**
-         * Delete many pass_groups
-         * @description Deletes many pass_groups by their IDs and returns array of deleted UUIDs.
-         *
-         *     Use `?partial=true` for partial success mode (deletes valid items even if some fail).
-         *
-         *     This resource manages pass_group items
-         */
-        delete: operations['delete_many_pass_groups'];
-        options?: never;
-        head?: never;
-        /**
-         * Update many pass_groups
-         * @description Updates multiple pass_groups in a batch. Limited to 100 items per request.
-         *
-         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
-         *
-         *     This resource manages pass_group items
-         */
-        patch: operations['update_many_pass_groups'];
-        trace?: never;
-    };
-    '/pass_groups/{id}': {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get one pass_group
-         * @description Retrieves one pass_group by its ID.
-         *
-         *     This resource manages pass_group items
-         */
-        get: operations['get_one_pass_group'];
-        /**
-         * Update one pass_group
-         * @description Updates one pass_group by its ID.
-         *
-         *     This resource manages pass_group items
-         */
-        put: operations['update_one_pass_group'];
-        post?: never;
-        /**
-         * Delete one pass_group
-         * @description Deletes one pass_group by its ID.
-         *
-         *     This resource manages pass_group items
-         */
-        delete: operations['delete_one_pass_group'];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     '/pass_videos': {
         parameters: {
             query?: never;
@@ -739,14 +761,17 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
          *     - pass_id
          *     - video_id
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_pass_videos'];
         put?: never;
@@ -851,23 +876,26 @@ export interface paths {
          *     This resource manages pass items
          *
          *     Additional sortable columns:
+         *     - surveyed_on
          *     - quality
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
          *     - transect_id
          *     - campaign_id
-         *     - survey_group_id
          *     - direction
-         *     - upside_down
+         *     - surveyed_on
          *     - label
          *     - quality
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_passes'];
         put?: never;
@@ -1215,7 +1243,8 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -1232,10 +1261,17 @@ export interface paths {
          *     - fps
          *     - preprocess_batch_size
          *     - taxonomy_version
+         *     - taxonomy_hash
          *     - preset_name
          *     - preset_version
+         *     - preset_hash
+         *     - camera_profile
+         *     - scale_type
+         *     - preset_id
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_runs'];
         put?: never;
@@ -1287,7 +1323,8 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -1295,7 +1332,9 @@ export interface paths {
          *     - country
          *     - region
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_sites'];
         put?: never;
@@ -1525,7 +1564,8 @@ export interface paths {
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -1534,7 +1574,9 @@ export interface paths {
          *     - length_m
          *     - depth_m
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_transects'];
         put?: never;
@@ -1685,10 +1727,13 @@ export interface paths {
          *     - size_bytes
          *     - duration_s
          *     - captured_at
+         *     - camera_label
+         *     - review
          *     - created_at
          *     - updated_at
          *     - deleted_at
-         *     - server_seq.
+         *     - server_seq
+         *     - validated_at.
          *
          *     Additional filterable columns:
          *     - id
@@ -1698,16 +1743,68 @@ export interface paths {
          *     - captured_at
          *     - gravity
          *     - gps
+         *     - camera_label
+         *     - rig_position
+         *     - upside_down
+         *     - review
          *     - deleted_at
-         *     - device_id.
+         *     - device_id
+         *     - validated_at
+         *     - validated_by.
          */
         get: operations['get_all_videos'];
         put?: never;
-        post?: never;
+        /**
+         * Create one video
+         * @description Creates a new video.
+         *
+         *     This resource manages video items
+         */
+        post: operations['create_one_video'];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    '/videos/batch': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create many videos
+         * @description Creates multiple videos in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages video items
+         */
+        post: operations['create_many_videos'];
+        /**
+         * Delete many videos
+         * @description Deletes many videos by their IDs and returns array of deleted UUIDs.
+         *
+         *     Use `?partial=true` for partial success mode (deletes valid items even if some fail).
+         *
+         *     This resource manages video items
+         */
+        delete: operations['delete_many_videos'];
+        options?: never;
+        head?: never;
+        /**
+         * Update many videos
+         * @description Updates multiple videos in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages video items
+         */
+        patch: operations['update_many_videos'];
         trace?: never;
     };
     '/videos/{id}': {
@@ -1724,9 +1821,21 @@ export interface paths {
          *     This resource manages video items
          */
         get: operations['get_one_video'];
-        put?: never;
+        /**
+         * Update one video
+         * @description Updates one video by its ID.
+         *
+         *     This resource manages video items
+         */
+        put: operations['update_one_video'];
         post?: never;
-        delete?: never;
+        /**
+         * Delete one video
+         * @description Deletes one video by its ID.
+         *
+         *     This resource manages video items
+         */
+        delete: operations['delete_one_video'];
         options?: never;
         head?: never;
         patch?: never;
@@ -1757,6 +1866,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description A row that landed, and the position the device stores as its next `base_seq`. */
+        Ack: {
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            seq: number;
+        };
         AssignAllResponse: {
             /** Format: date-time */
             assigned_at: string;
@@ -1849,6 +1965,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         CampaignResponse: {
             /** Format: date */
@@ -1883,6 +2005,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         CampaignUpdate: {
             /** Format: date */
@@ -1891,6 +2019,69 @@ export interface components {
             /** Format: date */
             end_date?: string | null;
             name?: string | null;
+        };
+        ChangeList: {
+            /** @description The console user behind a console entry. */
+            author?: string | null;
+            /** Format: int64 */
+            base_seq: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at?: string | null;
+            decided_by?: string | null;
+            /** Format: int64 */
+            decided_seq?: number | null;
+            /**
+             * Format: uuid
+             * @description The pushing laptop; null for a console entry.
+             */
+            device_id?: string | null;
+            /** @description The fields this entry changed against its base. */
+            patch: unknown;
+            /** Format: int64 */
+            projected_seq?: number | null;
+            reason?: string | null;
+            /** Format: uuid */
+            row_id: string;
+            /** Format: int64 */
+            seq: number;
+            status: string;
+            /** @description The section, as `contract/sync-contract.json` names it. */
+            table_key: string;
+            validate: boolean;
+        };
+        ChangeResponse: {
+            after_image: unknown;
+            /** @description The console user behind a console entry. */
+            author?: string | null;
+            /** Format: int64 */
+            base_seq: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at?: string | null;
+            decided_by?: string | null;
+            /** Format: int64 */
+            decided_seq?: number | null;
+            /**
+             * Format: uuid
+             * @description The pushing laptop; null for a console entry.
+             */
+            device_id?: string | null;
+            /** @description The fields this entry changed against its base. */
+            patch: unknown;
+            /** Format: int64 */
+            projected_seq?: number | null;
+            reason?: string | null;
+            /** Format: uuid */
+            row_id: string;
+            /** Format: int64 */
+            seq: number;
+            status: string;
+            /** @description The section, as `contract/sync-contract.json` names it. */
+            table_key: string;
+            validate: boolean;
         };
         /** @description One benthic class group and the colour every viewer draws it in. */
         ClassGroup: {
@@ -1960,6 +2151,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         CoverRowResponse: {
             class_group: string;
@@ -2003,19 +2200,27 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         CoverSeries: {
-            /**
-             * @description Named survey events first, ordered by period label then name, then campaign
-             *     buckets, then the passes with neither.
-             */
+            /** @description Campaigns by begin date then name, then the passes with none. */
             entries: components['schemas']['CoverSeriesEntry'][];
             level: string;
             /** Format: uuid */
             transect_id: string;
         };
         CoverSeriesEntry: {
-            /** Format: uuid */
+            /** Format: date */
+            begin_date?: string | null;
+            /**
+             * Format: uuid
+             * @description The campaign, or null for the passes with none.
+             */
             campaign_id?: string | null;
             campaign_name?: string | null;
             /**
@@ -2028,15 +2233,13 @@ export interface components {
              * @description Points the entry's fractions are measured over.
              */
             denominator: number;
-            /**
-             * Format: uuid
-             * @description The curator's survey event, or null for a campaign or unbucketed entry.
-             */
-            group_id?: string | null;
-            group_name?: string | null;
             /** @description Largest fraction first. */
             groups: components['schemas']['SeriesGroupCover'][];
-            period_label?: string | null;
+        };
+        DecisionResponse: {
+            /** Format: int64 */
+            seq: number;
+            status: string;
         };
         DeviceList: {
             /**
@@ -2305,6 +2508,21 @@ export interface components {
             /** Format: date-time */
             expires_at: string;
         };
+        /** @description The ledger's word on one entry a device pushed, decided since its cursor. */
+        OutboxEntry: {
+            /**
+             * Format: int64
+             * @description The row's `server_seq` once applied, for the device's `base_seq`.
+             */
+            projected_seq?: number | null;
+            reason?: string | null;
+            /** Format: uuid */
+            row_id: string;
+            /** Format: int64 */
+            seq: number;
+            status: components['schemas']['Status'];
+            table_key: string;
+        };
         PassCreate: {
             /** Format: double */
             begin_s: number;
@@ -2318,61 +2536,10 @@ export interface components {
             label: string;
             notes: string;
             quality?: string | null;
-            /** Format: uuid */
-            survey_group_id?: string | null;
+            /** Format: date */
+            surveyed_on?: string | null;
             /** Format: uuid */
             transect_id?: string | null;
-            upside_down: boolean;
-        };
-        PassGroupCreate: {
-            description: string;
-            /** Format: uuid */
-            id?: string | null;
-            name: string;
-            period_label?: string | null;
-        };
-        PassGroupList: {
-            /** Format: date-time */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description The tombstone. Written only by the delete route, which administrators alone
-             *     reach. Accepting it on create or update would let a member delete through a
-             *     plain edit.
-             */
-            deleted_at?: string | null;
-            description: string;
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** @description Where the event sits on a timeline (`2024 spring`), and what orders a series. */
-            period_label?: string | null;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PassGroupResponse: {
-            /** Format: date-time */
-            created_at: string;
-            /**
-             * Format: date-time
-             * @description The tombstone. Written only by the delete route, which administrators alone
-             *     reach. Accepting it on create or update would let a member delete through a
-             *     plain edit.
-             */
-            deleted_at?: string | null;
-            description: string;
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** @description Where the event sits on a timeline (`2024 spring`), and what orders a series. */
-            period_label?: string | null;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PassGroupUpdate: {
-            description?: string | null;
-            name?: string | null;
-            period_label?: string | null;
         };
         PassList: {
             /** Format: double */
@@ -2408,11 +2575,10 @@ export interface components {
             /** Format: int64 */
             server_seq: number;
             /**
-             * Format: uuid
-             * @description The curator's survey event, assigned in the console. Deliberately outside the
-             *     sync contract, so a device re-pushing this pass can never clobber it.
+             * Format: date
+             * @description The day the swim happened, from the clip's capture stamp unless corrected.
              */
-            survey_group_id?: string | null;
+            surveyed_on?: string | null;
             /**
              * Format: uuid
              * @description Nullable: footage is not always laid against a tape, and such a run is unscaled.
@@ -2425,7 +2591,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
-            upside_down: boolean;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         PassResponse: {
             /** Format: double */
@@ -2461,11 +2632,10 @@ export interface components {
             /** Format: int64 */
             server_seq: number;
             /**
-             * Format: uuid
-             * @description The curator's survey event, assigned in the console. Deliberately outside the
-             *     sync contract, so a device re-pushing this pass can never clobber it.
+             * Format: date
+             * @description The day the swim happened, from the clip's capture stamp unless corrected.
              */
-            survey_group_id?: string | null;
+            surveyed_on?: string | null;
             /**
              * Format: uuid
              * @description Nullable: footage is not always laid against a tape, and such a run is unscaled.
@@ -2478,7 +2648,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
-            upside_down: boolean;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         PassUpdate: {
             /** Format: double */
@@ -2491,11 +2666,10 @@ export interface components {
             label?: string | null;
             notes?: string | null;
             quality?: string | null;
-            /** Format: uuid */
-            survey_group_id?: string | null;
+            /** Format: date */
+            surveyed_on?: string | null;
             /** Format: uuid */
             transect_id?: string | null;
-            upside_down?: boolean | null;
         };
         PassVideoCreate: {
             /** Format: uuid */
@@ -2541,6 +2715,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
             /** Format: uuid */
             video_id: string;
         };
@@ -2578,6 +2758,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
             /** Format: uuid */
             video_id: string;
         };
@@ -2841,6 +3027,11 @@ export interface components {
              *     `Deepreefmap-Sections`. Upload-only sections are absent by design and not listed.
              */
             omitted_sections: string[];
+            /**
+             * @description Decisions on this device's entries since the cursor. Empty for an operator, and
+             *     under contract 1.
+             */
+            outbox: components['schemas']['OutboxEntry'][];
             sections: Record<string, never>;
         };
         PushRequest: {
@@ -2850,7 +3041,10 @@ export interface components {
              *     for the exchange.
              */
             contract_version: number;
-            /** @description Rows keyed by section name, as listed in `contract/sync-contract.json`. */
+            /**
+             * @description Rows keyed by section name, as listed in `contract/sync-contract.json`. From
+             *     contract 2 a row may carry `base_seq`, the `server_seq` the device last saw for it.
+             */
             sections: Record<string, never>;
         };
         PushResponse: {
@@ -2864,7 +3058,17 @@ export interface components {
              * @description Sequence position after this push, for the next pull's `since`.
              */
             cursor: number;
+            /**
+             * @description One [`SectionOutcome`] per section sent. Under contract 1 the older shape:
+             *     `applied` a count, and `skipped`, `refused`, `conflicted` lists of ids.
+             */
             sections: Record<string, never>;
+        };
+        /** @description A row that did not land, and why. The ledger keeps its values either way. */
+        Refusal: {
+            /** Format: uuid */
+            id: string;
+            reason: string;
         };
         RenameDeviceRequest: {
             name: string;
@@ -2934,8 +3138,16 @@ export interface components {
             updated_at: string;
         };
         RunList: {
+            /**
+             * @description The scale the cover was measured at: the camera profile, the tape length and
+             *     crop width the run used, the metres per pixel that gave, and how the scale
+             *     was established.
+             */
+            camera_profile?: string | null;
             /** Format: date-time */
             created_at: string;
+            /** Format: double */
+            crop_width_m?: number | null;
             /**
              * Format: date-time
              * @description The tombstone. Written only by the delete route, which administrators alone
@@ -2961,12 +3173,17 @@ export interface components {
             mapping_backend?: string | null;
             /** Format: uuid */
             pass_id: string;
+            /** Format: double */
+            pixel_size_m?: number | null;
             /** Format: int32 */
             preprocess_batch_size?: number | null;
-            /** @description Settings that departed from the preset, separating "unchanged" from "unrecorded". */
-            preset_deviations?: unknown;
             /** @description Digest of the preset definition, so a claimed version can be checked. */
             preset_hash?: string | null;
+            /**
+             * Format: uuid
+             * @description The preset row the run ran under, where the device knew it.
+             */
+            preset_id?: string | null;
             preset_name?: string | null;
             /** Format: int32 */
             preset_version?: number | null;
@@ -2985,6 +3202,7 @@ export interface components {
              * @description Wall-clock seconds for the whole run.
              */
             run_duration_s?: number | null;
+            scale_type?: string | null;
             segmentation_model?: string | null;
             /** Format: int64 */
             server_seq: number;
@@ -2995,6 +3213,8 @@ export interface components {
             taxonomy_hash?: string | null;
             /** Format: int32 */
             taxonomy_version?: number | null;
+            /** Format: double */
+            transect_length_m?: number | null;
             /**
              * Format: date-time
              * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
@@ -3002,10 +3222,24 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         RunResponse: {
+            /**
+             * @description The scale the cover was measured at: the camera profile, the tape length and
+             *     crop width the run used, the metres per pixel that gave, and how the scale
+             *     was established.
+             */
+            camera_profile?: string | null;
             /** Format: date-time */
             created_at: string;
+            /** Format: double */
+            crop_width_m?: number | null;
             /**
              * Format: date-time
              * @description The tombstone. Written only by the delete route, which administrators alone
@@ -3036,12 +3270,22 @@ export interface components {
             model_revisions?: unknown;
             /** Format: uuid */
             pass_id: string;
+            /** Format: double */
+            pixel_size_m?: number | null;
             /** Format: int32 */
             preprocess_batch_size?: number | null;
-            /** @description Settings that departed from the preset, separating "unchanged" from "unrecorded". */
+            /**
+             * @description Settings that departed from the preset, separating "unchanged" from "unrecorded".
+             *     Detail view only.
+             */
             preset_deviations?: unknown;
             /** @description Digest of the preset definition, so a claimed version can be checked. */
             preset_hash?: string | null;
+            /**
+             * Format: uuid
+             * @description The preset row the run ran under, where the device knew it.
+             */
+            preset_id?: string | null;
             preset_name?: string | null;
             /** Format: int32 */
             preset_version?: number | null;
@@ -3060,6 +3304,7 @@ export interface components {
              * @description Wall-clock seconds for the whole run.
              */
             run_duration_s?: number | null;
+            scale_type?: string | null;
             segmentation_model?: string | null;
             /** Format: int64 */
             server_seq: number;
@@ -3080,6 +3325,8 @@ export interface components {
             taxonomy_hash?: string | null;
             /** Format: int32 */
             taxonomy_version?: number | null;
+            /** Format: double */
+            transect_length_m?: number | null;
             /**
              * Format: date-time
              * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
@@ -3087,6 +3334,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         RunsProbeRequest: {
             /** @description Runs to look up, at most 200. */
@@ -3099,24 +3352,15 @@ export interface components {
             };
         };
         SectionOutcome: {
-            /** @description Rows written, inserted or updated. */
-            applied: number;
-            /**
-             * @description Ids the database would not take: a unique collision, a missing parent, or a value
-             *     outside its allowed set. Re-sending the same row cannot help.
-             */
-            conflicted: string[];
+            /** @description Rows written, inserted or merged. */
+            applied: components['schemas']['Ack'][];
+            /** @description Rows the console holds the last word on, kept as proposals a curator reviews. */
+            proposed: components['schemas']['Refusal'][];
             received: number;
-            /**
-             * @description Ids left untouched because this origin does not author them: another origin's row,
-             *     or any row of a section this origin may not write. A human reconciles these.
-             */
-            refused: string[];
-            /**
-             * @description Ids this origin owns but the server holds at an equal or newer `updated_at`; pull
-             *     them to see what won.
-             */
-            skipped: string[];
+            /** @description Rows the database would not take. Re-sending the same row cannot help. */
+            rejected: components['schemas']['Refusal'][];
+            /** @description Rows another origin owns, or this origin has since moved past. */
+            superseded: components['schemas']['Refusal'][];
         };
         SeriesGroupCover: {
             class_group: string;
@@ -3193,6 +3437,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         SiteResponse: {
             country?: string | null;
@@ -3235,6 +3485,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         SiteUpdate: {
             country?: string | null;
@@ -3246,6 +3502,11 @@ export interface components {
             name?: string | null;
             region?: string | null;
         };
+        /**
+         * @description How an entry was decided.
+         * @enum {string}
+         */
+        Status: 'applied' | 'superseded' | 'proposed' | 'rejected' | 'dismissed';
         StoredObjectList: {
             /**
              * Format: date-time
@@ -3323,9 +3584,9 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
-            end_lat: number;
+            end_lat?: number | null;
             /** Format: double */
-            end_lon: number;
+            end_lon?: number | null;
             /** Format: uuid */
             id?: string | null;
             /** Format: double */
@@ -3336,9 +3597,9 @@ export interface components {
             /** Format: double */
             start_accuracy_m?: number | null;
             /** Format: double */
-            start_lat: number;
+            start_lat?: number | null;
             /** Format: double */
-            start_lon: number;
+            start_lon?: number | null;
         };
         TransectList: {
             /** Format: date-time */
@@ -3362,9 +3623,9 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
-            end_lat: number;
+            end_lat?: number | null;
             /** Format: double */
-            end_lon: number;
+            end_lon?: number | null;
             /** Format: uuid */
             id: string;
             /** Format: double */
@@ -3380,10 +3641,13 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
+            /**
+             * Format: double
+             * @description End points are nullable: the historical lines mostly have none.
+             */
+            start_lat?: number | null;
             /** Format: double */
-            start_lat: number;
-            /** Format: double */
-            start_lon: number;
+            start_lon?: number | null;
             /**
              * Format: date-time
              * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
@@ -3391,6 +3655,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         TransectResponse: {
             /** Format: date-time */
@@ -3414,9 +3684,9 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
-            end_lat: number;
+            end_lat?: number | null;
             /** Format: double */
-            end_lon: number;
+            end_lon?: number | null;
             /** Format: uuid */
             id: string;
             /** Format: double */
@@ -3432,10 +3702,13 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
+            /**
+             * Format: double
+             * @description End points are nullable: the historical lines mostly have none.
+             */
+            start_lat?: number | null;
             /** Format: double */
-            start_lat: number;
-            /** Format: double */
-            start_lon: number;
+            start_lon?: number | null;
             /**
              * Format: date-time
              * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
@@ -3443,6 +3716,12 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
         };
         TransectUpdate: {
             /** Format: double */
@@ -3475,7 +3754,45 @@ export interface components {
             /** Format: int32 */
             part_number: number;
         };
+        ValidateRequest: {
+            ids: string[];
+            /** @description The section, as `contract/sync-contract.json` names it. */
+            section: string;
+        };
+        ValidateResponse: {
+            /** @description Rows this call validated. Rows already validated, or absent, are not listed. */
+            validated: string[];
+        };
+        VideoCreate: {
+            camera_label?: string | null;
+            /** Format: date-time */
+            captured_at?: string | null;
+            captured_source?: string | null;
+            codec?: string | null;
+            /** Format: double */
+            duration_s?: number | null;
+            file_name: string;
+            /** Format: double */
+            fps?: number | null;
+            gps: string;
+            gravity: string;
+            hash?: string | null;
+            /** Format: int32 */
+            height?: number | null;
+            /** Format: uuid */
+            id?: string | null;
+            notes: string;
+            review: string;
+            rig_position?: string | null;
+            /** Format: int64 */
+            size_bytes?: number | null;
+            upside_down: boolean;
+            /** Format: int32 */
+            width?: number | null;
+        };
         VideoList: {
+            /** @description The camera's name on the rig, as the field team labels it: `GoPro_3`, `cam1`. */
+            camera_label?: string | null;
             /** Format: date-time */
             captured_at?: string | null;
             /** @description Where `captured_at` came from: a container stamp and an mtime differ in trust. */
@@ -3515,6 +3832,11 @@ export interface components {
             height?: number | null;
             /** Format: uuid */
             id: string;
+            notes: string;
+            /** @description `unreviewed`, `usable` or `excluded`. */
+            review: string;
+            /** @description Where the camera sat relative to the diver: `left`, `centre` or `right`. */
+            rig_position?: string | null;
             /** Format: int64 */
             server_seq: number;
             /** Format: int64 */
@@ -3526,10 +3848,20 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /** @description Mounted inverted, which the reconstruction has to know and no probe can tell. */
+            upside_down: boolean;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
             /** Format: int32 */
             width?: number | null;
         };
         VideoResponse: {
+            /** @description The camera's name on the rig, as the field team labels it: `GoPro_3`, `cam1`. */
+            camera_label?: string | null;
             /** Format: date-time */
             captured_at?: string | null;
             /** @description Where `captured_at` came from: a container stamp and an mtime differ in trust. */
@@ -3569,6 +3901,11 @@ export interface components {
             height?: number | null;
             /** Format: uuid */
             id: string;
+            notes: string;
+            /** @description `unreviewed`, `usable` or `excluded`. */
+            review: string;
+            /** @description Where the camera sat relative to the diver: `left`, `centre` or `right`. */
+            rig_position?: string | null;
             /** Format: int64 */
             server_seq: number;
             /** Format: int64 */
@@ -3580,6 +3917,39 @@ export interface components {
              *     row against every later push. `/api/sync/push` writes it directly instead.
              */
             updated_at: string;
+            /** @description Mounted inverted, which the reconstruction has to know and no probe can tell. */
+            upside_down: boolean;
+            /**
+             * Format: date-time
+             * @description Stamped by the console; from then on a laptop's change is a proposal.
+             */
+            validated_at?: string | null;
+            validated_by?: string | null;
+            /** Format: int32 */
+            width?: number | null;
+        };
+        VideoUpdate: {
+            camera_label?: string | null;
+            /** Format: date-time */
+            captured_at?: string | null;
+            captured_source?: string | null;
+            codec?: string | null;
+            /** Format: double */
+            duration_s?: number | null;
+            file_name?: string | null;
+            /** Format: double */
+            fps?: number | null;
+            gps?: string | null;
+            gravity?: string | null;
+            hash?: string | null;
+            /** Format: int32 */
+            height?: number | null;
+            notes?: string | null;
+            review?: string | null;
+            rig_position?: string | null;
+            /** Format: int64 */
+            size_bytes?: number | null;
+            upside_down?: boolean | null;
             /** Format: int32 */
             width?: number | null;
         };
@@ -4454,6 +4824,263 @@ export interface operations {
             };
         };
     };
+    transects_for_campaign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Campaign id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Transects the campaign surveyed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['TransectResponse'][];
+                };
+            };
+        };
+    };
+    get_all_changes: {
+        parameters: {
+            query?: {
+                /**
+                 * @description JSON-encoded filter for querying resources.
+                 *
+                 *     This parameter supports various filtering options:
+                 *     - Free text search: `{"q": "search text"}`
+                 *     - Filtering by a single ID: `{"id": "550e8400-e29b-41d4-a716-446655440000"}`
+                 *     - Filtering by multiple IDs: `{"id": ["550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440001"]}`
+                 *     - Filtering on other columns: `{"name": "example"}`
+                 * @example {
+                 *       "id": "550e8400-e29b-41d4-a716-446655440000",
+                 *       "name": "example",
+                 *       "q": "search text"
+                 *     }
+                 */
+                filter?: string;
+                /**
+                 * @description Range for pagination in the format "[start, end]".
+                 *
+                 *     Example: `[0,9]`
+                 * @example [0,9]
+                 */
+                range?: string;
+                /**
+                 * @description Page number for standard REST pagination (1-based).
+                 *
+                 *     Example: `1`
+                 * @example 1
+                 */
+                page?: number;
+                /**
+                 * @description Number of items per page for standard REST pagination.
+                 *
+                 *     Example: `10`
+                 * @example 10
+                 */
+                per_page?: number;
+                /**
+                 * @description Sort order for the results in the format `["column", "order"]`.
+                 *
+                 *     Example: `["id", "ASC"]`
+                 * @example ["id", "ASC"]
+                 */
+                sort?: string;
+                /**
+                 * @description Sort column for standard REST format.
+                 *
+                 *     Example: `title`
+                 * @example title
+                 */
+                sort_by?: string;
+                /**
+                 * @description Sort order for standard REST format (ASC or DESC).
+                 *
+                 *     Example: `ASC`
+                 * @example ASC
+                 */
+                order?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ChangeList'][];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    validate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['ValidateRequest'];
+            };
+        };
+        responses: {
+            /** @description Rows validated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ValidateResponse'];
+                };
+            };
+            /** @description Unknown section, or a transect without a site */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_one_change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The requested resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ChangeResponse'];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Ledger position of the proposal */
+                seq: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Proposal applied */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['DecisionResponse'];
+                };
+            };
+            /** @description No such change */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a proposal */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Ledger position of the proposal */
+                seq: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Proposal dismissed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['DecisionResponse'];
+                };
+            };
+            /** @description No such change */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a proposal */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_class_groups: {
         parameters: {
             query?: never;
@@ -4998,454 +5625,6 @@ export interface operations {
             };
             /** @description No valid credential */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_all_pass_groups: {
-        parameters: {
-            query?: {
-                /**
-                 * @description JSON-encoded filter for querying resources.
-                 *
-                 *     This parameter supports various filtering options:
-                 *     - Free text search: `{"q": "search text"}`
-                 *     - Filtering by a single ID: `{"id": "550e8400-e29b-41d4-a716-446655440000"}`
-                 *     - Filtering by multiple IDs: `{"id": ["550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440001"]}`
-                 *     - Filtering on other columns: `{"name": "example"}`
-                 * @example {
-                 *       "id": "550e8400-e29b-41d4-a716-446655440000",
-                 *       "name": "example",
-                 *       "q": "search text"
-                 *     }
-                 */
-                filter?: string;
-                /**
-                 * @description Range for pagination in the format "[start, end]".
-                 *
-                 *     Example: `[0,9]`
-                 * @example [0,9]
-                 */
-                range?: string;
-                /**
-                 * @description Page number for standard REST pagination (1-based).
-                 *
-                 *     Example: `1`
-                 * @example 1
-                 */
-                page?: number;
-                /**
-                 * @description Number of items per page for standard REST pagination.
-                 *
-                 *     Example: `10`
-                 * @example 10
-                 */
-                per_page?: number;
-                /**
-                 * @description Sort order for the results in the format `["column", "order"]`.
-                 *
-                 *     Example: `["id", "ASC"]`
-                 * @example ["id", "ASC"]
-                 */
-                sort?: string;
-                /**
-                 * @description Sort column for standard REST format.
-                 *
-                 *     Example: `title`
-                 * @example title
-                 */
-                sort_by?: string;
-                /**
-                 * @description Sort order for standard REST format (ASC or DESC).
-                 *
-                 *     Example: `ASC`
-                 * @example ASC
-                 */
-                order?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of resources */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupList'][];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    create_one_pass_group: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                'application/json': components['schemas']['PassGroupCreate'];
-            };
-        };
-        responses: {
-            /** @description Resource created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupResponse'];
-                };
-            };
-            /** @description Duplicate record */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-        };
-    };
-    create_many_pass_groups: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Enable partial success mode for batch operations.
-                 *
-                 *     When `true`, the operation processes each item independently instead of
-                 *     using all-or-nothing semantics. Items that succeed are committed even if
-                 *     other items fail.
-                 *
-                 *     Default: `false` (all-or-nothing)
-                 * @example false
-                 */
-                partial?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                'application/json': components['schemas']['PassGroupCreate'][];
-            };
-        };
-        responses: {
-            /** @description Resources created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupResponse'][];
-                };
-            };
-            /** @description Partial success - some items created, some failed */
-            207: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad request - batch size exceeded or validation failed */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-            /** @description Duplicate record */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-        };
-    };
-    delete_many_pass_groups: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Enable partial success mode for batch operations.
-                 *
-                 *     When `true`, the operation processes each item independently instead of
-                 *     using all-or-nothing semantics. Items that succeed are committed even if
-                 *     other items fail.
-                 *
-                 *     Default: `false` (all-or-nothing)
-                 * @example false
-                 */
-                partial?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                'application/json': string[];
-            };
-        };
-        responses: {
-            /** @description Resources deleted successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': string[];
-                };
-            };
-            /** @description Partial success - some items deleted, some failed */
-            207: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad request - batch size exceeded */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-        };
-    };
-    update_many_pass_groups: {
-        parameters: {
-            query?: {
-                /**
-                 * @description Enable partial success mode for batch operations.
-                 *
-                 *     When `true`, the operation processes each item independently instead of
-                 *     using all-or-nothing semantics. Items that succeed are committed even if
-                 *     other items fail.
-                 *
-                 *     Default: `false` (all-or-nothing)
-                 * @example false
-                 */
-                partial?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
-            };
-        };
-        responses: {
-            /** @description Resources updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupResponse'][];
-                };
-            };
-            /** @description Partial success - some items updated, some failed */
-            207: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad request - batch size exceeded or validation failed */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-            /** @description One or more resources not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Duplicate record */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-        };
-    };
-    get_one_pass_group: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Resource identifier */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The requested resource */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupResponse'];
-                };
-            };
-            /** @description Bad request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_one_pass_group: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Resource identifier */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                'application/json': components['schemas']['PassGroupUpdate'];
-            };
-        };
-        responses: {
-            /** @description Resource updated successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'application/json': components['schemas']['PassGroupResponse'];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Duplicate record */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    'text/plain': string;
-                };
-            };
-        };
-    };
-    delete_one_pass_group: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Resource identifier */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Resource deleted successfully */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Internal Server Error */
-            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7781,13 +7960,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description A row references something that does not exist */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     get_all_transects: {
@@ -8391,6 +8563,247 @@ export interface operations {
             };
         };
     };
+    create_one_video: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['VideoCreate'];
+            };
+        };
+        responses: {
+            /** @description Resource created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['VideoResponse'];
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+        };
+    };
+    create_many_videos: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['VideoCreate'][];
+            };
+        };
+        responses: {
+            /** @description Resources created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['VideoResponse'][];
+                };
+            };
+            /** @description Partial success - some items created, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+        };
+    };
+    delete_many_videos: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': string[];
+            };
+        };
+        responses: {
+            /** @description Resources deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': string[];
+                };
+            };
+            /** @description Partial success - some items deleted, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+        };
+    };
+    update_many_videos: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['BatchUpdateRequest'][];
+            };
+        };
+        responses: {
+            /** @description Resources updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['VideoResponse'][];
+                };
+            };
+            /** @description Partial success - some items updated, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+            /** @description One or more resources not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+        };
+    };
     get_one_video: {
         parameters: {
             query?: never;
@@ -8414,6 +8827,84 @@ export interface operations {
             };
             /** @description Bad request */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_one_video: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['VideoUpdate'];
+            };
+        };
+        responses: {
+            /** @description Resource updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['VideoResponse'];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'text/plain': string;
+                };
+            };
+        };
+    };
+    delete_one_video: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resource deleted successfully */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

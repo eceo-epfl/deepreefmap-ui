@@ -14,7 +14,23 @@ const WORLD: LatLngBoundsExpression = [
     [60, 180],
 ];
 
-const endPoints = (transect: Transect): [LatLngTuple, LatLngTuple] => [
+type FixedTransect = Transect & {
+    start_lat: number;
+    start_lon: number;
+    end_lat: number;
+    end_lon: number;
+};
+
+const fixed = (transects: Transect[]): FixedTransect[] =>
+    transects.filter(
+        (transect): transect is FixedTransect =>
+            transect.start_lat != null &&
+            transect.start_lon != null &&
+            transect.end_lat != null &&
+            transect.end_lon != null,
+    );
+
+const endPoints = (transect: FixedTransect): [LatLngTuple, LatLngTuple] => [
     [transect.start_lat, transect.start_lon],
     [transect.end_lat, transect.end_lon],
 ];
@@ -34,7 +50,7 @@ const Overview = ({ height = '460px' }: { height?: string }) => {
 
     if (transects.isPending || sites.isPending) return <Loading />;
 
-    const lines = transects.data ?? [];
+    const lines = fixed(transects.data ?? []);
     const markers = located(sites.data ?? []);
     if (!lines.length && !markers.length) {
         return <Alert severity="info">Nothing mapped yet. Add a site or a transect.</Alert>;

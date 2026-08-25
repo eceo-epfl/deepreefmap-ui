@@ -14,18 +14,10 @@ const BAR_GAP = 2;
 const GROUP_GAP = 28;
 const WHISKER_CAP = 6;
 
-/** What one series entry is called, wherever it appears. */
-export const entryLabel = (entry: CoverSeriesEntry) => {
-    if (entry.group_name) {
-        return entry.period_label
-            ? `${entry.group_name} (${entry.period_label})`
-            : entry.group_name;
-    }
-    return entry.campaign_name ?? 'Ungrouped';
-};
+/** What one series entry is called, wherever it appears: the campaign, or none. */
+export const entryLabel = (entry: CoverSeriesEntry) => entry.campaign_name ?? 'No campaign';
 
-export const entryKey = (entry: CoverSeriesEntry) =>
-    entry.group_id ?? entry.campaign_id ?? 'ungrouped';
+export const entryKey = (entry: CoverSeriesEntry) => entry.campaign_id ?? 'no-campaign';
 
 // Every entry orders its own classes by size, so a shared order is needed for the
 // bars to line up across groups.
@@ -75,7 +67,7 @@ const barPath = (x: number, y: number, width: number, height: number) => {
 const truncate = (label: string, maxChars: number) =>
     label.length <= maxChars ? label : `${label.slice(0, Math.max(1, maxChars - 1))}…`;
 
-/** Grouped bars per survey event, whiskered with each class's per-pass spread. */
+/** Grouped bars per campaign, whiskered with each class's per-pass spread. */
 const CoverSeriesChart = ({
     entries,
     colours,

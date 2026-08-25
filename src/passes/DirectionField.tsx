@@ -20,6 +20,9 @@ export const directionChoices = DIRECTION_VALUES.map(id => ({
     name: DIRECTION_LABELS[id],
 }));
 
+/** For an edit form: null is a recorded fact, that nobody noted the direction. */
+export const DIRECTION_EMPTY_TEXT = 'Not recorded';
+
 /** Which way the diver swam the tape, which is a property of the swim, not the clip. */
 export const DirectionField = ({
     emptyText = '—',

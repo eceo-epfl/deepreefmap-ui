@@ -97,10 +97,9 @@ const EntryTable = ({
 );
 
 /**
- * Cover along this transect, one series entry per survey event.
- *
- * The registry orders the series itself: named groups by period label, then campaign
- * buckets, then the passes with neither. Grouping happens on the passes list.
+ * Cover along this transect, one series entry per campaign: a survey event is the
+ * passes of one transect in one campaign. The registry orders the series by the
+ * campaigns' begin dates, with the passes on no campaign last.
  */
 const Statistics = () => {
     const transect = useRecordContext<Transect>();

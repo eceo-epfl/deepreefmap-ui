@@ -15,8 +15,8 @@ import {
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 
-// A transect a device pushed carries no site, because the desktop app has no site picker.
-// Without this the uploaded lines cannot be grouped under the reef they belong to.
+// A transect made in the field may arrive without a site. Validation refuses one until
+// it has a site, so this is the repair step.
 const AssignSiteButton = () => {
     const [open, setOpen] = useState(false);
     const { selectedIds } = useListContext();

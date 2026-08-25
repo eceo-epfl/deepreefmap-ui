@@ -16,7 +16,8 @@ import {
 } from 'react-admin';
 import { Box, Divider, Grid, Typography } from '@mui/material';
 
-import { CoordinateField, SyncFields, TombstoneButton } from '../components';
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
+import { CoordinateField, SyncFields, TombstoneButton, ValidateButton } from '../components';
 import { useCanAuthor } from '../permissions';
 import { SiteMapOne } from '../maps/Sites';
 import type { Site, Transect } from '../contract';
@@ -25,6 +26,7 @@ const SiteShowActions = () => {
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
+            <ValidateButton section="sites" />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="site" />
         </TopToolbar>
@@ -74,11 +76,19 @@ const SiteTransects = () => {
                     <NumberField source="depth_m" label="Depth (m)" emptyText="—" />
                     <FunctionField<Transect>
                         label="Start"
-                        render={record => `${record.start_lat}°, ${record.start_lon}°`}
+                        render={record =>
+                            record.start_lat == null
+                                ? '—'
+                                : `${record.start_lat}°, ${record.start_lon}°`
+                        }
                     />
                     <FunctionField<Transect>
                         label="End"
-                        render={record => `${record.end_lat}°, ${record.end_lon}°`}
+                        render={record =>
+                            record.end_lat == null
+                                ? '—'
+                                : `${record.end_lat}°, ${record.end_lon}°`
+                        }
                     />
                 </Datagrid>
             </ReferenceManyField>
@@ -102,6 +112,7 @@ const SiteTransects = () => {
 const SiteShow = () => (
     <Show actions={<SiteShowActions />}>
         <SimpleShowLayout>
+            <ProposedChangesPanel section="sites" />
             <Grid container spacing={2}>
                 <Grid
                     size={{

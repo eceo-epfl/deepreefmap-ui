@@ -26,6 +26,15 @@ export const COVER_LEVEL_VALUES = ['fine', 'intermediate', 'coarse'] as const;
 export const COVER_ESTIMATOR_VALUES = ['per_pass', 'pooled'] as const;
 export const METRIC_SOURCE_VALUES = ['unprojected', 'tsdf'] as const;
 export const STORED_OBJECT_STATUS_VALUES = ['pending', 'complete', 'failed'] as const;
+export const RIG_POSITION_VALUES = ['left', 'centre', 'right'] as const;
+export const VIDEO_REVIEW_VALUES = ['unreviewed', 'usable', 'excluded'] as const;
+export const CHANGE_STATUS_VALUES = [
+    'applied',
+    'superseded',
+    'proposed',
+    'rejected',
+    'dismissed',
+] as const;
 
 export type Quality = (typeof QUALITY_VALUES)[number];
 export type Direction = (typeof DIRECTION_VALUES)[number];
@@ -35,15 +44,23 @@ export type CoverLevel = (typeof COVER_LEVEL_VALUES)[number];
 export type CoverEstimator = (typeof COVER_ESTIMATOR_VALUES)[number];
 export type MetricSource = (typeof METRIC_SOURCE_VALUES)[number];
 export type StoredObjectStatus = (typeof STORED_OBJECT_STATUS_VALUES)[number];
+export type RigPosition = (typeof RIG_POSITION_VALUES)[number];
+export type VideoReview = (typeof VIDEO_REVIEW_VALUES)[number];
+export type ChangeStatus = (typeof CHANGE_STATUS_VALUES)[number];
 
 export type Site = Schemas['SiteResponse'];
 export type Campaign = Schemas['CampaignResponse'];
 export type Transect = Schemas['TransectResponse'];
 export type Device = Schemas['DeviceResponse'];
 
-export type VideoAsset = Omit<Schemas['VideoResponse'], 'gravity' | 'gps'> & {
+export type VideoAsset = Omit<
+    Schemas['VideoResponse'],
+    'gravity' | 'gps' | 'rig_position' | 'review'
+> & {
     gravity: TriState;
     gps: TriState;
+    rig_position?: RigPosition | null;
+    review: VideoReview;
 };
 
 export type TransectPass = Omit<Schemas['PassResponse'], 'direction' | 'quality'> & {
@@ -64,8 +81,15 @@ export type CoverRow = Omit<
     metric_source?: MetricSource | null;
 };
 
-export type PassGroup = Schemas['PassGroupResponse'];
 export type Preset = Schemas['PresetResponse'];
+
+/** A ledger entry, keyed by `seq`; the data provider mirrors it onto `id` for react-admin. */
+export type Change = Omit<Schemas['ChangeResponse'], 'status'> & {
+    id: number;
+    status: ChangeStatus;
+};
+export type DecisionResponse = Schemas['DecisionResponse'];
+export type ValidateResponse = Schemas['ValidateResponse'];
 
 export type PooledCover = Schemas['PooledCover'];
 export type ClassGroup = Schemas['ClassGroup'];

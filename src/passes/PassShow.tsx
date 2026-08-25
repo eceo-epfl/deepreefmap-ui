@@ -1,5 +1,4 @@
 import {
-    BooleanField,
     Datagrid,
     DateField,
     EditButton,
@@ -14,12 +13,14 @@ import {
 } from 'react-admin';
 import { Box, Divider, Grid, Stack, Typography } from '@mui/material';
 
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
 import {
     asColumn,
     DurationField,
     QualityField,
     SyncFields,
     TombstoneButton,
+    ValidateButton,
 } from '../components';
 import { useCanAuthor } from '../permissions';
 import { RunStatusChip } from '../runs/StatusField';
@@ -31,6 +32,7 @@ const PassShowActions = () => {
     const canAuthor = useCanAuthor();
     return (
         <TopToolbar>
+            <ValidateButton section="passes" />
             {canAuthor && <EditButton />}
             <TombstoneButton noun="pass" />
         </TopToolbar>
@@ -155,6 +157,7 @@ const PassShow = () => (
                 p: 2,
             }}
         >
+            <ProposedChangesPanel section="passes" />
             <Grid container spacing={2}>
                 <Grid
                     size={{
@@ -210,15 +213,8 @@ const PassShow = () => (
                         md: 3,
                     }}
                 >
-                    <Labeled label="Group">
-                        <ReferenceField
-                            source="survey_group_id"
-                            reference="pass_groups"
-                            link="edit"
-                            emptyText="—"
-                        >
-                            <TextField source="name" />
-                        </ReferenceField>
+                    <Labeled label="Surveyed on">
+                        <DateField source="surveyed_on" emptyText="—" />
                     </Labeled>
                 </Grid>
                 <Grid
@@ -252,17 +248,6 @@ const PassShow = () => (
                 >
                     <Labeled label="Direction">
                         <DirectionField />
-                    </Labeled>
-                </Grid>
-                <Grid
-                    size={{
-                        xs: 12,
-                        sm: 6,
-                        md: 3,
-                    }}
-                >
-                    <Labeled label="Upside down">
-                        <BooleanField source="upside_down" />
                     </Labeled>
                 </Grid>
                 <Grid size={12}>
