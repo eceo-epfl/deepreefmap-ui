@@ -1327,6 +1327,7 @@ export interface paths {
          *     - camera_profile
          *     - scale_type
          *     - preset_id
+         *     - batch_id
          *     - deleted_at
          *     - device_id
          *     - validated_at
@@ -3270,6 +3271,14 @@ export interface components {
         };
         RunList: {
             /**
+             * Format: uuid
+             * @description The device session this run was processed in: the queue it was ordered from,
+             *     which groups the runs that went through the pipeline together. A correlation
+             *     key, not a foreign key -- a session is one workstation's cart and has no row
+             *     here.
+             */
+            batch_id?: string | null;
+            /**
              * @description The scale the cover was measured at: the camera profile, the tape length and
              *     crop width the run used, the metres per pixel that gave, and how the scale
              *     was established.
@@ -3398,6 +3407,14 @@ export interface components {
             state: string;
         };
         RunResponse: {
+            /**
+             * Format: uuid
+             * @description The device session this run was processed in: the queue it was ordered from,
+             *     which groups the runs that went through the pipeline together. A correlation
+             *     key, not a foreign key -- a session is one workstation's cart and has no row
+             *     here.
+             */
+            batch_id?: string | null;
             /**
              * @description The scale the cover was measured at: the camera profile, the tape length and
              *     crop width the run used, the metres per pixel that gave, and how the scale
