@@ -110,6 +110,13 @@ export type StoredObject = Omit<Schemas['StoredObjectResponse'], 'status'> & {
 };
 export type RunArtifact = Schemas['RunArtifactResponse'];
 
+export type OutputGroup = Schemas['OutputGroup'];
+export type RunOutputs = Schemas['RunOutputs'];
+export type OutputFiles = Omit<Schemas['OutputFiles'], 'files'> & { files: OutputFile[] };
+export type OutputFile = Omit<Schemas['OutputFile'], 'status'> & {
+    status: StoredObjectStatus | null;
+};
+
 export type ArchiveInitiateRequest = Schemas['InitiateRequest'];
 export type ArchiveInitiate = Omit<Schemas['InitiateResponse'], 'status'> & {
     status: StoredObjectStatus;

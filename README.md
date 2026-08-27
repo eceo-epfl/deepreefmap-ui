@@ -30,8 +30,10 @@ colours the registry publishes (`/api/config/classes`), reading the label grid f
 run's archived `ortho.npz`, with the photograph behind a switch and a magnifier under
 the pointer. 3D cloud reads the archived `cloud_web.drmw` and draws it with three.js:
 classes by default, click a point to name its class and isolate it, double click to
-move the pivot, and a camera path where the file carries one. Outputs downloads any
-group, or the whole run, as one zip streamed by the registry.
+move the pivot, and a camera path where the file carries one. Outputs lists the run's
+files by group from `/api/runs/{id}/outputs`, reading a group's own files only when it
+is opened, and downloads any group, or the whole run, as one zip streamed by the
+registry.
 
 ## Types from the contract
 

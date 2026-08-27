@@ -27,7 +27,9 @@ import type {
     DecisionResponse,
     DeviceRename,
     DeviceRevocation,
+    OutputFiles,
     PerformanceSummary,
+    RunOutputs,
     PresetAssignment,
     PooledCover,
     RunRecord,
@@ -49,6 +51,13 @@ export interface DrmDataProvider extends DataProvider {
     videoRuns: (videoId: string) => Promise<RunRecord[]>;
     classGroups: () => Promise<ClassGroup[]>;
     benthicClasses: () => Promise<BenthicClass[]>;
+    runOutputs: (runId: string) => Promise<RunOutputs>;
+    runOutputFiles: (
+        runId: string,
+        purpose: string,
+        offset: number,
+        limit: number,
+    ) => Promise<OutputFiles>;
     runOutputsBundle: (runId: string, purpose?: string) => Promise<BundleResponse>;
     mintConnectCode: (deviceName: string) => Promise<ConnectCode>;
     revokeDevice: (deviceId: string) => Promise<DeviceRevocation>;
@@ -271,6 +280,22 @@ const dataProvider = (
 
         // Hundreds of objects make one download. The link is minted per click, like a
         // single object's, and streams the zip from the registry.
+        runOutputs: runId =>
+            httpClient(`${apiUrl}/runs/${runId}/outputs`).then(
+                ({ json }) => json as RunOutputs,
+            ),
+
+        runOutputFiles: (runId, purpose, offset, limit) => {
+            const query = new URLSearchParams({
+                purpose,
+                offset: String(offset),
+                limit: String(limit),
+            });
+            return httpClient(`${apiUrl}/runs/${runId}/outputs/files?${query}`).then(
+                ({ json }) => json as OutputFiles,
+            );
+        },
+
         runOutputsBundle: (runId, purpose) => {
             const query = purpose ? `?purpose=${encodeURIComponent(purpose)}` : '';
             return httpClient(`${apiUrl}/runs/${runId}/outputs/bundle${query}`).then(

@@ -203,13 +203,13 @@ const Panel = ({
     </Paper>
 );
 
-/** Columns that pack by height, so a short panel does not hold a gap open. */
+/** Columns balanced in reading order, as many as the width takes. */
 const Panels = ({ children }: { children: ReactNode }) => (
     <Box
         sx={{
             width: '100%',
             columnWidth: 440,
-            columnGap: 16,
+            columnGap: '16px',
             '& > *': { breakInside: 'avoid', mb: 2 },
         }}
     >
@@ -219,10 +219,6 @@ const Panels = ({ children }: { children: ReactNode }) => (
 
 const Performance = ({ record, totals }: { record: RunRecord; totals: ProfileTotals }) => (
     <Panels>
-        <Panel title="Peak resource use" tip="Highest across all stages.">
-            <RunPeakSummary value={record.stage_peaks} totals={totals} />
-        </Panel>
-
         <Panel title="Stages" tip={STAGE_PEAK_NOTES}>
             <StagesTable
                 durations={record.stage_durations}
@@ -230,6 +226,10 @@ const Performance = ({ record, totals }: { record: RunRecord; totals: ProfileTot
                 totals={totals}
                 emptyText="No stages recorded."
             />
+        </Panel>
+
+        <Panel title="Peak resource use" tip="Highest across all stages.">
+            <RunPeakSummary value={record.stage_peaks} totals={totals} />
         </Panel>
 
         <Panel

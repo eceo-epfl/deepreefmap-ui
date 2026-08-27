@@ -68,13 +68,17 @@ const centroidAt = (
     return sum.divideScalar(to - from);
 };
 
-/** Where the pass began and ended: the points the first and last frames added. */
+/** Where the pass began and ended: the points its first and last drawn frames added. */
 const endpoints = (byClass: Map<number, ClassEntry>, frameCount: number) => {
-    const average = (pick: (entry: ClassEntry) => THREE.Vector3 | null) => {
+    const positionsOf = (entry: ClassEntry) =>
+        entry.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const at = (frame: number) => {
         const sum = new THREE.Vector3();
         let found = 0;
         for (const entry of byClass.values()) {
-            const point = pick(entry);
+            const from = frame === 0 ? 0 : (entry.prefixEnd[frame - 1] ?? 0);
+            const to = entry.prefixEnd[frame] ?? entry.pointCount;
+            const point = centroidAt(entry, from, to, positionsOf(entry));
             if (point) {
                 sum.add(point);
                 found += 1;
@@ -82,20 +86,13 @@ const endpoints = (byClass: Map<number, ClassEntry>, frameCount: number) => {
         }
         return found > 0 ? sum.divideScalar(found) : null;
     };
-    const positionsOf = (entry: ClassEntry) =>
-        entry.points.geometry.getAttribute('position') as THREE.BufferAttribute;
-    const start = average(entry =>
-        centroidAt(entry, 0, entry.prefixEnd[0] ?? 0, positionsOf(entry)),
-    );
-    const last = frameCount - 1;
-    const end = average(entry =>
-        centroidAt(
-            entry,
-            entry.prefixEnd[last - 1] ?? 0,
-            entry.prefixEnd[last] ?? entry.pointCount,
-            positionsOf(entry),
-        ),
-    );
+    // A frame can add nothing at all: everything masked out, or nothing within range.
+    // The markers belong to the frames that did add something, so the search runs in
+    // from both ends rather than trusting the first and last.
+    let start = null;
+    for (let frame = 0; frame < frameCount && !start; frame += 1) start = at(frame);
+    let end = null;
+    for (let frame = frameCount - 1; frame >= 0 && !end; frame -= 1) end = at(frame);
     return { start, end };
 };
 
@@ -233,6 +230,7 @@ const CloudViewer = ({ cloud }: { cloud: DrmwCloud }) => {
     const [sizeScale, setSizeScale] = useState(1);
     const [showCameras, setShowCameras] = useState(false);
     const [selected, setSelected] = useState<Selection | null>(null);
+    const [marked, setMarked] = useState({ start: false, end: false });
 
     const counts = [...cloud.header.per_class]
         .map(entry => ({
@@ -353,6 +351,7 @@ const CloudViewer = ({ cloud }: { cloud: DrmwCloud }) => {
         }
         ends.renderOrder = 2;
         scene.add(ends);
+        setMarked({ start: Boolean(start), end: Boolean(end) });
 
         const path = frustums(cloud, radius / 8);
         if (path) {
@@ -571,10 +570,16 @@ const CloudViewer = ({ cloud }: { cloud: DrmwCloud }) => {
                         onChange={(_, value) => setSizeScale(value as number)}
                     />
                 </Stack>
-                <Legend colour={`#${START_COLOUR.toString(16).padStart(6, '0')}`}>
-                    start
-                </Legend>
-                <Legend colour={`#${END_COLOUR.toString(16).padStart(6, '0')}`}>end</Legend>
+                {marked.start && (
+                    <Legend colour={`#${START_COLOUR.toString(16).padStart(6, '0')}`}>
+                        start
+                    </Legend>
+                )}
+                {marked.end && (
+                    <Legend colour={`#${END_COLOUR.toString(16).padStart(6, '0')}`}>
+                        end
+                    </Legend>
+                )}
                 <Tooltip title="Drag to orbit the crosshair, double click a point to move it there.">
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                         {cloud.header.point_count.toLocaleString()} points

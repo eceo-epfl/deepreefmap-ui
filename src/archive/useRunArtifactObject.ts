@@ -1,7 +1,6 @@
-import { useGetOne } from 'react-admin';
+import { useGetList, useGetOne } from 'react-admin';
 
-import type { StoredObject } from '../contract';
-import { useRunArtifacts } from './useRunArtifacts';
+import type { RunArtifact, StoredObject } from '../contract';
 
 export type ArtifactState =
     | { name: 'pending' }
@@ -9,13 +8,30 @@ export type ArtifactState =
     | { name: 'error'; message: string }
     | { name: 'ready'; objectId: string };
 
+/** How many rows a path filter can match, since the registry filters on contains. */
+const CANDIDATES = 20;
+
 /** The archived object holding one of a run's output files, or why it is not there. */
 export const useRunArtifactObject = (
     runId: string | undefined,
     relpath: string,
 ): ArtifactState => {
-    const { data: artifacts, isPending, error } = useRunArtifacts(runId);
-    const artifact = artifacts?.find(candidate => candidate.relpath === relpath);
+    // Asked for by path rather than read out of the run's listing, which runs to
+    // thousands of rows on a full-length pass.
+    const {
+        data: candidates,
+        isPending,
+        error,
+    } = useGetList<RunArtifact>(
+        'run_artifacts',
+        {
+            filter: { run_id: runId, relpath },
+            pagination: { page: 1, perPage: CANDIDATES },
+            sort: { field: 'relpath', order: 'ASC' },
+        },
+        { enabled: !!runId },
+    );
+    const artifact = candidates?.find(candidate => candidate.relpath === relpath);
     const { data: object } = useGetOne<StoredObject>(
         'stored_objects',
         { id: artifact?.stored_object_id ?? '' },

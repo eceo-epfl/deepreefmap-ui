@@ -1364,6 +1364,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/runs/{run_id}/outputs': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What one run archived, by group. */
+        get: operations['outputs'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/runs/{run_id}/outputs/bundle': {
         parameters: {
             query?: never;
@@ -1373,6 +1390,23 @@ export interface paths {
         };
         /** A signed link that streams one run's outputs, or one group of them, as a zip. */
         get: operations['bundle'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/runs/{run_id}/outputs/files': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The files of one group, in path order. */
+        get: operations['files'];
         put?: never;
         post?: never;
         delete?: never;
@@ -2655,6 +2689,40 @@ export interface components {
             status: components['schemas']['Status'];
             table_key: string;
         };
+        OutputFile: {
+            /** Format: uuid */
+            id: string;
+            relpath: string;
+            /** Format: int64 */
+            size_bytes?: number | null;
+            /** @description The linked object's status, absent where an artefact links none. */
+            status?: string | null;
+            /** Format: uuid */
+            stored_object_id?: string | null;
+        };
+        OutputFiles: {
+            files: components['schemas']['OutputFile'][];
+        };
+        OutputGroup: {
+            /**
+             * Format: int64
+             * @description How many of the group's files link an object in each status.
+             */
+            complete: number;
+            /** Format: int64 */
+            failed: number;
+            /** Format: int64 */
+            files: number;
+            /** @description A purpose, or the directory the files sit in. */
+            name: string;
+            /** Format: int64 */
+            pending: number;
+            /**
+             * Format: int64
+             * @description Total size of the group, whatever each object's status.
+             */
+            size_bytes: number;
+        };
         PassCreate: {
             /** Format: double */
             begin_s: number;
@@ -3368,6 +3436,22 @@ export interface components {
              */
             validated_at?: string | null;
             validated_by?: string | null;
+        };
+        RunOutputs: {
+            /** Format: int64 */
+            complete: number;
+            /** Format: int64 */
+            failed: number;
+            /** Format: int64 */
+            files: number;
+            /** @description Purposes first, then directories by name. */
+            groups: components['schemas']['OutputGroup'][];
+            /** Format: int64 */
+            pending: number;
+            /** Format: uuid */
+            run_id: string;
+            /** Format: int64 */
+            size_bytes: number;
         };
         RunOverview: {
             /**
@@ -7588,6 +7672,29 @@ export interface operations {
             };
         };
     };
+    outputs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Run whose outputs to summarise */
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The run's outputs, grouped */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['RunOutputs'];
+                };
+            };
+        };
+    };
     bundle: {
         parameters: {
             query?: {
@@ -7624,6 +7731,44 @@ export interface operations {
             };
             /** @description The archive is not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    files: {
+        parameters: {
+            query: {
+                /**
+                 * @description The group to list: a purpose, or a directory name.
+                 * @example frames
+                 */
+                purpose: string;
+                offset?: number | null;
+                limit?: number | null;
+            };
+            header?: never;
+            path: {
+                /** @description Run whose outputs to list */
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The group's files */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['OutputFiles'];
+                };
+            };
+            /** @description No group named */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

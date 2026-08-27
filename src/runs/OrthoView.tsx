@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDataProvider, useRecordContext } from 'react-admin';
 import {
     Alert,
@@ -143,12 +143,13 @@ const parseHex = (hex: string): [number, number, number] => [
 /** Paint the label grid in the group colours of the level on show. */
 const useClassCanvas = (grid: Grid | undefined, level: string) => {
     const registry = useClassRegistry(level);
-    const canvasRef = useRef<HTMLCanvasElement>(document.createElement('canvas'));
     const { colours, groupOf } = registry;
 
     return useMemo(() => {
         if (!grid || !registry.ready) return null;
-        const canvas = canvasRef.current;
+        // A new canvas each time, so a level change is a new source downstream and
+        // not the same element quietly repainted.
+        const canvas = document.createElement('canvas');
         canvas.width = grid.width;
         canvas.height = grid.height;
         const context = canvas.getContext('2d');
@@ -254,10 +255,13 @@ const OrthoView = ({ level }: { level: string }) => {
     const grid = gridLoad.name === 'ready' ? gridLoad.value : undefined;
     const classCanvas = useClassCanvas(grid, level);
 
-    const open = (next: Layer) => {
-        setLayer(next);
-        setOpened(current => (current.includes(next) ? current : [...current, next]));
-    };
+    // A layer is fetched when it is first shown, whether the reader asked for it or
+    // it stood in for one the run never archived.
+    useEffect(() => {
+        setOpened(current => (current.includes(showing) ? current : [...current, showing]));
+    }, [showing]);
+
+    const open = (next: Layer) => setLayer(next);
 
     const readout = (x: number, y: number) => {
         if (!grid || x < 0 || y < 0 || x >= grid.width || y >= grid.height) return null;
@@ -269,10 +273,12 @@ const OrthoView = ({ level }: { level: string }) => {
         return group && group !== entry.name ? `${entry.name}, ${group}` : entry.name;
     };
 
-    if (photoState.name === 'error')
-        return <Alert severity="error">{photoState.message}</Alert>;
     if (photoState.name !== 'ready' && gridState.name !== 'ready') {
-        if (photoState.name === 'pending') return <LinearProgress />;
+        const failed = [photoState, gridState].find(state => state.name === 'error');
+        if (failed?.name === 'error') return <Alert severity="error">{failed.message}</Alert>;
+        if (photoState.name === 'pending' || gridState.name === 'pending') {
+            return <LinearProgress />;
+        }
         return <Muted>The ortho appears once the desktop app archives the run.</Muted>;
     }
 

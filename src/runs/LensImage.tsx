@@ -3,6 +3,7 @@ import { Box, Paper, Typography } from '@mui/material';
 
 const LENS = 168;
 const ZOOM = 6;
+const GAP = 16;
 
 type Probe = { x: number; y: number; readout: ReactNode };
 
@@ -31,6 +32,7 @@ const LensImage = ({
     const frameRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const lensRef = useRef<HTMLCanvasElement>(null);
+    const boxRef = useRef<HTMLDivElement>(null);
     const [probe, setProbe] = useState<Probe | null>(null);
 
     const paint = useCallback(() => {
@@ -86,9 +88,17 @@ const LensImage = ({
                 LENS,
             );
         }
+        // The lens sits inside a card that clips it, so it is kept whole: to the
+        // left of the pointer near the right edge, below it near the top.
+        const at = { x: event.clientX - box.left, y: event.clientY - box.top };
+        const lensBox = boxRef.current?.getBoundingClientRect();
+        const lensWidth = lensBox?.width ?? LENS;
+        const lensHeight = lensBox?.height ?? LENS;
+        const frame = frameRef.current;
+        const room = frame ? frame.clientWidth : box.width;
         setProbe({
-            x: event.clientX - box.left,
-            y: event.clientY - box.top,
+            x: Math.max(0, Math.min(at.x + GAP, room - lensWidth)),
+            y: at.y - lensHeight - GAP < 0 ? at.y + GAP : at.y - lensHeight - GAP,
             readout: readout?.(sx, sy),
         });
     };
@@ -113,13 +123,12 @@ const LensImage = ({
                     top: 0,
                     left: 0,
                     visibility: probe ? 'visible' : 'hidden',
-                    transform: `translate(${(probe?.x ?? 0) + 16}px, ${
-                        (probe?.y ?? 0) - LENS - 16
-                    }px)`,
+                    transform: `translate(${probe?.x ?? 0}px, ${probe?.y ?? 0}px)`,
                     pointerEvents: 'none',
                 }}
             >
                 <Paper
+                    ref={boxRef}
                     elevation={6}
                     sx={{ p: 0.5, display: 'inline-block', lineHeight: 0, borderRadius: 1 }}
                 >
