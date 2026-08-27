@@ -94,6 +94,8 @@ const TransectListBody = () => {
                 </ReferenceField>
                 <NumberField source="length_m" label="Length (m)" />
                 <NumberField source="depth_m" label="Depth (m)" />
+                <NumberField source="start_depth_m" label="Start depth (m)" />
+                <NumberField source="end_depth_m" label="End depth (m)" />
                 <ValidatedField label="Validated" sortable={false} />
             </Datagrid>
         </>

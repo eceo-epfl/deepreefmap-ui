@@ -2,7 +2,7 @@
 export const GLOSSARY: Record<string, string> = {
     sites: 'A named reef location with country and map point. Transects belong to a site.',
     campaigns: 'One trip. A repeat visit is a new campaign.',
-    transects: 'A tape line at a site: end points, tape length, depth.',
+    transects: 'A tape line at a site: end points, tape length, depth at each end.',
     passes: 'One traversal of a transect: a time window over ordered clips, with a direction.',
     videos: 'A camera file identified by content hash, with camera and rig position.',
     runs: 'One reconstruction of one pass.',

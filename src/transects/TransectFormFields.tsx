@@ -20,6 +20,20 @@ type EndPoints = {
     end_lon?: number | null;
 };
 
+type Depths = {
+    depth_m?: number | null;
+    start_depth_m?: number | null;
+    end_depth_m?: number | null;
+};
+
+/** A blank depth takes the mean of the two end depths; a typed one stands. */
+export const fillDepthFromEnds = <T extends Depths>(values: T): T => {
+    if (values.depth_m != null || values.start_depth_m == null || values.end_depth_m == null) {
+        return values;
+    }
+    return { ...values, depth_m: (values.start_depth_m + values.end_depth_m) / 2 };
+};
+
 /** An end point is both coordinates or neither; the line as a whole may have none. */
 export const validateEndPoints = (values: EndPoints) => {
     const errors: Record<string, string> = {};
@@ -181,6 +195,33 @@ const TransectFormFields = () => (
                 <NumberInput
                     source="depth_m"
                     label="Depth (m)"
+                    validate={nonNegative}
+                    helperText="Mean of the two end depths when left blank."
+                    fullWidth
+                />
+            </Grid>
+            <Grid
+                size={{
+                    xs: 12,
+                    sm: 6,
+                }}
+            >
+                <NumberInput
+                    source="start_depth_m"
+                    label="Start depth (m)"
+                    validate={nonNegative}
+                    fullWidth
+                />
+            </Grid>
+            <Grid
+                size={{
+                    xs: 12,
+                    sm: 6,
+                }}
+            >
+                <NumberInput
+                    source="end_depth_m"
+                    label="End depth (m)"
                     validate={nonNegative}
                     fullWidth
                 />

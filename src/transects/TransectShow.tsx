@@ -98,6 +98,16 @@ const TransectHeader = () => (
                         <NumberField source="depth_m" emptyText="—" />
                     </Labeled>
                 </Grid>
+                <Grid size={6}>
+                    <Labeled label="Start depth (m)">
+                        <NumberField source="start_depth_m" emptyText="—" />
+                    </Labeled>
+                </Grid>
+                <Grid size={6}>
+                    <Labeled label="End depth (m)">
+                        <NumberField source="end_depth_m" emptyText="—" />
+                    </Labeled>
+                </Grid>
                 <Grid size={12}>
                     <Labeled label="Description">
                         <TextField source="description" emptyText="—" />

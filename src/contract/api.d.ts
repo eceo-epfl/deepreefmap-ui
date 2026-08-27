@@ -1672,6 +1672,8 @@ export interface paths {
          *     - name
          *     - length_m
          *     - depth_m
+         *     - start_depth_m
+         *     - end_depth_m
          *     - created_at
          *     - updated_at
          *     - deleted_at
@@ -1684,6 +1686,8 @@ export interface paths {
          *     - name
          *     - length_m
          *     - depth_m
+         *     - start_depth_m
+         *     - end_depth_m
          *     - deleted_at
          *     - device_id
          *     - validated_at
@@ -3853,6 +3857,8 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
+            end_depth_m?: number | null;
+            /** Format: double */
             end_lat?: number | null;
             /** Format: double */
             end_lon?: number | null;
@@ -3865,6 +3871,8 @@ export interface components {
             site_id?: string | null;
             /** Format: double */
             start_accuracy_m?: number | null;
+            /** Format: double */
+            start_depth_m?: number | null;
             /** Format: double */
             start_lat?: number | null;
             /** Format: double */
@@ -3892,6 +3900,8 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
+            end_depth_m?: number | null;
+            /** Format: double */
             end_lat?: number | null;
             /** Format: double */
             end_lon?: number | null;
@@ -3910,6 +3920,8 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
+            /** Format: double */
+            start_depth_m?: number | null;
             /**
              * Format: double
              * @description End points are nullable: the historical lines mostly have none.
@@ -3953,6 +3965,8 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
+            end_depth_m?: number | null;
+            /** Format: double */
             end_lat?: number | null;
             /** Format: double */
             end_lon?: number | null;
@@ -3971,6 +3985,8 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
+            /** Format: double */
+            start_depth_m?: number | null;
             /**
              * Format: double
              * @description End points are nullable: the historical lines mostly have none.
@@ -3999,6 +4015,8 @@ export interface components {
             /** Format: double */
             end_accuracy_m?: number | null;
             /** Format: double */
+            end_depth_m?: number | null;
+            /** Format: double */
             end_lat?: number | null;
             /** Format: double */
             end_lon?: number | null;
@@ -4009,6 +4027,8 @@ export interface components {
             site_id?: string | null;
             /** Format: double */
             start_accuracy_m?: number | null;
+            /** Format: double */
+            start_depth_m?: number | null;
             /** Format: double */
             start_lat?: number | null;
             /** Format: double */
