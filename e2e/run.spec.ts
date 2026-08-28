@@ -37,6 +37,10 @@ test('outputs tab expands results and collapses frames', async ({ page }) => {
 
     await frames.click();
     await expect.poll(() => listed.some(url => url.includes('purpose=frames'))).toBe(true);
+    // A page at a time, so a group of thousands is walked rather than asked for whole.
+    const asked = listed.find(url => url.includes('purpose=frames')) ?? '';
+    expect(asked).toContain('offset=0');
+    expect(asked).toContain('limit=200');
 });
 
 test('outputs header counts every archived file', async ({ page }) => {

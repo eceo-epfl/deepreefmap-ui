@@ -278,8 +278,8 @@ const dataProvider = (
                 ({ json }) => json as ClassGroup[],
             ),
 
-        // Hundreds of objects make one download. The link is minted per click, like a
-        // single object's, and streams the zip from the registry.
+        // The registry counts and sizes a run's files by group, so the console never
+        // walks thousands of artifact rows to show the tab.
         runOutputs: runId =>
             httpClient(`${apiUrl}/runs/${runId}/outputs`).then(
                 ({ json }) => json as RunOutputs,
@@ -296,6 +296,8 @@ const dataProvider = (
             );
         },
 
+        // Hundreds of objects make one download. The link is minted per click, like a
+        // single object's, and streams the zip from the registry.
         runOutputsBundle: (runId, purpose) => {
             const query = purpose ? `?purpose=${encodeURIComponent(purpose)}` : '';
             return httpClient(`${apiUrl}/runs/${runId}/outputs/bundle${query}`).then(

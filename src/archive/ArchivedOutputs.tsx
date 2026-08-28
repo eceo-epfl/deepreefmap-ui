@@ -22,7 +22,7 @@ import BundleButton from './BundleButton';
 import DownloadButton from './DownloadButton';
 import { ObjectStatusChip } from './StatusField';
 import { expandedByDefault } from './purpose';
-import { FILE_PAGE, useRunOutputFiles, useRunOutputs } from './useRunOutputs';
+import { useRunOutputFiles, useRunOutputs } from './useRunOutputs';
 
 const fileName = (relpath: string) => relpath.slice(relpath.lastIndexOf('/') + 1);
 
@@ -43,9 +43,9 @@ const FileRow = ({ file }: { file: OutputFile }) => (
 
 const GroupRows = ({ group, runId }: { group: OutputGroup; runId: string }) => {
     const [open, setOpen] = useState(expandedByDefault(group.name));
-    const [limit, setLimit] = useState(FILE_PAGE);
-    const { data, isPending } = useRunOutputFiles(runId, group.name, limit, open);
-    const files = data?.files ?? [];
+    const { data, isPending, hasNextPage, fetchNextPage, isFetchingNextPage } =
+        useRunOutputFiles(runId, group.name, group.files, open);
+    const files = data?.pages.flatMap(page => page.files) ?? [];
     return (
         <>
             <TableRow
@@ -94,7 +94,7 @@ const GroupRows = ({ group, runId }: { group: OutputGroup; runId: string }) => {
                     )}
                 </TableCell>
             </TableRow>
-            {open && isPending && (
+            {open && (isPending || isFetchingNextPage) && (
                 <TableRow>
                     <TableCell colSpan={4} sx={{ py: 0 }}>
                         <LinearProgress />
@@ -102,14 +102,14 @@ const GroupRows = ({ group, runId }: { group: OutputGroup; runId: string }) => {
                 </TableRow>
             )}
             {open && files.map(file => <FileRow key={file.id} file={file} />)}
-            {open && files.length < group.files && (
+            {open && hasNextPage && (
                 <TableRow>
                     <TableCell colSpan={4} sx={{ pl: 6, py: 0 }}>
                         <Button
                             size="small"
                             onClick={event => {
                                 event.stopPropagation();
-                                setLimit(value => value + FILE_PAGE);
+                                fetchNextPage();
                             }}
                         >
                             Show more

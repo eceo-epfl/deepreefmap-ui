@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useDataProvider } from 'react-admin';
 
 import type { DrmDataProvider } from '../dataProvider';
@@ -16,17 +16,25 @@ export const useRunOutputs = (runId: string | undefined) => {
     });
 };
 
-/** One group's files, fetched only once the group is open. */
+/** One group's files, a page per request, fetched only once the group is open. */
 export const useRunOutputFiles = (
     runId: string | undefined,
     purpose: string,
-    limit: number,
+    total: number,
     enabled: boolean,
 ) => {
     const dataProvider = useDataProvider<DrmDataProvider>();
-    return useQuery({
-        queryKey: ['run_outputs', runId, 'files', purpose, limit],
+    return useInfiniteQuery({
+        queryKey: ['run_outputs', runId, 'files', purpose],
         enabled: enabled && !!runId,
-        queryFn: () => dataProvider.runOutputFiles(runId as string, purpose, 0, limit),
+        initialPageParam: 0,
+        queryFn: ({ pageParam }) =>
+            dataProvider.runOutputFiles(runId as string, purpose, pageParam, FILE_PAGE),
+        // The group row already carries the count, so the last page is known without
+        // asking for an empty one.
+        getNextPageParam: (last, pages) => {
+            const listed = pages.reduce((sum, page) => sum + page.files.length, 0);
+            return last.files.length === 0 || listed >= total ? undefined : listed;
+        },
     });
 };

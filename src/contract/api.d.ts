@@ -126,7 +126,7 @@ export interface paths {
             cookie?: never;
         };
         /** Stream one run's outputs as a zip against a signed bundle link. */
-        get: operations['bundle'];
+        get: operations['stream_bundle'];
         put?: never;
         post?: never;
         delete?: never;
@@ -4504,7 +4504,7 @@ export interface operations {
             };
         };
     };
-    bundle: {
+    stream_bundle: {
         parameters: {
             query: {
                 /** @description The group named when the link was signed. */

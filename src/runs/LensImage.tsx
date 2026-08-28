@@ -1,11 +1,11 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 
 const LENS = 168;
 const ZOOM = 6;
 const GAP = 16;
 
-type Probe = { x: number; y: number; readout: ReactNode };
+type Probe = { x: number; y: number; room: number; readout: ReactNode };
 
 /**
  * One raster drawn to fit its column, with a magnifier under the pointer.
@@ -33,6 +33,7 @@ const LensImage = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const lensRef = useRef<HTMLCanvasElement>(null);
     const boxRef = useRef<HTMLDivElement>(null);
+    const holderRef = useRef<HTMLDivElement>(null);
     const [probe, setProbe] = useState<Probe | null>(null);
 
     const paint = useCallback(() => {
@@ -88,20 +89,27 @@ const LensImage = ({
                 LENS,
             );
         }
-        // The lens sits inside a card that clips it, so it is kept whole: to the
-        // left of the pointer near the right edge, below it near the top.
-        const at = { x: event.clientX - box.left, y: event.clientY - box.top };
-        const lensBox = boxRef.current?.getBoundingClientRect();
-        const lensWidth = lensBox?.width ?? LENS;
-        const lensHeight = lensBox?.height ?? LENS;
         const frame = frameRef.current;
-        const room = frame ? frame.clientWidth : box.width;
         setProbe({
-            x: Math.max(0, Math.min(at.x + GAP, room - lensWidth)),
-            y: at.y - lensHeight - GAP < 0 ? at.y + GAP : at.y - lensHeight - GAP,
+            x: event.clientX - box.left,
+            y: event.clientY - box.top,
+            room: frame ? frame.clientWidth : box.width,
             readout: readout?.(sx, sy),
         });
     };
+
+    // The lens sits inside a card that clips it, so it is kept whole: to the left of
+    // the pointer near the right edge, below it near the top. Placed after the paint,
+    // since the readout beside it decides how wide it is.
+    useLayoutEffect(() => {
+        const holder = holderRef.current;
+        const lens = boxRef.current;
+        if (!holder || !lens || !probe) return;
+        const { width, height } = lens.getBoundingClientRect();
+        const x = Math.max(0, Math.min(probe.x + GAP, probe.room - width));
+        const y = probe.y - height - GAP < 0 ? probe.y + GAP : probe.y - height - GAP;
+        holder.style.transform = `translate(${x}px, ${y}px)`;
+    }, [probe]);
 
     return (
         <Box ref={frameRef} sx={{ position: 'relative', width: '100%', lineHeight: 0 }}>
@@ -118,12 +126,12 @@ const LensImage = ({
                 }}
             />
             <Box
+                ref={holderRef}
                 sx={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     visibility: probe ? 'visible' : 'hidden',
-                    transform: `translate(${probe?.x ?? 0}px, ${probe?.y ?? 0}px)`,
                     pointerEvents: 'none',
                 }}
             >
