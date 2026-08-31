@@ -1,4 +1,8 @@
-const PREFIX = 'drm1.';
+import contract from '../contract/sync-contract.json';
+
+// Published by the registry in contract/sync-contract.json. The desktop app reads the
+// same field, so the tag lives in one place and a bump lands in one file.
+export const CONNECT_CODE_PREFIX = contract.connect_code.prefix;
 
 const fromBase64Url = (encoded: string): string => {
     const padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
@@ -17,11 +21,11 @@ const acceptableUrl = (value: string): boolean => {
     }
 };
 
-/** The server address a `drm1.…` code points at, or null if it will not decode. */
+/** The server address a connect code points at, or null if it will not decode. */
 export const connectCodeUrl = (code: string): string | null => {
-    if (!code.startsWith(PREFIX)) return null;
+    if (!code.startsWith(CONNECT_CODE_PREFIX)) return null;
     try {
-        const payload = JSON.parse(fromBase64Url(code.slice(PREFIX.length))) as {
+        const payload = JSON.parse(fromBase64Url(code.slice(CONNECT_CODE_PREFIX.length))) as {
             url?: unknown;
         };
         return typeof payload.url === 'string' && acceptableUrl(payload.url)

@@ -2544,7 +2544,7 @@ export interface components {
             url: string;
         };
         EnrolRequest: {
-            /** @description The whole `drm1.…` string or its bare secret. */
+            /** @description The whole `reef1.…` string or its bare secret. */
             code: string;
             gui_version?: string | null;
             library_version?: string | null;
@@ -3888,7 +3888,12 @@ export interface components {
              *     member delete through a plain edit.
              */
             deleted_at?: string | null;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description The mean of the two ends wherever both are set, written by the
+             *     `transect_depth_from_ends` trigger. Accepted from a client only so a line
+             *     with no end readings still has a depth.
+             */
             depth_m?: number | null;
             description: string;
             /**
@@ -3920,7 +3925,10 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Nullable: a line is often drawn before the dive that measures it.
+             */
             start_depth_m?: number | null;
             /**
              * Format: double
@@ -3953,7 +3961,12 @@ export interface components {
              *     member delete through a plain edit.
              */
             deleted_at?: string | null;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description The mean of the two ends wherever both are set, written by the
+             *     `transect_depth_from_ends` trigger. Accepted from a client only so a line
+             *     with no end readings still has a depth.
+             */
             depth_m?: number | null;
             description: string;
             /**
@@ -3985,7 +3998,10 @@ export interface components {
              * @description Accuracy is per end point, as the field records have it.
              */
             start_accuracy_m?: number | null;
-            /** Format: double */
+            /**
+             * Format: double
+             * @description Nullable: a line is often drawn before the dive that measures it.
+             */
             start_depth_m?: number | null;
             /**
              * Format: double
