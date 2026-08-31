@@ -25,6 +25,7 @@ import videos from './videos';
 import runs from './runs';
 import changes from './changes';
 import devices from './devices';
+import cameras from './cameras';
 import presets from './presets';
 import archive from './archive';
 import PerformancePage from './performance/PerformancePage';
@@ -162,6 +163,10 @@ const App = () => {
                             admin-only. */}
                         <Resource name="devices" {...devices} />
                         <Resource name="presets" {...presets} />
+                        <Resource name="camera_profiles" {...cameras} />
+                        {/* No list view of its own: calibrations are read through the
+                            camera profile that owns them. */}
+                        <Resource name="camera_calibrations" />
                         <Resource name="stored_objects" {...archive} />
                         <Resource name="changes" {...changes} />
                         {/* No list view, so no menu entry: registered only for the

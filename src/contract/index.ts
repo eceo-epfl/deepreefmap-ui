@@ -83,6 +83,9 @@ export type CoverRow = Omit<
 
 export type Preset = Schemas['PresetResponse'];
 
+export type CameraProfile = Schemas['CameraProfileResponse'];
+export type CameraCalibration = Schemas['CameraCalibrationResponse'];
+
 /** A ledger entry, keyed by `seq`; the data provider mirrors it onto `id` for react-admin. */
 export type Change = Omit<Schemas['ChangeResponse'], 'status'> & {
     id: number;

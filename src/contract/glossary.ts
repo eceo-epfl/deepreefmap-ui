@@ -8,6 +8,8 @@ export const GLOSSARY: Record<string, string> = {
     runs: 'One reconstruction of one pass.',
     devices: 'An enrolled field laptop.',
     presets: 'Named run settings the registry defines and laptops download.',
+    camera_profiles:
+        'A rig: a body, a lens mode, a housing, a resolution. Its calibrations are the measurements laptops rectify footage with.',
     changes: 'The ledger of every write, and the proposals from laptops awaiting a decision.',
     stored_objects: 'An archived clip or run output, keyed by content hash.',
 };

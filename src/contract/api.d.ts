@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    '/admin/erase-subject': {
+    "/admin/erase-subject": {
         parameters: {
             query?: never;
             header?: never;
@@ -18,14 +18,14 @@ export interface paths {
          * @description Touches only the onboarding and upload audit columns. None of them sync, so the
          *     erasure is complete on the server and nothing propagates to devices.
          */
-        post: operations['erase_subject'];
+        post: operations["erase_subject"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/archive/by-hash/{content_hash}': {
+    "/archive/by-hash/{content_hash}": {
         parameters: {
             query?: never;
             header?: never;
@@ -33,7 +33,7 @@ export interface paths {
             cookie?: never;
         };
         /** Whether content with this hash is archived. Cheap, for badges. */
-        get: operations['by_hash'];
+        get: operations["by_hash"];
         put?: never;
         post?: never;
         delete?: never;
@@ -42,7 +42,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/archive/initiate': {
+    "/archive/initiate": {
         parameters: {
             query?: never;
             header?: never;
@@ -56,14 +56,14 @@ export interface paths {
          * @description Content already archived answers `complete` with no upload at all. An unfinished
          *     upload of the same content resumes wherever it stopped, whoever started it.
          */
-        post: operations['initiate'];
+        post: operations["initiate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/archive/overview': {
+    "/archive/overview": {
         parameters: {
             query?: never;
             header?: never;
@@ -75,7 +75,7 @@ export interface paths {
          * @description Unpaged: the whole archive comes back in one response. Deleted runs and clips are
          *     left out, so an object linked only through them counts as unlinked.
          */
-        get: operations['overview'];
+        get: operations["overview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -84,7 +84,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/archive/probe': {
+    "/archive/probe": {
         parameters: {
             query?: never;
             header?: never;
@@ -94,14 +94,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Archive state for many hashes at once, so badges cost one request per page. */
-        post: operations['probe'];
+        post: operations["probe"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/archive/runs-probe': {
+    "/archive/runs-probe": {
         parameters: {
             query?: never;
             header?: never;
@@ -111,14 +111,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Archive state for many runs at once: artefact counts, grouped in one query. */
-        post: operations['runs_probe'];
+        post: operations["runs_probe"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/archive/runs/{run_id}/outputs.zip': {
+    "/archive/runs/{run_id}/outputs.zip": {
         parameters: {
             query?: never;
             header?: never;
@@ -126,7 +126,7 @@ export interface paths {
             cookie?: never;
         };
         /** Stream one run's outputs as a zip against a signed bundle link. */
-        get: operations['stream_bundle'];
+        get: operations["stream_bundle"];
         put?: never;
         post?: never;
         delete?: never;
@@ -135,7 +135,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/archive/{object_id}/complete': {
+    "/archive/{object_id}/complete": {
         parameters: {
             query?: never;
             header?: never;
@@ -154,14 +154,14 @@ export interface paths {
          *     object, fails the row and answers 409, so a wrong upload can never poison a
          *     content-addressed key another device would dedup against.
          */
-        post: operations['complete'];
+        post: operations["complete"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/archive/{object_id}/download': {
+    "/archive/{object_id}/download": {
         parameters: {
             query?: never;
             header?: never;
@@ -174,7 +174,7 @@ export interface paths {
          *     HMAC signature in the query, so a browser navigation needs no bearer header
          *     while the object store stays unreachable.
          */
-        get: operations['download'];
+        get: operations["download"];
         put?: never;
         post?: never;
         delete?: never;
@@ -183,7 +183,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/archive/{object_id}/fetch': {
+    "/archive/{object_id}/fetch": {
         parameters: {
             query?: never;
             header?: never;
@@ -191,7 +191,7 @@ export interface paths {
             cookie?: never;
         };
         /** Stream a verified object against a signed fetch link. */
-        get: operations['fetch'];
+        get: operations["fetch"];
         put?: never;
         post?: never;
         delete?: never;
@@ -200,7 +200,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/archive/{object_id}/parts/{part_number}': {
+    "/archive/{object_id}/parts/{part_number}": {
         parameters: {
             query?: never;
             header?: never;
@@ -215,7 +215,7 @@ export interface paths {
          *     under the caller's authenticated identity. Parts may arrive in any order and
          *     re-sending one overwrites it, which is how a retry works.
          */
-        put: operations['upload_part'];
+        put: operations["upload_part"];
         post?: never;
         delete?: never;
         options?: never;
@@ -223,7 +223,266 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/campaigns': {
+    "/camera_calibrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all camera_calibrations
+         * @description Retrieves all camera_calibrations.
+         *
+         *     This resource manages camera_calibration items
+         *
+         *     Additional sortable columns:
+         *     - camera_profile_id
+         *     - version
+         *     - image_width
+         *     - image_height
+         *     - reprojection_error_px
+         *     - registered_frames
+         *     - calibrated_at
+         *     - created_at
+         *     - updated_at
+         *     - deleted_at
+         *     - server_seq.
+         *
+         *     Additional filterable columns:
+         *     - id
+         *     - camera_profile_id
+         *     - version
+         *     - image_width
+         *     - image_height
+         *     - reprojection_error_px
+         *     - registered_frames
+         *     - calibrated_at
+         *     - deleted_at
+         *     - device_id.
+         */
+        get: operations["get_all_camera_calibrations"];
+        put?: never;
+        /**
+         * Create one camera_calibration
+         * @description Creates a new camera_calibration.
+         *
+         *     This resource manages camera_calibration items
+         */
+        post: operations["create_one_camera_calibration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/camera_calibrations/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create many camera_calibrations
+         * @description Creates multiple camera_calibrations in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages camera_calibration items
+         */
+        post: operations["create_many_camera_calibrations"];
+        /**
+         * Delete many camera_calibrations
+         * @description Deletes many camera_calibrations by their IDs and returns array of deleted UUIDs.
+         *
+         *     Use `?partial=true` for partial success mode (deletes valid items even if some fail).
+         *
+         *     This resource manages camera_calibration items
+         */
+        delete: operations["delete_many_camera_calibrations"];
+        options?: never;
+        head?: never;
+        /**
+         * Update many camera_calibrations
+         * @description Updates multiple camera_calibrations in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages camera_calibration items
+         */
+        patch: operations["update_many_camera_calibrations"];
+        trace?: never;
+    };
+    "/camera_calibrations/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a calibration made on a laptop. */
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/camera_calibrations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one camera_calibration
+         * @description Retrieves one camera_calibration by its ID.
+         *
+         *     This resource manages camera_calibration items
+         */
+        get: operations["get_one_camera_calibration"];
+        /**
+         * Update one camera_calibration
+         * @description Updates one camera_calibration by its ID.
+         *
+         *     This resource manages camera_calibration items
+         */
+        put: operations["update_one_camera_calibration"];
+        post?: never;
+        /**
+         * Delete one camera_calibration
+         * @description Deletes one camera_calibration by its ID.
+         *
+         *     This resource manages camera_calibration items
+         */
+        delete: operations["delete_one_camera_calibration"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/camera_profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all camera_profiles
+         * @description Retrieves all camera_profiles.
+         *
+         *     This resource manages camera_profile items
+         *
+         *     Additional sortable columns:
+         *     - name
+         *     - created_at
+         *     - updated_at
+         *     - deleted_at
+         *     - server_seq.
+         *
+         *     Additional filterable columns:
+         *     - id
+         *     - name
+         *     - deleted_at
+         *     - device_id.
+         */
+        get: operations["get_all_camera_profiles"];
+        put?: never;
+        /**
+         * Create one camera_profile
+         * @description Creates a new camera_profile.
+         *
+         *     This resource manages camera_profile items
+         */
+        post: operations["create_one_camera_profile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/camera_profiles/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create many camera_profiles
+         * @description Creates multiple camera_profiles in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages camera_profile items
+         */
+        post: operations["create_many_camera_profiles"];
+        /**
+         * Delete many camera_profiles
+         * @description Deletes many camera_profiles by their IDs and returns array of deleted UUIDs.
+         *
+         *     Use `?partial=true` for partial success mode (deletes valid items even if some fail).
+         *
+         *     This resource manages camera_profile items
+         */
+        delete: operations["delete_many_camera_profiles"];
+        options?: never;
+        head?: never;
+        /**
+         * Update many camera_profiles
+         * @description Updates multiple camera_profiles in a batch. Limited to 100 items per request.
+         *
+         *     Use `?partial=true` for partial success mode (commits successful items even if some fail).
+         *
+         *     This resource manages camera_profile items
+         */
+        patch: operations["update_many_camera_profiles"];
+        trace?: never;
+    };
+    "/camera_profiles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one camera_profile
+         * @description Retrieves one camera_profile by its ID.
+         *
+         *     This resource manages camera_profile items
+         */
+        get: operations["get_one_camera_profile"];
+        /**
+         * Update one camera_profile
+         * @description Updates one camera_profile by its ID.
+         *
+         *     This resource manages camera_profile items
+         */
+        put: operations["update_one_camera_profile"];
+        post?: never;
+        /**
+         * Delete one camera_profile
+         * @description Deletes one camera_profile by its ID.
+         *
+         *     This resource manages camera_profile items
+         */
+        delete: operations["delete_one_camera_profile"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns": {
         parameters: {
             query?: never;
             header?: never;
@@ -256,7 +515,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_campaigns'];
+        get: operations["get_all_campaigns"];
         put?: never;
         /**
          * Create one campaign
@@ -264,14 +523,14 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        post: operations['create_one_campaign'];
+        post: operations["create_one_campaign"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/campaigns/batch': {
+    "/campaigns/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -288,7 +547,7 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        post: operations['create_many_campaigns'];
+        post: operations["create_many_campaigns"];
         /**
          * Delete many campaigns
          * @description Deletes many campaigns by their IDs and returns array of deleted UUIDs.
@@ -297,7 +556,7 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        delete: operations['delete_many_campaigns'];
+        delete: operations["delete_many_campaigns"];
         options?: never;
         head?: never;
         /**
@@ -308,10 +567,10 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        patch: operations['update_many_campaigns'];
+        patch: operations["update_many_campaigns"];
         trace?: never;
     };
-    '/campaigns/{id}': {
+    "/campaigns/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -324,14 +583,14 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        get: operations['get_one_campaign'];
+        get: operations["get_one_campaign"];
         /**
          * Update one campaign
          * @description Updates one campaign by its ID.
          *
          *     This resource manages campaign items
          */
-        put: operations['update_one_campaign'];
+        put: operations["update_one_campaign"];
         post?: never;
         /**
          * Delete one campaign
@@ -339,13 +598,13 @@ export interface paths {
          *
          *     This resource manages campaign items
          */
-        delete: operations['delete_one_campaign'];
+        delete: operations["delete_one_campaign"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/campaigns/{id}/transects': {
+    "/campaigns/{id}/transects": {
         parameters: {
             query?: never;
             header?: never;
@@ -353,7 +612,7 @@ export interface paths {
             cookie?: never;
         };
         /** Transects with a live pass in the campaign, by name. */
-        get: operations['transects_for_campaign'];
+        get: operations["transects_for_campaign"];
         put?: never;
         post?: never;
         delete?: never;
@@ -362,7 +621,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/changes': {
+    "/changes": {
         parameters: {
             query?: never;
             header?: never;
@@ -394,7 +653,7 @@ export interface paths {
          *     - validate
          *     - decided_by.
          */
-        get: operations['get_all_changes'];
+        get: operations["get_all_changes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -403,7 +662,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/changes/validate': {
+    "/changes/validate": {
         parameters: {
             query?: never;
             header?: never;
@@ -413,14 +672,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Validate rows: from here on a laptop's change to them is a proposal. */
-        post: operations['validate'];
+        post: operations["validate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/changes/{id}': {
+    "/changes/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -433,7 +692,7 @@ export interface paths {
          *
          *     This resource manages change items
          */
-        get: operations['get_one_change'];
+        get: operations["get_one_change"];
         put?: never;
         post?: never;
         delete?: never;
@@ -442,7 +701,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/changes/{seq}/accept': {
+    "/changes/{seq}/accept": {
         parameters: {
             query?: never;
             header?: never;
@@ -452,14 +711,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Accept a proposal: its fields land on the row as a console write. */
-        post: operations['accept'];
+        post: operations["accept"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/changes/{seq}/dismiss': {
+    "/changes/{seq}/dismiss": {
         parameters: {
             query?: never;
             header?: never;
@@ -469,14 +728,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Dismiss a proposal: the row stands, the values stay in the ledger. */
-        post: operations['dismiss'];
+        post: operations["dismiss"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/config/class-groups': {
+    "/config/class-groups": {
         parameters: {
             query?: never;
             header?: never;
@@ -487,7 +746,7 @@ export interface paths {
          * The benthic class groups and the colour each is drawn in.
          * @description Served so the console colours a cover figure the same way the desktop viewer does.
          */
-        get: operations['get_class_groups'];
+        get: operations["get_class_groups"];
         put?: never;
         post?: never;
         delete?: never;
@@ -496,7 +755,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/config/classes': {
+    "/config/classes": {
         parameters: {
             query?: never;
             header?: never;
@@ -508,7 +767,7 @@ export interface paths {
          * @description A label id in a run's `ortho.npz` is one of these ids, so a viewer can paint the
          *     class ortho in the same colours the cover figure uses.
          */
-        get: operations['get_classes'];
+        get: operations["get_classes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -517,7 +776,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/config/keycloak': {
+    "/config/keycloak": {
         parameters: {
             query?: never;
             header?: never;
@@ -525,7 +784,7 @@ export interface paths {
             cookie?: never;
         };
         /** Keycloak details for the web interface. */
-        get: operations['get_keycloak_config'];
+        get: operations["get_keycloak_config"];
         put?: never;
         post?: never;
         delete?: never;
@@ -534,7 +793,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/cover_rows': {
+    "/cover_rows": {
         parameters: {
             query?: never;
             header?: never;
@@ -570,7 +829,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_cover_rows'];
+        get: operations["get_all_cover_rows"];
         put?: never;
         post?: never;
         delete?: never;
@@ -579,7 +838,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/cover_rows/{id}': {
+    "/cover_rows/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -592,7 +851,7 @@ export interface paths {
          *
          *     This resource manages cover_row items
          */
-        get: operations['get_one_cover_row'];
+        get: operations["get_one_cover_row"];
         put?: never;
         post?: never;
         delete?: never;
@@ -601,7 +860,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/devices': {
+    "/devices": {
         parameters: {
             query?: never;
             header?: never;
@@ -635,7 +894,7 @@ export interface paths {
          *     - assigned_preset_id
          *     - revoked_at.
          */
-        get: operations['get_all_devices'];
+        get: operations["get_all_devices"];
         put?: never;
         post?: never;
         delete?: never;
@@ -644,7 +903,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/devices/connect-codes': {
+    "/devices/connect-codes": {
         parameters: {
             query?: never;
             header?: never;
@@ -657,14 +916,14 @@ export interface paths {
          * Mint a connect code for a desktop installation.
          * @description Interactive login only, so a device cannot invite further devices.
          */
-        post: operations['mint_code'];
+        post: operations["mint_code"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/devices/{device_id}/assign-preset': {
+    "/devices/{device_id}/assign-preset": {
         parameters: {
             query?: never;
             header?: never;
@@ -680,14 +939,14 @@ export interface paths {
          *     preset it actually runs under in the request after that, so `active_preset_*` on
          *     the device row says whether the assignment was acknowledged.
          */
-        post: operations['assign_preset'];
+        post: operations["assign_preset"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/devices/{device_id}/rename': {
+    "/devices/{device_id}/rename": {
         parameters: {
             query?: never;
             header?: never;
@@ -701,14 +960,14 @@ export interface paths {
          * @description Interactive login only. A device that could rename itself would make its own
          *     attribution editable.
          */
-        post: operations['rename'];
+        post: operations["rename"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/devices/{device_id}/revoke': {
+    "/devices/{device_id}/revoke": {
         parameters: {
             query?: never;
             header?: never;
@@ -718,14 +977,14 @@ export interface paths {
         get?: never;
         put?: never;
         /** Revoke a device. Members may revoke their own, administrators anyone's. */
-        post: operations['revoke'];
+        post: operations["revoke"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/devices/{id}': {
+    "/devices/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -738,7 +997,7 @@ export interface paths {
          *
          *     This resource manages device items
          */
-        get: operations['get_one_device'];
+        get: operations["get_one_device"];
         put?: never;
         post?: never;
         delete?: never;
@@ -747,7 +1006,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/enrol': {
+    "/enrol": {
         parameters: {
             query?: never;
             header?: never;
@@ -761,14 +1020,14 @@ export interface paths {
          * @description Unauthenticated, since the code is the credential: rate limited per IP, and the
          *     code is spent in the same transaction that creates the device.
          */
-        post: operations['enrol'];
+        post: operations["enrol"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/healthz': {
+    "/healthz": {
         parameters: {
             query?: never;
             header?: never;
@@ -776,7 +1035,7 @@ export interface paths {
             cookie?: never;
         };
         /** Liveness: the process is up. */
-        get: operations['healthz'];
+        get: operations["healthz"];
         put?: never;
         post?: never;
         delete?: never;
@@ -785,7 +1044,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/me': {
+    "/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -793,7 +1052,7 @@ export interface paths {
             cookie?: never;
         };
         /** Who the caller is, by whichever credential they presented. */
-        get: operations['get_me'];
+        get: operations["get_me"];
         put?: never;
         post?: never;
         delete?: never;
@@ -802,7 +1061,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/pass_videos': {
+    "/pass_videos": {
         parameters: {
             query?: never;
             header?: never;
@@ -832,7 +1091,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_pass_videos'];
+        get: operations["get_all_pass_videos"];
         put?: never;
         /**
          * Create one pass_video
@@ -840,14 +1099,14 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        post: operations['create_one_pass_video'];
+        post: operations["create_one_pass_video"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/pass_videos/batch': {
+    "/pass_videos/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -864,7 +1123,7 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        post: operations['create_many_pass_videos'];
+        post: operations["create_many_pass_videos"];
         /**
          * Delete many pass_videos
          * @description Deletes many pass_videos by their IDs and returns array of deleted UUIDs.
@@ -873,7 +1132,7 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        delete: operations['delete_many_pass_videos'];
+        delete: operations["delete_many_pass_videos"];
         options?: never;
         head?: never;
         /**
@@ -884,10 +1143,10 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        patch: operations['update_many_pass_videos'];
+        patch: operations["update_many_pass_videos"];
         trace?: never;
     };
-    '/pass_videos/{id}': {
+    "/pass_videos/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -900,14 +1159,14 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        get: operations['get_one_pass_video'];
+        get: operations["get_one_pass_video"];
         /**
          * Update one pass_video
          * @description Updates one pass_video by its ID.
          *
          *     This resource manages pass_video items
          */
-        put: operations['update_one_pass_video'];
+        put: operations["update_one_pass_video"];
         post?: never;
         /**
          * Delete one pass_video
@@ -915,13 +1174,13 @@ export interface paths {
          *
          *     This resource manages pass_video items
          */
-        delete: operations['delete_one_pass_video'];
+        delete: operations["delete_one_pass_video"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/passes': {
+    "/passes": {
         parameters: {
             query?: never;
             header?: never;
@@ -956,7 +1215,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_passes'];
+        get: operations["get_all_passes"];
         put?: never;
         /**
          * Create one pass
@@ -964,14 +1223,14 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        post: operations['create_one_pass'];
+        post: operations["create_one_pass"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/passes/batch': {
+    "/passes/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -988,7 +1247,7 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        post: operations['create_many_passes'];
+        post: operations["create_many_passes"];
         /**
          * Delete many passes
          * @description Deletes many passes by their IDs and returns array of deleted UUIDs.
@@ -997,7 +1256,7 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        delete: operations['delete_many_passes'];
+        delete: operations["delete_many_passes"];
         options?: never;
         head?: never;
         /**
@@ -1008,10 +1267,10 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        patch: operations['update_many_passes'];
+        patch: operations["update_many_passes"];
         trace?: never;
     };
-    '/passes/{id}': {
+    "/passes/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1024,14 +1283,14 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        get: operations['get_one_pass'];
+        get: operations["get_one_pass"];
         /**
          * Update one pass
          * @description Updates one pass by its ID.
          *
          *     This resource manages pass items
          */
-        put: operations['update_one_pass'];
+        put: operations["update_one_pass"];
         post?: never;
         /**
          * Delete one pass
@@ -1039,13 +1298,13 @@ export interface paths {
          *
          *     This resource manages pass items
          */
-        delete: operations['delete_one_pass'];
+        delete: operations["delete_one_pass"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/performance/summary': {
+    "/performance/summary": {
         parameters: {
             query?: never;
             header?: never;
@@ -1076,7 +1335,7 @@ export interface paths {
          *     from the device's current profile, not from its profile when the runs happened, so a
          *     machine that has since been upgraded reports its new hardware against its old runs.
          */
-        get: operations['performance_summary'];
+        get: operations["performance_summary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1085,7 +1344,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/presets': {
+    "/presets": {
         parameters: {
             query?: never;
             header?: never;
@@ -1113,7 +1372,7 @@ export interface paths {
          *     - deleted_at
          *     - device_id.
          */
-        get: operations['get_all_presets'];
+        get: operations["get_all_presets"];
         put?: never;
         /**
          * Create one preset
@@ -1121,14 +1380,14 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        post: operations['create_one_preset'];
+        post: operations["create_one_preset"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/presets/batch': {
+    "/presets/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -1145,7 +1404,7 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        post: operations['create_many_presets'];
+        post: operations["create_many_presets"];
         /**
          * Delete many presets
          * @description Deletes many presets by their IDs and returns array of deleted UUIDs.
@@ -1154,7 +1413,7 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        delete: operations['delete_many_presets'];
+        delete: operations["delete_many_presets"];
         options?: never;
         head?: never;
         /**
@@ -1165,10 +1424,10 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        patch: operations['update_many_presets'];
+        patch: operations["update_many_presets"];
         trace?: never;
     };
-    '/presets/{id}': {
+    "/presets/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1181,14 +1440,14 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        get: operations['get_one_preset'];
+        get: operations["get_one_preset"];
         /**
          * Update one preset
          * @description Updates one preset by its ID.
          *
          *     This resource manages preset items
          */
-        put: operations['update_one_preset'];
+        put: operations["update_one_preset"];
         post?: never;
         /**
          * Delete one preset
@@ -1196,13 +1455,13 @@ export interface paths {
          *
          *     This resource manages preset items
          */
-        delete: operations['delete_one_preset'];
+        delete: operations["delete_one_preset"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/presets/{preset_id}/assign-all': {
+    "/presets/{preset_id}/assign-all": {
         parameters: {
             query?: never;
             header?: never;
@@ -1217,14 +1476,14 @@ export interface paths {
          *     fleet per caller, so this one is admin-only. Each assignment travels in that
          *     device's next heartbeat response, exactly as the single route's does.
          */
-        post: operations['assign_all'];
+        post: operations["assign_all"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/run_artifacts': {
+    "/run_artifacts": {
         parameters: {
             query?: never;
             header?: never;
@@ -1250,7 +1509,7 @@ export interface paths {
          *     - content_hash
          *     - stored_object_id.
          */
-        get: operations['get_all_run_artifacts'];
+        get: operations["get_all_run_artifacts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1259,7 +1518,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/run_artifacts/{id}': {
+    "/run_artifacts/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1272,7 +1531,7 @@ export interface paths {
          *
          *     This resource manages run_artifact items
          */
-        get: operations['get_one_run_artifact'];
+        get: operations["get_one_run_artifact"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1281,7 +1540,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/runs': {
+    "/runs": {
         parameters: {
             query?: never;
             header?: never;
@@ -1327,13 +1586,14 @@ export interface paths {
          *     - camera_profile
          *     - scale_type
          *     - preset_id
+         *     - camera_calibration_id
          *     - batch_id
          *     - deleted_at
          *     - device_id
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_runs'];
+        get: operations["get_all_runs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1342,7 +1602,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/runs/{id}': {
+    "/runs/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1355,7 +1615,7 @@ export interface paths {
          *
          *     This resource manages run items
          */
-        get: operations['get_one_run'];
+        get: operations["get_one_run"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1364,7 +1624,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/runs/{run_id}/outputs': {
+    "/runs/{run_id}/outputs": {
         parameters: {
             query?: never;
             header?: never;
@@ -1372,7 +1632,7 @@ export interface paths {
             cookie?: never;
         };
         /** What one run archived, by group. */
-        get: operations['outputs'];
+        get: operations["outputs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1381,7 +1641,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/runs/{run_id}/outputs/bundle': {
+    "/runs/{run_id}/outputs/bundle": {
         parameters: {
             query?: never;
             header?: never;
@@ -1389,7 +1649,7 @@ export interface paths {
             cookie?: never;
         };
         /** A signed link that streams one run's outputs, or one group of them, as a zip. */
-        get: operations['bundle'];
+        get: operations["bundle"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1398,7 +1658,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/runs/{run_id}/outputs/files': {
+    "/runs/{run_id}/outputs/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -1406,7 +1666,7 @@ export interface paths {
             cookie?: never;
         };
         /** The files of one group, in path order. */
-        get: operations['files'];
+        get: operations["files"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1415,7 +1675,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/sites': {
+    "/sites": {
         parameters: {
             query?: never;
             header?: never;
@@ -1447,7 +1707,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_sites'];
+        get: operations["get_all_sites"];
         put?: never;
         /**
          * Create one site
@@ -1455,14 +1715,14 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        post: operations['create_one_site'];
+        post: operations["create_one_site"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/sites/batch': {
+    "/sites/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -1479,7 +1739,7 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        post: operations['create_many_sites'];
+        post: operations["create_many_sites"];
         /**
          * Delete many sites
          * @description Deletes many sites by their IDs and returns array of deleted UUIDs.
@@ -1488,7 +1748,7 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        delete: operations['delete_many_sites'];
+        delete: operations["delete_many_sites"];
         options?: never;
         head?: never;
         /**
@@ -1499,10 +1759,10 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        patch: operations['update_many_sites'];
+        patch: operations["update_many_sites"];
         trace?: never;
     };
-    '/sites/{id}': {
+    "/sites/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1515,14 +1775,14 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        get: operations['get_one_site'];
+        get: operations["get_one_site"];
         /**
          * Update one site
          * @description Updates one site by its ID.
          *
          *     This resource manages site items
          */
-        put: operations['update_one_site'];
+        put: operations["update_one_site"];
         post?: never;
         /**
          * Delete one site
@@ -1530,13 +1790,13 @@ export interface paths {
          *
          *     This resource manages site items
          */
-        delete: operations['delete_one_site'];
+        delete: operations["delete_one_site"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/stored_objects': {
+    "/stored_objects": {
         parameters: {
             query?: never;
             header?: never;
@@ -1565,7 +1825,7 @@ export interface paths {
          *     - uploaded_by_device_id
          *     - uploaded_by.
          */
-        get: operations['get_all_stored_objects'];
+        get: operations["get_all_stored_objects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1574,7 +1834,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/stored_objects/{id}': {
+    "/stored_objects/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1587,7 +1847,7 @@ export interface paths {
          *
          *     This resource manages stored_object items
          */
-        get: operations['get_one_stored_object'];
+        get: operations["get_one_stored_object"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1596,7 +1856,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/sync/heartbeat': {
+    "/sync/heartbeat": {
         parameters: {
             query?: never;
             header?: never;
@@ -1610,14 +1870,14 @@ export interface paths {
          * @description Identity comes from the credential and never from the body, so a device cannot
          *     report on a sibling's behalf.
          */
-        post: operations['heartbeat'];
+        post: operations["heartbeat"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/sync/pull': {
+    "/sync/pull": {
         parameters: {
             query?: never;
             header?: never;
@@ -1625,7 +1885,7 @@ export interface paths {
             cookie?: never;
         };
         /** Download rows changed since a cursor. */
-        get: operations['pull'];
+        get: operations["pull"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1634,7 +1894,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/sync/push': {
+    "/sync/push": {
         parameters: {
             query?: never;
             header?: never;
@@ -1648,14 +1908,14 @@ export interface paths {
          * @description One transaction, sections in foreign-key order, so a client need not order its
          *     own writes.
          */
-        post: operations['push'];
+        post: operations["push"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/transects': {
+    "/transects": {
         parameters: {
             query?: never;
             header?: never;
@@ -1693,7 +1953,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_transects'];
+        get: operations["get_all_transects"];
         put?: never;
         /**
          * Create one transect
@@ -1701,14 +1961,14 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        post: operations['create_one_transect'];
+        post: operations["create_one_transect"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/transects/batch': {
+    "/transects/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -1725,7 +1985,7 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        post: operations['create_many_transects'];
+        post: operations["create_many_transects"];
         /**
          * Delete many transects
          * @description Deletes many transects by their IDs and returns array of deleted UUIDs.
@@ -1734,7 +1994,7 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        delete: operations['delete_many_transects'];
+        delete: operations["delete_many_transects"];
         options?: never;
         head?: never;
         /**
@@ -1745,10 +2005,10 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        patch: operations['update_many_transects'];
+        patch: operations["update_many_transects"];
         trace?: never;
     };
-    '/transects/{id}': {
+    "/transects/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1761,14 +2021,14 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        get: operations['get_one_transect'];
+        get: operations["get_one_transect"];
         /**
          * Update one transect
          * @description Updates one transect by its ID.
          *
          *     This resource manages transect items
          */
-        put: operations['update_one_transect'];
+        put: operations["update_one_transect"];
         post?: never;
         /**
          * Delete one transect
@@ -1776,13 +2036,13 @@ export interface paths {
          *
          *     This resource manages transect items
          */
-        delete: operations['delete_one_transect'];
+        delete: operations["delete_one_transect"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/transects/{id}/cover': {
+    "/transects/{id}/cover": {
         parameters: {
             query?: never;
             header?: never;
@@ -1794,7 +2054,7 @@ export interface paths {
          * @description Collapses reruns to the latest succeeded run per pass, so a pass processed twice counts
          *     once.
          */
-        get: operations['pooled_cover'];
+        get: operations["pooled_cover"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1803,7 +2063,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/transects/{id}/cover-series': {
+    "/transects/{id}/cover-series": {
         parameters: {
             query?: never;
             header?: never;
@@ -1815,7 +2075,7 @@ export interface paths {
          * @description Collapses reruns to the latest succeeded run per pass, so a pass processed twice counts
          *     once.
          */
-        get: operations['cover_series'];
+        get: operations["cover_series"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1824,7 +2084,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    '/videos': {
+    "/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish a calibration made on a laptop. */
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/videos": {
         parameters: {
             query?: never;
             header?: never;
@@ -1867,7 +2144,7 @@ export interface paths {
          *     - validated_at
          *     - validated_by.
          */
-        get: operations['get_all_videos'];
+        get: operations["get_all_videos"];
         put?: never;
         /**
          * Create one video
@@ -1875,14 +2152,14 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        post: operations['create_one_video'];
+        post: operations["create_one_video"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/videos/batch': {
+    "/videos/batch": {
         parameters: {
             query?: never;
             header?: never;
@@ -1899,7 +2176,7 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        post: operations['create_many_videos'];
+        post: operations["create_many_videos"];
         /**
          * Delete many videos
          * @description Deletes many videos by their IDs and returns array of deleted UUIDs.
@@ -1908,7 +2185,7 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        delete: operations['delete_many_videos'];
+        delete: operations["delete_many_videos"];
         options?: never;
         head?: never;
         /**
@@ -1919,10 +2196,10 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        patch: operations['update_many_videos'];
+        patch: operations["update_many_videos"];
         trace?: never;
     };
-    '/videos/{id}': {
+    "/videos/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1935,14 +2212,14 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        get: operations['get_one_video'];
+        get: operations["get_one_video"];
         /**
          * Update one video
          * @description Updates one video by its ID.
          *
          *     This resource manages video items
          */
-        put: operations['update_one_video'];
+        put: operations["update_one_video"];
         post?: never;
         /**
          * Delete one video
@@ -1950,13 +2227,13 @@ export interface paths {
          *
          *     This resource manages video items
          */
-        delete: operations['delete_one_video'];
+        delete: operations["delete_one_video"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    '/videos/{id}/runs': {
+    "/videos/{id}/runs": {
         parameters: {
             query?: never;
             header?: never;
@@ -1968,7 +2245,7 @@ export interface paths {
          * @description Follows `pass_video` to `transect_pass` to `run_record`, so every rerun of every
          *     pass the clip played in is listed.
          */
-        get: operations['runs_for_video'];
+        get: operations["runs_for_video"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1990,10 +2267,10 @@ export interface components {
         };
         ArchiveOverview: {
             /** @description Stored objects whose hash matches a clip, by `completed_at`. */
-            clips: components['schemas']['ClipOverview'][];
+            clips: components["schemas"]["ClipOverview"][];
             /** @description Runs with artefact rows, by last activity: `last_completed_at`, then `started_at`. */
-            runs: components['schemas']['RunOverview'][];
-            unlinked: components['schemas']['UnlinkedOverview'];
+            runs: components["schemas"]["RunOverview"][];
+            unlinked: components["schemas"]["UnlinkedOverview"];
         };
         AssignAllResponse: {
             /** Format: date-time */
@@ -2033,7 +2310,7 @@ export interface components {
          * @description Wrapper type for batch update request items.
          *     Each item contains an `id` field and the update fields flattened into the same object.
          */
-        BatchUpdateRequest: components['schemas']['SiteUpdate'] & {
+        BatchUpdateRequest: components["schemas"]["SiteUpdate"] & {
             /** @description The ID of the resource to update */
             id: string;
         };
@@ -2075,6 +2352,209 @@ export interface components {
             /** Format: uuid */
             object_id: string;
             status: string;
+        };
+        CameraCalibrationCreate: {
+            /** Format: date-time */
+            calibrated_at?: string | null;
+            /** Format: uuid */
+            camera_profile_id: string;
+            description: string;
+            document: unknown;
+            /** Format: uuid */
+            id?: string | null;
+            /** Format: int32 */
+            image_height?: number | null;
+            /** Format: int32 */
+            image_width?: number | null;
+            /** Format: int32 */
+            registered_frames?: number | null;
+            /** Format: double */
+            reprojection_error_px?: number | null;
+            source_clip: string;
+            /** Format: int32 */
+            version: number;
+        };
+        CameraCalibrationList: {
+            /** Format: date-time */
+            calibrated_at?: string | null;
+            /** Format: uuid */
+            camera_profile_id: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            deleted_at?: string | null;
+            description: string;
+            /**
+             * Format: uuid
+             * @description The device that measured it, where a device published it.
+             */
+            device_id?: string | null;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            image_height?: number | null;
+            /** Format: int32 */
+            image_width?: number | null;
+            /** Format: int32 */
+            registered_frames?: number | null;
+            /**
+             * Format: double
+             * @description What COLMAP reported when this was measured. The one number that says whether
+             *     a calibration is worth trusting.
+             */
+            reprojection_error_px?: number | null;
+            /** Format: int64 */
+            server_seq: number;
+            /** @description The clip it was measured from, by name. Empty where nobody recorded one. */
+            source_clip: string;
+            /**
+             * Format: date-time
+             * @description The conflict key last-write-wins resolves on. Server-stamped, as everywhere.
+             */
+            updated_at: string;
+            /** Format: int32 */
+            version: number;
+        };
+        CameraCalibrationResponse: {
+            /** Format: date-time */
+            calibrated_at?: string | null;
+            /** Format: uuid */
+            camera_profile_id: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            deleted_at?: string | null;
+            description: string;
+            /**
+             * Format: uuid
+             * @description The device that measured it, where a device published it.
+             */
+            device_id?: string | null;
+            /**
+             * @description The profile JSON itself, opaque to the registry beyond the shape check on
+             *     write. Detail view only: a page of calibrations does not carry every document.
+             */
+            document: unknown;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            image_height?: number | null;
+            /** Format: int32 */
+            image_width?: number | null;
+            /** Format: int32 */
+            registered_frames?: number | null;
+            /**
+             * Format: double
+             * @description What COLMAP reported when this was measured. The one number that says whether
+             *     a calibration is worth trusting.
+             */
+            reprojection_error_px?: number | null;
+            /** Format: int64 */
+            server_seq: number;
+            /** @description The clip it was measured from, by name. Empty where nobody recorded one. */
+            source_clip: string;
+            /**
+             * Format: date-time
+             * @description The conflict key last-write-wins resolves on. Server-stamped, as everywhere.
+             */
+            updated_at: string;
+            /** Format: int32 */
+            version: number;
+        };
+        CameraCalibrationUpdate: {
+            /** Format: date-time */
+            calibrated_at?: string | null;
+            /** Format: uuid */
+            camera_profile_id?: string | null;
+            description?: string | null;
+            document?: unknown;
+            /** Format: int32 */
+            image_height?: number | null;
+            /** Format: int32 */
+            image_width?: number | null;
+            /** Format: int32 */
+            registered_frames?: number | null;
+            /** Format: double */
+            reprojection_error_px?: number | null;
+            source_clip?: string | null;
+            /** Format: int32 */
+            version?: number | null;
+        };
+        CameraProfileCreate: {
+            description: string;
+            /** Format: uuid */
+            id?: string | null;
+            name: string;
+        };
+        CameraProfileList: {
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description The tombstone. Written only by the delete route, which administrators alone
+             *     reach, and by `/api/sync/push`.
+             */
+            deleted_at?: string | null;
+            description: string;
+            /**
+             * Format: uuid
+             * @description The device that published the profile, where one did. Never accepted from a
+             *     client, which would otherwise forge another device.
+             */
+            device_id?: string | null;
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Resolved by a device against its own profile directory, so it follows the
+             *     library's own charset: letters, numbers, underscores and hyphens.
+             */
+            name: string;
+            /** Format: int64 */
+            server_seq: number;
+            /**
+             * Format: date-time
+             * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
+             *     fires for a field the update model excludes, and a client-set stamp could pin a
+             *     row against every later push. `/api/sync/push` writes it directly instead.
+             */
+            updated_at: string;
+        };
+        CameraProfileResponse: {
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description The tombstone. Written only by the delete route, which administrators alone
+             *     reach, and by `/api/sync/push`.
+             */
+            deleted_at?: string | null;
+            description: string;
+            /**
+             * Format: uuid
+             * @description The device that published the profile, where one did. Never accepted from a
+             *     client, which would otherwise forge another device.
+             */
+            device_id?: string | null;
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Resolved by a device against its own profile directory, so it follows the
+             *     library's own charset: letters, numbers, underscores and hyphens.
+             */
+            name: string;
+            /** Format: int64 */
+            server_seq: number;
+            /**
+             * Format: date-time
+             * @description The conflict key last-write-wins resolves on. Server-stamped: `on_update` only
+             *     fires for a field the update model excludes, and a client-set stamp could pin a
+             *     row against every later push. `/api/sync/push` writes it directly instead.
+             */
+            updated_at: string;
+        };
+        CameraProfileUpdate: {
+            description?: string | null;
+            name?: string | null;
         };
         CampaignCreate: {
             /** Format: date */
@@ -2266,7 +2746,7 @@ export interface components {
              *     own `ListParts`, because a resuming client cannot know the `ETag`s of
              *     parts an earlier attempt sent.
              */
-            parts?: components['schemas']['CompletedPartBody'][];
+            parts?: components["schemas"]["CompletedPartBody"][];
         };
         CompleteResponse: {
             /** Format: uuid */
@@ -2379,7 +2859,7 @@ export interface components {
         };
         CoverSeries: {
             /** @description Campaigns by begin date then name, then the passes with none. */
-            entries: components['schemas']['CoverSeriesEntry'][];
+            entries: components["schemas"]["CoverSeriesEntry"][];
             level: string;
             /** Format: uuid */
             transect_id: string;
@@ -2404,7 +2884,7 @@ export interface components {
              */
             denominator: number;
             /** @description Largest fraction first. */
-            groups: components['schemas']['SeriesGroupCover'][];
+            groups: components["schemas"]["SeriesGroupCover"][];
         };
         DecisionResponse: {
             /** Format: int64 */
@@ -2606,7 +3086,7 @@ export interface components {
             system_profile?: unknown;
         };
         HeartbeatResponse: {
-            assigned_preset?: null | components['schemas']['AssignedPreset'];
+            assigned_preset?: null | components["schemas"]["AssignedPreset"];
         };
         InitiateRequest: {
             /**
@@ -2690,7 +3170,7 @@ export interface components {
             row_id: string;
             /** Format: int64 */
             seq: number;
-            status: components['schemas']['Status'];
+            status: components["schemas"]["Status"];
             table_key: string;
         };
         OutputFile: {
@@ -2705,7 +3185,7 @@ export interface components {
             stored_object_id?: string | null;
         };
         OutputFiles: {
-            files: components['schemas']['OutputFile'][];
+            files: components["schemas"]["OutputFile"][];
         };
         OutputGroup: {
             /**
@@ -3088,7 +3568,7 @@ export interface components {
             vram_std_bytes?: number | null;
         };
         PerformanceSummary: {
-            groups: components['schemas']['PerformanceGroup'][];
+            groups: components["schemas"]["PerformanceGroup"][];
         };
         PooledCover: {
             /** Format: uuid */
@@ -3109,7 +3589,7 @@ export interface components {
              */
             expected_passes: number;
             /** @description Largest fraction first. */
-            groups: components['schemas']['GroupCover'][];
+            groups: components["schemas"]["GroupCover"][];
             level: string;
             /** Format: uuid */
             transect_id: string;
@@ -3206,7 +3686,7 @@ export interface components {
         ProbeResponse: {
             /** @description One entry per hash that has a row. Hashes never seen are simply absent. */
             states: {
-                [key: string]: components['schemas']['ProbeState'];
+                [key: string]: components["schemas"]["ProbeState"];
             };
         };
         ProbeState: {
@@ -3235,7 +3715,7 @@ export interface components {
              * @description Decisions on this device's entries since the cursor. Empty for an operator, and
              *     under contract 1.
              */
-            outbox: components['schemas']['OutboxEntry'][];
+            outbox: components["schemas"]["OutboxEntry"][];
             sections: Record<string, never>;
         };
         PushRequest: {
@@ -3351,6 +3831,13 @@ export interface components {
              */
             batch_id?: string | null;
             /**
+             * Format: uuid
+             * @description Which measurement of the lens rectified this run's frames, where the device
+             *     knew one. The run's own outputs carry the document; this resolves it to what
+             *     the console holds.
+             */
+            camera_calibration_id?: string | null;
+            /**
              * @description The scale the cover was measured at: the camera profile, the tape length and
              *     crop width the run used, the metres per pixel that gave, and how the scale
              *     was established.
@@ -3449,7 +3936,7 @@ export interface components {
             /** Format: int64 */
             files: number;
             /** @description Purposes first, then directories by name. */
-            groups: components['schemas']['OutputGroup'][];
+            groups: components["schemas"]["OutputGroup"][];
             /** Format: int64 */
             pending: number;
             /** Format: uuid */
@@ -3503,6 +3990,13 @@ export interface components {
              *     here.
              */
             batch_id?: string | null;
+            /**
+             * Format: uuid
+             * @description Which measurement of the lens rectified this run's frames, where the device
+             *     knew one. The run's own outputs carry the document; this resolves it to what
+             *     the console holds.
+             */
+            camera_calibration_id?: string | null;
             /**
              * @description The scale the cover was measured at: the camera profile, the tape length and
              *     crop width the run used, the metres per pixel that gave, and how the scale
@@ -3621,19 +4115,19 @@ export interface components {
         RunsProbeResponse: {
             /** @description One entry per run id with artefact rows. Runs without any are absent. */
             states: {
-                [key: string]: components['schemas']['RunArchiveState'];
+                [key: string]: components["schemas"]["RunArchiveState"];
             };
         };
         SectionOutcome: {
             /** @description Rows written, inserted or merged. */
-            applied: components['schemas']['Ack'][];
+            applied: components["schemas"]["Ack"][];
             /** @description Rows the console holds the last word on, kept as proposals a curator reviews. */
-            proposed: components['schemas']['Refusal'][];
+            proposed: components["schemas"]["Refusal"][];
             received: number;
             /** @description Rows the database would not take. Re-sending the same row cannot help. */
-            rejected: components['schemas']['Refusal'][];
+            rejected: components["schemas"]["Refusal"][];
             /** @description Rows another origin owns, or this origin has since moved past. */
-            superseded: components['schemas']['Refusal'][];
+            superseded: components["schemas"]["Refusal"][];
         };
         SeriesGroupCover: {
             class_group: string;
@@ -3779,7 +4273,7 @@ export interface components {
          * @description How an entry was decided.
          * @enum {string}
          */
-        Status: 'applied' | 'superseded' | 'proposed' | 'rejected' | 'dismissed';
+        Status: "applied" | "superseded" | "proposed" | "rejected" | "dismissed";
         StoredObjectList: {
             /**
              * Format: date-time
@@ -4068,6 +4562,28 @@ export interface components {
             /** Format: int32 */
             part_number: number;
         };
+        UploadRequest: {
+            description?: string | null;
+            /** @description The profile JSON the desktop writes, verbatim. */
+            document: unknown;
+            /** @description The profile this measures. Made if the registry has never seen it. */
+            name: string;
+            /** Format: int32 */
+            registered_frames?: number | null;
+            /** Format: double */
+            reprojection_error_px?: number | null;
+            source_clip?: string | null;
+        };
+        UploadResponse: {
+            /** Format: uuid */
+            camera_calibration_id: string;
+            /** Format: uuid */
+            camera_profile_id: string;
+            /** @description False when this document was already the profile's calibration at this version. */
+            created: boolean;
+            /** Format: int32 */
+            version: number;
+        };
         ValidateRequest: {
             ids: string[];
             /** @description The section, as `contract/sync-contract.json` names it. */
@@ -4285,7 +4801,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['EraseSubjectRequest'];
+                "application/json": components["schemas"]["EraseSubjectRequest"];
             };
         };
         responses: {
@@ -4295,7 +4811,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['EraseSubjectResponse'];
+                    "application/json": components["schemas"]["EraseSubjectResponse"];
                 };
             };
             /** @description Empty subject */
@@ -4332,7 +4848,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ByHashResponse'];
+                    "application/json": components["schemas"]["ByHashResponse"];
                 };
             };
             /** @description Malformed hash */
@@ -4367,7 +4883,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['InitiateRequest'];
+                "application/json": components["schemas"]["InitiateRequest"];
             };
         };
         responses: {
@@ -4377,7 +4893,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['InitiateResponse'];
+                    "application/json": components["schemas"]["InitiateResponse"];
                 };
             };
             /** @description Malformed hash, size, kind or relpath */
@@ -4425,7 +4941,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ArchiveOverview'];
+                    "application/json": components["schemas"]["ArchiveOverview"];
                 };
             };
             /** @description Called with a device token */
@@ -4453,7 +4969,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['ProbeRequest'];
+                "application/json": components["schemas"]["ProbeRequest"];
             };
         };
         responses: {
@@ -4463,7 +4979,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ProbeResponse'];
+                    "application/json": components["schemas"]["ProbeResponse"];
                 };
             };
             /** @description Malformed hash or too many of them */
@@ -4491,7 +5007,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['RunsProbeRequest'];
+                "application/json": components["schemas"]["RunsProbeRequest"];
             };
         };
         responses: {
@@ -4501,7 +5017,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunsProbeResponse'];
+                    "application/json": components["schemas"]["RunsProbeResponse"];
                 };
             };
             /** @description Too many run ids */
@@ -4581,7 +5097,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['CompleteRequest'];
+                "application/json": components["schemas"]["CompleteRequest"];
             };
         };
         responses: {
@@ -4591,7 +5107,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CompleteResponse'];
+                    "application/json": components["schemas"]["CompleteResponse"];
                 };
             };
             /** @description No such object */
@@ -4635,7 +5151,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['DownloadResponse'];
+                    "application/json": components["schemas"]["DownloadResponse"];
                 };
             };
             /** @description No such object */
@@ -4723,7 +5239,7 @@ export interface operations {
         /** @description The part's raw bytes */
         requestBody: {
             content: {
-                'application/octet-stream': number[];
+                "application/octet-stream": number[];
             };
         };
         responses: {
@@ -4733,7 +5249,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['UploadPartResponse'];
+                    "application/json": components["schemas"]["UploadPartResponse"];
                 };
             };
             /** @description Part number out of range */
@@ -4766,6 +5282,925 @@ export interface operations {
             };
             /** @description The archive is not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_all_camera_calibrations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description JSON-encoded filter for querying resources.
+                 *
+                 *     This parameter supports various filtering options:
+                 *     - Free text search: `{"q": "search text"}`
+                 *     - Filtering by a single ID: `{"id": "550e8400-e29b-41d4-a716-446655440000"}`
+                 *     - Filtering by multiple IDs: `{"id": ["550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440001"]}`
+                 *     - Filtering on other columns: `{"name": "example"}`
+                 * @example {
+                 *       "id": "550e8400-e29b-41d4-a716-446655440000",
+                 *       "name": "example",
+                 *       "q": "search text"
+                 *     }
+                 */
+                filter?: string;
+                /**
+                 * @description Range for pagination in the format "[start, end]".
+                 *
+                 *     Example: `[0,9]`
+                 * @example [0,9]
+                 */
+                range?: string;
+                /**
+                 * @description Page number for standard REST pagination (1-based).
+                 *
+                 *     Example: `1`
+                 * @example 1
+                 */
+                page?: number;
+                /**
+                 * @description Number of items per page for standard REST pagination.
+                 *
+                 *     Example: `10`
+                 * @example 10
+                 */
+                per_page?: number;
+                /**
+                 * @description Sort order for the results in the format `["column", "order"]`.
+                 *
+                 *     Example: `["id", "ASC"]`
+                 * @example ["id", "ASC"]
+                 */
+                sort?: string;
+                /**
+                 * @description Sort column for standard REST format.
+                 *
+                 *     Example: `title`
+                 * @example title
+                 */
+                sort_by?: string;
+                /**
+                 * @description Sort order for standard REST format (ASC or DESC).
+                 *
+                 *     Example: `ASC`
+                 * @example ASC
+                 */
+                order?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationList"][];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_one_camera_calibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraCalibrationCreate"];
+            };
+        };
+        responses: {
+            /** @description Resource created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationResponse"];
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    create_many_camera_calibrations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraCalibrationCreate"][];
+            };
+        };
+        responses: {
+            /** @description Resources created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationResponse"][];
+                };
+            };
+            /** @description Partial success - some items created, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    delete_many_camera_calibrations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string[];
+            };
+        };
+        responses: {
+            /** @description Resources deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Partial success - some items deleted, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    update_many_camera_calibrations: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
+            };
+        };
+        responses: {
+            /** @description Resources updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationResponse"][];
+                };
+            };
+            /** @description Partial success - some items updated, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description One or more resources not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResponse"];
+                };
+            };
+        };
+    };
+    get_one_camera_calibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The requested resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationResponse"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_one_camera_calibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraCalibrationUpdate"];
+            };
+        };
+        responses: {
+            /** @description Resource updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraCalibrationResponse"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    delete_one_camera_calibration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resource deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_all_camera_profiles: {
+        parameters: {
+            query?: {
+                /**
+                 * @description JSON-encoded filter for querying resources.
+                 *
+                 *     This parameter supports various filtering options:
+                 *     - Free text search: `{"q": "search text"}`
+                 *     - Filtering by a single ID: `{"id": "550e8400-e29b-41d4-a716-446655440000"}`
+                 *     - Filtering by multiple IDs: `{"id": ["550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440001"]}`
+                 *     - Filtering on other columns: `{"name": "example"}`
+                 * @example {
+                 *       "id": "550e8400-e29b-41d4-a716-446655440000",
+                 *       "name": "example",
+                 *       "q": "search text"
+                 *     }
+                 */
+                filter?: string;
+                /**
+                 * @description Range for pagination in the format "[start, end]".
+                 *
+                 *     Example: `[0,9]`
+                 * @example [0,9]
+                 */
+                range?: string;
+                /**
+                 * @description Page number for standard REST pagination (1-based).
+                 *
+                 *     Example: `1`
+                 * @example 1
+                 */
+                page?: number;
+                /**
+                 * @description Number of items per page for standard REST pagination.
+                 *
+                 *     Example: `10`
+                 * @example 10
+                 */
+                per_page?: number;
+                /**
+                 * @description Sort order for the results in the format `["column", "order"]`.
+                 *
+                 *     Example: `["id", "ASC"]`
+                 * @example ["id", "ASC"]
+                 */
+                sort?: string;
+                /**
+                 * @description Sort column for standard REST format.
+                 *
+                 *     Example: `title`
+                 * @example title
+                 */
+                sort_by?: string;
+                /**
+                 * @description Sort order for standard REST format (ASC or DESC).
+                 *
+                 *     Example: `ASC`
+                 * @example ASC
+                 */
+                order?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of resources */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileList"][];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    create_one_camera_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraProfileCreate"];
+            };
+        };
+        responses: {
+            /** @description Resource created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileResponse"];
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    create_many_camera_profiles: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraProfileCreate"][];
+            };
+        };
+        responses: {
+            /** @description Resources created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileResponse"][];
+                };
+            };
+            /** @description Partial success - some items created, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    delete_many_camera_profiles: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string[];
+            };
+        };
+        responses: {
+            /** @description Resources deleted successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Partial success - some items deleted, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    update_many_camera_profiles: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Enable partial success mode for batch operations.
+                 *
+                 *     When `true`, the operation processes each item independently instead of
+                 *     using all-or-nothing semantics. Items that succeed are committed even if
+                 *     other items fail.
+                 *
+                 *     Default: `false` (all-or-nothing)
+                 * @example false
+                 */
+                partial?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
+            };
+        };
+        responses: {
+            /** @description Resources updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileResponse"][];
+                };
+            };
+            /** @description Partial success - some items updated, some failed */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request - batch size exceeded or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description One or more resources not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    get_one_camera_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The requested resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileResponse"];
+                };
+            };
+            /** @description Bad request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_one_camera_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CameraProfileUpdate"];
+            };
+        };
+        responses: {
+            /** @description Resource updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CameraProfileResponse"];
+                };
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate record */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
+    delete_one_camera_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Resource identifier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Resource deleted successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Resource not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Internal Server Error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4846,7 +6281,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignList'][];
+                    "application/json": components["schemas"]["CampaignList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -4867,7 +6302,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['CampaignCreate'];
+                "application/json": components["schemas"]["CampaignCreate"];
             };
         };
         responses: {
@@ -4877,7 +6312,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignResponse'];
+                    "application/json": components["schemas"]["CampaignResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -4886,7 +6321,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -4912,7 +6347,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['CampaignCreate'][];
+                "application/json": components["schemas"]["CampaignCreate"][];
             };
         };
         responses: {
@@ -4922,7 +6357,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignResponse'][];
+                    "application/json": components["schemas"]["CampaignResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -4938,7 +6373,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -4947,7 +6382,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -4956,7 +6391,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -4982,7 +6417,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -4992,7 +6427,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -5008,7 +6443,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -5017,7 +6452,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -5043,7 +6478,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -5053,7 +6488,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignResponse'][];
+                    "application/json": components["schemas"]["CampaignResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -5069,7 +6504,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -5085,7 +6520,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -5094,7 +6529,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -5117,7 +6552,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignResponse'];
+                    "application/json": components["schemas"]["CampaignResponse"];
                 };
             };
             /** @description Bad request */
@@ -5155,7 +6590,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['CampaignUpdate'];
+                "application/json": components["schemas"]["CampaignUpdate"];
             };
         };
         responses: {
@@ -5165,7 +6600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CampaignResponse'];
+                    "application/json": components["schemas"]["CampaignResponse"];
                 };
             };
             /** @description Resource not found */
@@ -5181,7 +6616,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -5239,7 +6674,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'][];
+                    "application/json": components["schemas"]["TransectResponse"][];
                 };
             };
         };
@@ -5317,7 +6752,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ChangeList'][];
+                    "application/json": components["schemas"]["ChangeList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -5338,7 +6773,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['ValidateRequest'];
+                "application/json": components["schemas"]["ValidateRequest"];
             };
         };
         responses: {
@@ -5348,7 +6783,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ValidateResponse'];
+                    "application/json": components["schemas"]["ValidateResponse"];
                 };
             };
             /** @description Unknown section, or a transect without a site */
@@ -5378,7 +6813,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ChangeResponse'];
+                    "application/json": components["schemas"]["ChangeResponse"];
                 };
             };
             /** @description Bad request */
@@ -5422,7 +6857,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['DecisionResponse'];
+                    "application/json": components["schemas"]["DecisionResponse"];
                 };
             };
             /** @description No such change */
@@ -5459,7 +6894,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['DecisionResponse'];
+                    "application/json": components["schemas"]["DecisionResponse"];
                 };
             };
             /** @description No such change */
@@ -5493,7 +6928,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['ClassGroup'][];
+                    "application/json": components["schemas"]["ClassGroup"][];
                 };
             };
         };
@@ -5513,7 +6948,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['BenthicClass'][];
+                    "application/json": components["schemas"]["BenthicClass"][];
                 };
             };
         };
@@ -5533,7 +6968,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['KeycloakConfigResponse'];
+                    "application/json": components["schemas"]["KeycloakConfigResponse"];
                 };
             };
         };
@@ -5611,7 +7046,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CoverRowList'][];
+                    "application/json": components["schemas"]["CoverRowList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -5641,7 +7076,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CoverRowResponse'];
+                    "application/json": components["schemas"]["CoverRowResponse"];
                 };
             };
             /** @description Bad request */
@@ -5740,7 +7175,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['DeviceList'][];
+                    "application/json": components["schemas"]["DeviceList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -5761,7 +7196,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['MintConnectCodeRequest'];
+                "application/json": components["schemas"]["MintConnectCodeRequest"];
             };
         };
         responses: {
@@ -5771,7 +7206,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['MintConnectCodeResponse'];
+                    "application/json": components["schemas"]["MintConnectCodeResponse"];
                 };
             };
             /** @description Empty device name */
@@ -5809,7 +7244,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['AssignPresetRequest'];
+                "application/json": components["schemas"]["AssignPresetRequest"];
             };
         };
         responses: {
@@ -5819,7 +7254,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['AssignPresetResponse'];
+                    "application/json": components["schemas"]["AssignPresetResponse"];
                 };
             };
             /** @description Not your device, or a device token */
@@ -5850,7 +7285,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['RenameDeviceRequest'];
+                "application/json": components["schemas"]["RenameDeviceRequest"];
             };
         };
         responses: {
@@ -5860,7 +7295,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RenameDeviceResponse'];
+                    "application/json": components["schemas"]["RenameDeviceResponse"];
                 };
             };
             /** @description Empty name */
@@ -5904,7 +7339,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RevokeResponse'];
+                    "application/json": components["schemas"]["RevokeResponse"];
                 };
             };
             /** @description Not your device */
@@ -5941,7 +7376,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['DeviceResponse'];
+                    "application/json": components["schemas"]["DeviceResponse"];
                 };
             };
             /** @description Bad request */
@@ -5976,7 +7411,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['EnrolRequest'];
+                "application/json": components["schemas"]["EnrolRequest"];
             };
         };
         responses: {
@@ -5986,7 +7421,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['EnrolResponse'];
+                    "application/json": components["schemas"]["EnrolResponse"];
                 };
             };
             /** @description Malformed request */
@@ -6037,7 +7472,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['MeResponse'];
+                    "application/json": components["schemas"]["MeResponse"];
                 };
             };
             /** @description No valid credential */
@@ -6122,7 +7557,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoList'][];
+                    "application/json": components["schemas"]["PassVideoList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -6143,7 +7578,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassVideoCreate'];
+                "application/json": components["schemas"]["PassVideoCreate"];
             };
         };
         responses: {
@@ -6153,7 +7588,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoResponse'];
+                    "application/json": components["schemas"]["PassVideoResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -6162,7 +7597,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6188,7 +7623,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassVideoCreate'][];
+                "application/json": components["schemas"]["PassVideoCreate"][];
             };
         };
         responses: {
@@ -6198,7 +7633,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoResponse'][];
+                    "application/json": components["schemas"]["PassVideoResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -6214,7 +7649,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -6223,7 +7658,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6232,7 +7667,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6258,7 +7693,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -6268,7 +7703,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -6284,7 +7719,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6293,7 +7728,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6319,7 +7754,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -6329,7 +7764,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoResponse'][];
+                    "application/json": components["schemas"]["PassVideoResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -6345,7 +7780,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -6361,7 +7796,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6370,7 +7805,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6393,7 +7828,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoResponse'];
+                    "application/json": components["schemas"]["PassVideoResponse"];
                 };
             };
             /** @description Bad request */
@@ -6431,7 +7866,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassVideoUpdate'];
+                "application/json": components["schemas"]["PassVideoUpdate"];
             };
         };
         responses: {
@@ -6441,7 +7876,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassVideoResponse'];
+                    "application/json": components["schemas"]["PassVideoResponse"];
                 };
             };
             /** @description Resource not found */
@@ -6457,7 +7892,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6570,7 +8005,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassList'][];
+                    "application/json": components["schemas"]["PassList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -6591,7 +8026,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassCreate'];
+                "application/json": components["schemas"]["PassCreate"];
             };
         };
         responses: {
@@ -6601,7 +8036,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassResponse'];
+                    "application/json": components["schemas"]["PassResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -6610,7 +8045,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6636,7 +8071,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassCreate'][];
+                "application/json": components["schemas"]["PassCreate"][];
             };
         };
         responses: {
@@ -6646,7 +8081,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassResponse'][];
+                    "application/json": components["schemas"]["PassResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -6662,7 +8097,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -6671,7 +8106,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6680,7 +8115,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6706,7 +8141,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -6716,7 +8151,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -6732,7 +8167,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6741,7 +8176,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6767,7 +8202,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -6777,7 +8212,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassResponse'][];
+                    "application/json": components["schemas"]["PassResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -6793,7 +8228,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -6809,7 +8244,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -6818,7 +8253,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6841,7 +8276,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassResponse'];
+                    "application/json": components["schemas"]["PassResponse"];
                 };
             };
             /** @description Bad request */
@@ -6879,7 +8314,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PassUpdate'];
+                "application/json": components["schemas"]["PassUpdate"];
             };
         };
         responses: {
@@ -6889,7 +8324,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PassResponse'];
+                    "application/json": components["schemas"]["PassResponse"];
                 };
             };
             /** @description Resource not found */
@@ -6905,7 +8340,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -6960,7 +8395,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PerformanceSummary'];
+                    "application/json": components["schemas"]["PerformanceSummary"];
                 };
             };
         };
@@ -7038,7 +8473,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetList'][];
+                    "application/json": components["schemas"]["PresetList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -7059,7 +8494,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PresetCreate'];
+                "application/json": components["schemas"]["PresetCreate"];
             };
         };
         responses: {
@@ -7069,7 +8504,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetResponse'];
+                    "application/json": components["schemas"]["PresetResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -7078,7 +8513,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7104,7 +8539,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PresetCreate'][];
+                "application/json": components["schemas"]["PresetCreate"][];
             };
         };
         responses: {
@@ -7114,7 +8549,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetResponse'][];
+                    "application/json": components["schemas"]["PresetResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -7130,7 +8565,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -7139,7 +8574,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -7148,7 +8583,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7174,7 +8609,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -7184,7 +8619,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -7200,7 +8635,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -7209,7 +8644,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7235,7 +8670,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -7245,7 +8680,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetResponse'][];
+                    "application/json": components["schemas"]["PresetResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -7261,7 +8696,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -7277,7 +8712,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -7286,7 +8721,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7309,7 +8744,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetResponse'];
+                    "application/json": components["schemas"]["PresetResponse"];
                 };
             };
             /** @description Bad request */
@@ -7347,7 +8782,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PresetUpdate'];
+                "application/json": components["schemas"]["PresetUpdate"];
             };
         };
         responses: {
@@ -7357,7 +8792,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PresetResponse'];
+                    "application/json": components["schemas"]["PresetResponse"];
                 };
             };
             /** @description Resource not found */
@@ -7373,7 +8808,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7431,7 +8866,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['AssignAllResponse'];
+                    "application/json": components["schemas"]["AssignAllResponse"];
                 };
             };
             /** @description Requires the deepreefmap-admin role */
@@ -7523,7 +8958,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunArtifactList'][];
+                    "application/json": components["schemas"]["RunArtifactList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -7553,7 +8988,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunArtifactResponse'];
+                    "application/json": components["schemas"]["RunArtifactResponse"];
                 };
             };
             /** @description Bad request */
@@ -7652,7 +9087,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunList'][];
+                    "application/json": components["schemas"]["RunList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -7682,7 +9117,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunResponse'];
+                    "application/json": components["schemas"]["RunResponse"];
                 };
             };
             /** @description Bad request */
@@ -7726,7 +9161,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunOutputs'];
+                    "application/json": components["schemas"]["RunOutputs"];
                 };
             };
         };
@@ -7755,7 +9190,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['BundleResponse'];
+                    "application/json": components["schemas"]["BundleResponse"];
                 };
             };
             /** @description No such run, or nothing archived in that group */
@@ -7800,7 +9235,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['OutputFiles'];
+                    "application/json": components["schemas"]["OutputFiles"];
                 };
             };
             /** @description No group named */
@@ -7885,7 +9320,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteList'][];
+                    "application/json": components["schemas"]["SiteList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -7906,7 +9341,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['SiteCreate'];
+                "application/json": components["schemas"]["SiteCreate"];
             };
         };
         responses: {
@@ -7916,7 +9351,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteResponse'];
+                    "application/json": components["schemas"]["SiteResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -7925,7 +9360,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -7951,7 +9386,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['SiteCreate'][];
+                "application/json": components["schemas"]["SiteCreate"][];
             };
         };
         responses: {
@@ -7961,7 +9396,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteResponse'][];
+                    "application/json": components["schemas"]["SiteResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -7977,7 +9412,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -7986,7 +9421,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -7995,7 +9430,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8021,7 +9456,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -8031,7 +9466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -8047,7 +9482,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -8056,7 +9491,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8082,7 +9517,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -8092,7 +9527,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteResponse'][];
+                    "application/json": components["schemas"]["SiteResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -8108,7 +9543,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -8124,7 +9559,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -8133,7 +9568,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8156,7 +9591,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteResponse'];
+                    "application/json": components["schemas"]["SiteResponse"];
                 };
             };
             /** @description Bad request */
@@ -8194,7 +9629,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['SiteUpdate'];
+                "application/json": components["schemas"]["SiteUpdate"];
             };
         };
         responses: {
@@ -8204,7 +9639,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['SiteResponse'];
+                    "application/json": components["schemas"]["SiteResponse"];
                 };
             };
             /** @description Resource not found */
@@ -8220,7 +9655,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8333,7 +9768,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['StoredObjectList'][];
+                    "application/json": components["schemas"]["StoredObjectList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -8363,7 +9798,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['StoredObjectResponse'];
+                    "application/json": components["schemas"]["StoredObjectResponse"];
                 };
             };
             /** @description Bad request */
@@ -8398,7 +9833,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['HeartbeatRequest'];
+                "application/json": components["schemas"]["HeartbeatRequest"];
             };
         };
         responses: {
@@ -8408,7 +9843,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['HeartbeatResponse'];
+                    "application/json": components["schemas"]["HeartbeatResponse"];
                 };
             };
             /** @description system_profile is not a JSON object */
@@ -8447,7 +9882,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PullResponse'];
+                    "application/json": components["schemas"]["PullResponse"];
                 };
             };
         };
@@ -8461,7 +9896,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['PushRequest'];
+                "application/json": components["schemas"]["PushRequest"];
             };
         };
         responses: {
@@ -8471,7 +9906,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PushResponse'];
+                    "application/json": components["schemas"]["PushResponse"];
                 };
             };
             /** @description Unknown section, bad contract version, or malformed row */
@@ -8556,7 +9991,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectList'][];
+                    "application/json": components["schemas"]["TransectList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -8577,7 +10012,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['TransectCreate'];
+                "application/json": components["schemas"]["TransectCreate"];
             };
         };
         responses: {
@@ -8587,7 +10022,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'];
+                    "application/json": components["schemas"]["TransectResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -8596,7 +10031,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8622,7 +10057,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['TransectCreate'][];
+                "application/json": components["schemas"]["TransectCreate"][];
             };
         };
         responses: {
@@ -8632,7 +10067,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'][];
+                    "application/json": components["schemas"]["TransectResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -8648,7 +10083,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -8657,7 +10092,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -8666,7 +10101,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8692,7 +10127,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -8702,7 +10137,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -8718,7 +10153,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -8727,7 +10162,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8753,7 +10188,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -8763,7 +10198,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'][];
+                    "application/json": components["schemas"]["TransectResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -8779,7 +10214,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -8795,7 +10230,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -8804,7 +10239,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8827,7 +10262,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'];
+                    "application/json": components["schemas"]["TransectResponse"];
                 };
             };
             /** @description Bad request */
@@ -8865,7 +10300,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['TransectUpdate'];
+                "application/json": components["schemas"]["TransectUpdate"];
             };
         };
         responses: {
@@ -8875,7 +10310,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['TransectResponse'];
+                    "application/json": components["schemas"]["TransectResponse"];
                 };
             };
             /** @description Resource not found */
@@ -8891,7 +10326,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -8954,7 +10389,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['PooledCover'];
+                    "application/json": components["schemas"]["PooledCover"];
                 };
             };
             /** @description Unknown level */
@@ -8987,7 +10422,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['CoverSeries'];
+                    "application/json": components["schemas"]["CoverSeries"];
                 };
             };
             /** @description Unknown level */
@@ -8996,6 +10431,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResponse"];
+                };
             };
         };
     };
@@ -9072,7 +10530,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoList'][];
+                    "application/json": components["schemas"]["VideoList"][];
                 };
             };
             /** @description Internal Server Error */
@@ -9093,7 +10551,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['VideoCreate'];
+                "application/json": components["schemas"]["VideoCreate"];
             };
         };
         responses: {
@@ -9103,7 +10561,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoResponse'];
+                    "application/json": components["schemas"]["VideoResponse"];
                 };
             };
             /** @description Duplicate record */
@@ -9112,7 +10570,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -9138,7 +10596,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['VideoCreate'][];
+                "application/json": components["schemas"]["VideoCreate"][];
             };
         };
         responses: {
@@ -9148,7 +10606,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoResponse'][];
+                    "application/json": components["schemas"]["VideoResponse"][];
                 };
             };
             /** @description Partial success - some items created, some failed */
@@ -9164,7 +10622,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Duplicate record */
@@ -9173,7 +10631,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -9182,7 +10640,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -9208,7 +10666,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': string[];
+                "application/json": string[];
             };
         };
         responses: {
@@ -9218,7 +10676,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': string[];
+                    "application/json": string[];
                 };
             };
             /** @description Partial success - some items deleted, some failed */
@@ -9234,7 +10692,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -9243,7 +10701,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -9269,7 +10727,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['BatchUpdateRequest'][];
+                "application/json": components["schemas"]["BatchUpdateRequest"][];
             };
         };
         responses: {
@@ -9279,7 +10737,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoResponse'][];
+                    "application/json": components["schemas"]["VideoResponse"][];
                 };
             };
             /** @description Partial success - some items updated, some failed */
@@ -9295,7 +10753,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description One or more resources not found */
@@ -9311,7 +10769,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
             /** @description Internal Server Error */
@@ -9320,7 +10778,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -9343,7 +10801,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoResponse'];
+                    "application/json": components["schemas"]["VideoResponse"];
                 };
             };
             /** @description Bad request */
@@ -9381,7 +10839,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                'application/json': components['schemas']['VideoUpdate'];
+                "application/json": components["schemas"]["VideoUpdate"];
             };
         };
         responses: {
@@ -9391,7 +10849,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['VideoResponse'];
+                    "application/json": components["schemas"]["VideoResponse"];
                 };
             };
             /** @description Resource not found */
@@ -9407,7 +10865,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'text/plain': string;
+                    "text/plain": string;
                 };
             };
         };
@@ -9465,7 +10923,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    'application/json': components['schemas']['RunResponse'][];
+                    "application/json": components["schemas"]["RunResponse"][];
                 };
             };
         };
