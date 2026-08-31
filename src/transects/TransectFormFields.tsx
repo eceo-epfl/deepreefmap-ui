@@ -7,6 +7,7 @@ import {
     minValue,
     required,
 } from 'react-admin';
+import { useWatch } from 'react-hook-form';
 import { Grid, Typography } from '@mui/material';
 
 const latitude = [minValue(-90), maxValue(90)];
@@ -26,12 +27,38 @@ type Depths = {
     end_depth_m?: number | null;
 };
 
-/** A blank depth takes the mean of the two end depths; a typed one stands. */
+/**
+ * The depth of a line measured at both ends is their mean. The registry derives it
+ * on write, and the form sends the same figure so the saved row reads back as shown.
+ * A line with an end missing keeps whatever single reading it carries: that is how
+ * the historical sheets record depth.
+ */
 export const fillDepthFromEnds = <T extends Depths>(values: T): T => {
-    if (values.depth_m != null || values.start_depth_m == null || values.end_depth_m == null) {
+    if (values.start_depth_m == null || values.end_depth_m == null) {
         return values;
     }
     return { ...values, depth_m: (values.start_depth_m + values.end_depth_m) / 2 };
+};
+
+/** Depth: stated where the ends give it, entered where they do not. */
+const DepthInput = () => {
+    const start = useWatch({ name: 'start_depth_m' }) as number | null | undefined;
+    const end = useWatch({ name: 'end_depth_m' }) as number | null | undefined;
+    const derived = start != null && end != null;
+    return (
+        <NumberInput
+            source="depth_m"
+            label="Depth (m)"
+            validate={nonNegative}
+            readOnly={derived}
+            helperText={
+                derived
+                    ? 'The mean of the two ends, kept in step with them.'
+                    : 'The single reading, where the ends were not recorded separately.'
+            }
+            fullWidth
+        />
+    );
 };
 
 /** An end point is both coordinates or neither; the line as a whole may have none. */
@@ -192,13 +219,7 @@ const TransectFormFields = () => (
                     sm: 6,
                 }}
             >
-                <NumberInput
-                    source="depth_m"
-                    label="Depth (m)"
-                    validate={nonNegative}
-                    helperText="Mean of the two end depths when left blank."
-                    fullWidth
-                />
+                <DepthInput />
             </Grid>
             <Grid
                 size={{
@@ -210,6 +231,7 @@ const TransectFormFields = () => (
                     source="start_depth_m"
                     label="Start depth (m)"
                     validate={nonNegative}
+                    helperText="Where the tape was tied off."
                     fullWidth
                 />
             </Grid>
@@ -223,6 +245,7 @@ const TransectFormFields = () => (
                     source="end_depth_m"
                     label="End depth (m)"
                     validate={nonNegative}
+                    helperText="Where the tape ran out."
                     fullWidth
                 />
             </Grid>
