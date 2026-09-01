@@ -14,7 +14,7 @@ import { Alert, Box, Paper, Stack, Tooltip, Typography } from '@mui/material';
 
 import ArchivedOutputs from '../archive/ArchivedOutputs';
 import { HashField, SyncFields } from '../components';
-import type { Device, RunRecord } from '../contract';
+import type { CameraCalibration, Device, RunRecord } from '../contract';
 import { profileTotals, type ProfileTotals } from '../devices/profile';
 import RunCloudTab from '../viewer/RunCloudTab';
 import ProvenanceTable from './ProvenanceTable';
@@ -98,9 +98,50 @@ const scaleLine = (record: RunRecord): string => {
             : `${(record.pixel_size_m * 1000).toLocaleString(undefined, {
                   maximumFractionDigits: 2,
               })} mm/px`,
-        record.camera_profile ? `camera ${record.camera_profile}` : null,
     ];
     return parts.filter(Boolean).join(', ') || '—';
+};
+
+const CalibrationVersion = () => {
+    const record = useRecordContext<CameraCalibration>();
+    return (
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {record ? `calibration v${record.version}` : ''}
+        </Typography>
+    );
+};
+
+/** The rig the run was shot on, and the measurement it was rectified with when
+ * that measurement came from the registry. A laptop that calibrated its own
+ * camera has a name and nothing to link to. */
+const CameraLine = ({ record }: { record: RunRecord }) => {
+    if (!record.camera_calibration_id) {
+        return (
+            <Typography variant="body2">
+                {record.camera_profile
+                    ? `${record.camera_profile}, calibrated on the device`
+                    : '—'}
+            </Typography>
+        );
+    }
+    return (
+        <ReferenceField
+            source="camera_calibration_id"
+            reference="camera_calibrations"
+            link={false}
+        >
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
+                <ReferenceField
+                    source="camera_profile_id"
+                    reference="camera_profiles"
+                    link="show"
+                >
+                    <TextField source="name" />
+                </ReferenceField>
+                <CalibrationVersion />
+            </Stack>
+        </ReferenceField>
+    );
 };
 
 const versionsLine = (record: RunRecord): string =>
@@ -174,6 +215,9 @@ const Overview = ({ record }: { record: RunRecord }) => {
                             {deviations}
                         </Typography>
                     )}
+                </Term>
+                <Term label="Camera">
+                    <CameraLine record={record} />
                 </Term>
                 <Term label="Scale">
                     <Typography variant="body2">{scaleLine(record)}</Typography>

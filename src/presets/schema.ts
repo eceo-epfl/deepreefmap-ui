@@ -18,6 +18,7 @@ export type PresetFieldDef = {
     choices: string;
     applies_when: string[];
     nullable: boolean;
+    open: boolean;
     default: unknown;
 };
 

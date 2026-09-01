@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+import CameraProfileInput from './CameraProfileInput';
 import { choicesFor, PRESET_FIELDS, PRESET_SCHEMA_VERSION } from './schema';
 import type { PresetFieldDef } from './schema';
 
@@ -45,6 +46,15 @@ const SettingInput = ({
     const label = field.unit ? `${titled(field.label)} (${field.unit})` : titled(field.label);
     if (field.kind === 'bool') {
         return <BooleanInput source={source} label={label} helperText={false} />;
+    }
+    if (field.kind === 'enum' && field.open && field.choices === 'camera') {
+        return (
+            <CameraProfileInput
+                source={source}
+                label={label}
+                bundled={choicesFor(field.choices).map(choice => choice.id)}
+            />
+        );
     }
     if (field.kind === 'enum') {
         return (
