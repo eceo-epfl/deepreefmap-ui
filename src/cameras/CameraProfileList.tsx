@@ -11,6 +11,7 @@ import {
 import { GLOSSARY } from '../contract/glossary';
 import { useCanAuthor } from '../permissions';
 import CalibrationCountField from './CalibrationCountField';
+import PublishCalibrationButton from './PublishCalibrationButton';
 
 const cameraFilters = [<SearchInput source="q" alwaysOn key="q" />];
 
@@ -19,6 +20,7 @@ const CameraProfileListActions = () => {
     return (
         <TopToolbar>
             {canAuthor && <CreateButton />}
+            {canAuthor && <PublishCalibrationButton />}
             <ExportButton />
         </TopToolbar>
     );

@@ -93,6 +93,8 @@ export type Change = Omit<Schemas['ChangeResponse'], 'status'> & {
 };
 export type DecisionResponse = Schemas['DecisionResponse'];
 export type ValidateResponse = Schemas['ValidateResponse'];
+export type CalibrationUpload = Schemas['UploadRequest'];
+export type CalibrationUploaded = Schemas['UploadResponse'];
 
 export type PooledCover = Schemas['PooledCover'];
 export type ClassGroup = Schemas['ClassGroup'];

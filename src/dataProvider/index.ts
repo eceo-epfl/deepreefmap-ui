@@ -17,6 +17,8 @@ import type {
     ArchivePartReceipt,
     ArchiveProbe,
     AssignAllResponse,
+    CalibrationUpload,
+    CalibrationUploaded,
     BatchProbe,
     BenthicClass,
     BundleResponse,
@@ -80,6 +82,7 @@ export interface DrmDataProvider extends DataProvider {
     campaignTransects: (campaignId: string) => Promise<Transect[]>;
     validate: (section: string, ids: string[]) => Promise<ValidateResponse>;
     acceptChange: (seq: number) => Promise<DecisionResponse>;
+    publishCalibration: (body: CalibrationUpload) => Promise<CalibrationUploaded>;
     dismissChange: (seq: number) => Promise<DecisionResponse>;
 }
 
@@ -426,6 +429,14 @@ const dataProvider = (
             httpClient(`${apiUrl}/changes/${seq}/dismiss`, { method: 'POST' }).then(
                 ({ json }) => json as DecisionResponse,
             ),
+
+        // The same endpoint a laptop publishes through: idempotent by content, and
+        // a document that differs takes the profile's next version.
+        publishCalibration: body =>
+            httpClient(`${apiUrl}/camera_calibrations/upload`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }).then(({ json }) => json as CalibrationUploaded),
     };
 };
 
