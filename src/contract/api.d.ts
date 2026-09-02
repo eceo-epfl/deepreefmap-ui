@@ -390,6 +390,7 @@ export interface paths {
          *     Additional filterable columns:
          *     - id
          *     - name
+         *     - current_calibration_id
          *     - deleted_at
          *     - device_id.
          */
@@ -2490,6 +2491,13 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /**
+             * Format: uuid
+             * @description Which calibration laptops run this rig under. None follows the newest, which
+             *     is what a profile does until a curator deploys a particular measurement.
+             *     Excluded from create: a profile has no calibrations at the moment it is made.
+             */
+            current_calibration_id?: string | null;
+            /**
              * Format: date-time
              * @description The tombstone. Written only by the delete route, which administrators alone
              *     reach, and by `/api/sync/push`.
@@ -2523,6 +2531,13 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /**
+             * Format: uuid
+             * @description Which calibration laptops run this rig under. None follows the newest, which
+             *     is what a profile does until a curator deploys a particular measurement.
+             *     Excluded from create: a profile has no calibrations at the moment it is made.
+             */
+            current_calibration_id?: string | null;
+            /**
              * Format: date-time
              * @description The tombstone. Written only by the delete route, which administrators alone
              *     reach, and by `/api/sync/push`.
@@ -2553,6 +2568,8 @@ export interface components {
             updated_at: string;
         };
         CameraProfileUpdate: {
+            /** Format: uuid */
+            current_calibration_id?: string | null;
             description?: string | null;
             name?: string | null;
         };
