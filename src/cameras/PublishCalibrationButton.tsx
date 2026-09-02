@@ -60,8 +60,7 @@ const PublishCalibrationButton = () => {
         setDeployed(null);
     };
 
-    // A confirmed document is confirmed, and editing either field makes it a
-    // different one.
+    // Editing either field makes it a different document to the confirmed one.
     const reconsider = () => {
         setChanges(null);
         setDeployed(null);
@@ -150,8 +149,7 @@ const PublishCalibrationButton = () => {
                 setChanges(differences);
                 setDeployed(current?.version ?? null);
             })
-            // Advisory only: a lookup that cannot answer must not stand between a
-            // rig measured in the field and the registry.
+            // Advisory: a lookup that cannot answer must not block a publication.
             .catch(() => send(parsed))
             .finally(() => setBusy(false));
     };

@@ -1,13 +1,7 @@
 /** Whether two calibrations of one rig describe the same optics.
  *
- * A profile name is a rig, so a second physical camera published under an
- * existing name silently rewrites what every laptop rectifies with. Nothing
- * else in the system notices, hence this comparison at the point of publishing.
- *
- * The registry guarantees only `name`, `distorted.params`,
- * `rectified_pinhole.image_size` and `rectified_pinhole.K`, so every individual
- * parameter is treated as optional and a field missing on either side is
- * skipped rather than reported as a change.
+ * The registry guarantees only `name`, `distorted.params`, `image_size` and `K`,
+ * so a field missing on either side is skipped rather than called a change.
  */
 
 const FOCAL_TOLERANCE = 0.01;
@@ -105,8 +99,8 @@ export const describeOpticsChange = (previous: unknown, next: unknown): string[]
         );
     }
 
-    // Both an absolute and a relative floor: these sit near zero, so relative
-    // alone calls a re-measurement of one lens a different lens.
+    // Both floors: these sit near zero, so relative alone calls a re-measurement
+    // of one lens a different lens.
     for (const name of ['k1', 'k2']) {
         const was = param(previous, name);
         const is = param(next, name);
