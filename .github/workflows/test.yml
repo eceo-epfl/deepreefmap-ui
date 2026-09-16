@@ -1,0 +1,119 @@
+name: CI
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Mirrors node:22.23.2-alpine in both Dockerfiles.
+  NODE_VERSION: '22.23.2'
+
+jobs:
+  checks:
+    name: type-check, lint, format, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out ui repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # After setup-node, so the shims land on the Node this job runs.
+      - name: Enable corepack
+        run: corepack enable
+
+      # Yarn 4 caches globally under ~/.yarn/berry, so ask rather than assume a path.
+      - name: Resolve Yarn cache folder
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      # Fails when yarn.lock does not already satisfy package.json.
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Type check
+        run: yarn type-check
+
+      # Not `yarn lint`, which carries --fix. CI must not rewrite the tree.
+      - name: Lint
+        run: yarn eslint ./src
+
+      - name: Format check
+        run: yarn prettier --check ./src
+
+      - name: Build
+        run: yarn build
+
+  contract:
+    # A stale api.d.ts means the console's types disagree with the server it calls.
+    name: contract types are current
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out ui repository
+        uses: actions/checkout@v7
+
+      # Public repo, so the default token suffices. Only contract/ is needed.
+      - name: Check out api contract
+        uses: actions/checkout@v7
+        with:
+          repository: eceo-epfl/deepreefmap-api
+          ref: main
+          path: api
+          sparse-checkout: contract
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Resolve Yarn cache folder
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Yarn cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      # The committed file is generator output passed through prettier, so do both.
+      - name: Regenerate contract types
+        env:
+          DRM_API_DIR: ${{ github.workspace }}/api
+        run: |
+          yarn contract-types
+          yarn prettier --write src/contract/api.d.ts
+
+      - name: Check the checked-in types are current
+        run: |
+          if ! git diff --exit-code -- src/contract/api.d.ts; then
+            echo "::error::src/contract/api.d.ts is stale. Run 'yarn contract-types && yarn format' and commit the result."
+            exit 1
+          fi

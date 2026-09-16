@@ -1,0 +1,196 @@
+import {
+    Datagrid,
+    DateField,
+    EditButton,
+    FunctionField,
+    Labeled,
+    Link,
+    Pagination,
+    ReferenceField,
+    ReferenceManyField,
+    Show,
+    SimpleShowLayout,
+    TextField,
+    TopToolbar,
+    useCreatePath,
+    useDataProvider,
+    useRecordContext,
+} from 'react-admin';
+import { useQuery } from '@tanstack/react-query';
+import { Box, Chip, Divider, Grid, Stack, Typography } from '@mui/material';
+
+import ProposedChangesPanel from '../changes/ProposedChangesPanel';
+import {
+    formatSeconds,
+    QualityField,
+    SyncFields,
+    TombstoneButton,
+    ValidateButton,
+} from '../components';
+import type { DrmDataProvider } from '../dataProvider';
+import { useCanAuthor } from '../permissions';
+import type { Campaign, TransectPass } from '../contract';
+
+const CampaignShowActions = () => {
+    const canAuthor = useCanAuthor();
+    return (
+        <TopToolbar>
+            <ValidateButton section="campaigns" />
+            {canAuthor && <EditButton />}
+            <TombstoneButton noun="campaign" />
+        </TopToolbar>
+    );
+};
+
+/** The lines this trip swam, as links. The registry resolves the join through the passes. */
+const TransectsSurveyed = () => {
+    const record = useRecordContext<Campaign>();
+    const createPath = useCreatePath();
+    const dataProvider = useDataProvider<DrmDataProvider>();
+    const { data: transects } = useQuery({
+        queryKey: ['campaigns', record?.id, 'transects'],
+        queryFn: () => dataProvider.campaignTransects(record?.id ?? ''),
+        enabled: Boolean(record?.id),
+    });
+
+    if (!transects?.length) return null;
+    const named = transects;
+    return (
+        <Box>
+            <Typography
+                variant="overline"
+                sx={{
+                    color: 'text.secondary',
+                }}
+            >
+                Transects surveyed
+            </Typography>
+            <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                sx={{
+                    flexWrap: 'wrap',
+                }}
+            >
+                {named.map(transect => (
+                    <Chip
+                        key={transect.id}
+                        component={Link}
+                        to={createPath({
+                            resource: 'transects',
+                            type: 'show',
+                            id: transect.id,
+                        })}
+                        label={transect.name}
+                        size="small"
+                        clickable
+                    />
+                ))}
+            </Stack>
+        </Box>
+    );
+};
+
+const NoPasses = () => (
+    <Typography
+        variant="body2"
+        sx={{
+            color: 'text.secondary',
+        }}
+    >
+        No passes yet. They arrive when a laptop syncs.
+    </Typography>
+);
+
+const CampaignPasses = () => (
+    <Box>
+        <Typography
+            variant="overline"
+            sx={{
+                color: 'text.secondary',
+            }}
+        >
+            Passes
+        </Typography>
+        <ReferenceManyField
+            reference="passes"
+            target="campaign_id"
+            sort={{ field: 'created_at', order: 'DESC' }}
+            perPage={25}
+            pagination={<Pagination />}
+        >
+            <Datagrid rowClick="show" bulkActionButtons={false} empty={<NoPasses />}>
+                <TextField source="label" emptyText="unnamed" sortable={false} />
+                <ReferenceField
+                    source="transect_id"
+                    reference="transects"
+                    link="show"
+                    sortable={false}
+                >
+                    <TextField source="name" />
+                </ReferenceField>
+                <FunctionField<TransectPass>
+                    label="Window"
+                    render={record =>
+                        `${formatSeconds(record.begin_s)} – ${formatSeconds(record.end_s)}`
+                    }
+                />
+                <TextField source="direction" />
+                <QualityField source="quality" />
+            </Datagrid>
+        </ReferenceManyField>
+    </Box>
+);
+
+const CampaignShow = () => (
+    <Show actions={<CampaignShowActions />}>
+        <SimpleShowLayout>
+            <ProposedChangesPanel section="campaigns" />
+            <Grid container spacing={2}>
+                <Grid
+                    size={{
+                        xs: 12,
+                        sm: 4,
+                    }}
+                >
+                    <Labeled label="Name">
+                        <TextField source="name" />
+                    </Labeled>
+                </Grid>
+                <Grid
+                    size={{
+                        xs: 12,
+                        sm: 4,
+                    }}
+                >
+                    <Labeled label="Begin date">
+                        <DateField source="begin_date" emptyText="—" />
+                    </Labeled>
+                </Grid>
+                <Grid
+                    size={{
+                        xs: 12,
+                        sm: 4,
+                    }}
+                >
+                    <Labeled label="End date">
+                        <DateField source="end_date" emptyText="—" />
+                    </Labeled>
+                </Grid>
+                <Grid size={12}>
+                    <Labeled label="Description">
+                        <TextField source="description" emptyText="—" />
+                    </Labeled>
+                </Grid>
+            </Grid>
+            <TransectsSurveyed />
+            <Divider />
+            <CampaignPasses />
+            <Divider />
+            <SyncFields />
+        </SimpleShowLayout>
+    </Show>
+);
+
+export default CampaignShow;

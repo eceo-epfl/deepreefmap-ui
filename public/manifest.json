@@ -1,6 +1,6 @@
 {
-    "short_name": "deepreefmap-frontend",
-    "name": "{{name}}",
+    "short_name": "DeepReefMap",
+    "name": "DeepReefMap",
     "icons": [
         {
             "src": "favicon.ico",

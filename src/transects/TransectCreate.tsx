@@ -1,67 +1,20 @@
-import {
-    Create,
-    SimpleForm,
-    TextInput,
-    required,
-    minValue,
-    maxValue,
-    NumberInput,
-} from 'react-admin';
-import { Grid, Typography } from '@mui/material';
-import 'react-dropzone-uploader/dist/styles.css';
-import 'filepond/dist/filepond.min.css';
+import { Create, SimpleForm, SaveButton, Toolbar } from 'react-admin';
 
-const TransectCreate = () => {
-    return (
-        <Create redirect="show">
-            <SimpleForm>
-                {/* Basic Information */}
-                <Typography variant="h6" gutterBottom>
-                    Basic Information
-                </Typography>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                        <TextInput source="name" validate={[required()]} fullWidth />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextInput source="description" multiline fullWidth />
-                    </Grid>
-                </Grid>
+import TransectFormFields, { fillDepthFromEnds, validateEndPoints } from './TransectFormFields';
 
-                {/* Location */}
-                <Typography variant="h6" gutterBottom style={{ marginTop: '16px' }}>
-                    Location
-                </Typography>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="latitude_start" validate={[required(), minValue(-90), maxValue(90)]} fullWidth />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="longitude_start" validate={[required(), minValue(-180), maxValue(180)]} fullWidth />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="latitude_end" validate={[required(), minValue(-90), maxValue(90)]} fullWidth />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="longitude_end" validate={[required(), minValue(-180), maxValue(180)]} fullWidth />
-                    </Grid>
-                </Grid>
+// Rows are tombstoned by the sync protocol, never removed, so no delete is offered.
+const TransectFormToolbar = () => (
+    <Toolbar>
+        <SaveButton />
+    </Toolbar>
+);
 
-                {/* Measurements */}
-                <Typography variant="h6" gutterBottom style={{ marginTop: '16px' }}>
-                    Measurements
-                </Typography>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="length" label="length (m)" validate={[minValue(0)]} fullWidth />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <NumberInput source="depth" label="depth (m)" validate={[minValue(0)]} fullWidth />
-                    </Grid>
-                </Grid>
-            </SimpleForm>
-        </Create>
-    );
-};
+const TransectCreate = () => (
+    <Create redirect="show" transform={fillDepthFromEnds}>
+        <SimpleForm validate={validateEndPoints} toolbar={<TransectFormToolbar />}>
+            <TransectFormFields />
+        </SimpleForm>
+    </Create>
+);
 
 export default TransectCreate;

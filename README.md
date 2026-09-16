@@ -1,43 +1,71 @@
-# deepreefmap-frontend
+# deepreefmap-ui
 
-## Installation
+**The web console for the DeepReefMap metadata registry.**
 
-Install the application dependencies by running:
+Administrators define the sites, campaigns and transects that field laptops download,
+enrol those laptops, and browse the survey metadata they upload.
 
-```sh
-yarn
+## Quick Start
+
+The console needs the registry and a Keycloak realm. The compose stack in this repository
+brings up all three:
+
+```bash
+docker compose up -d
 ```
 
-## Development
+The console is then at `http://localhost:88`, and everything binds to loopback only.
 
-Start the application in development mode by running:
+For a local dev server against a registry that is already running:
 
-```sh
+```bash
+yarn install
 yarn dev
 ```
 
-## Production
+## Viewing a run
 
-Build the application in production mode by running:
+The run page shows the reconstruction in five tabs. Cover draws the ortho in the class
+colours the registry publishes (`/api/config/classes`), reading the label grid from the
+run's archived `ortho.npz`, with the photograph behind a switch and a magnifier under
+the pointer. 3D cloud reads the archived `cloud_web.drmw` and draws it with three.js:
+classes by default, click a point to name its class and isolate it, double click to
+move the pivot, and a camera path where the file carries one. Outputs lists the run's
+files by group from `/api/runs/{id}/outputs`, reading a group's own files only when it
+is opened, and downloads any group, or the whole run, as one zip streamed by the
+registry.
 
-```sh
+## Types from the contract
+
+Every entity type is generated from the registry's published `OpenAPI` document, so a
+field the server renamed becomes a compile error here:
+
+```bash
+yarn contract-types
+```
+
+It reads `../deepreefmap-api/contract/openapi.json`, or `$DRM_API_DIR/contract` when the
+registry lives elsewhere.
+
+## Checks
+
+```bash
+yarn type-check
 yarn build
 ```
 
-## DataProvider
+## End-to-end tests
 
-The included data provider use [FakeREST](https://github.com/marmelab/fakerest) to simulate a backend.
-You'll find a `data.json` file in the `src` directory that includes some fake data for testing purposes.
+Playwright drives the console at `http://localhost:88`, signed in as the dev realm's `admin`:
 
-It includes two resources, posts and comments.
-Posts have the following properties: `id`, `title` and `content`.
-Comments have the following properties: `id`, `post_id` and `content`.
+```bash
+yarn install
+npx playwright install chromium
+yarn e2e
+```
 
-## Authentication
+The catalogue flow creates a site and a transect named with a timestamp on each run.
 
-The included auth provider should only be used for development and test purposes.
-You'll find a `users.json` file in the `src` directory that includes the users you can use.
+## Licence
 
-You can sign in to the application with the following usernames and password:
-- janedoe / password
-- johndoe / password
+MIT
