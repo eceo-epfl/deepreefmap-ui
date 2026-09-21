@@ -1,6 +1,6 @@
 {
   "name": "deepreefmap-frontend",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "packageManager": "yarn@4.9.2",
   "scripts": {
