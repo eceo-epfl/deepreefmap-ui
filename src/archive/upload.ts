@@ -1,3 +1,5 @@
+import SparkMD5 from 'spark-md5';
+
 import type { CompletedPart } from '../contract';
 import type { DrmDataProvider } from '../dataProvider';
 
@@ -35,21 +37,41 @@ export const uploadVideo = async (
     if (!partSize) {
         throw new Error('The server answered pending without a part size.');
     }
-    const done = new Set(initiated.parts_done ?? []);
+    const stored = new Map(
+        (initiated.uploaded_parts ?? []).map(part => [part.part_number, part]),
+    );
     const total = Math.ceil(file.size / partSize);
     const parts: CompletedPart[] = [];
-    let sent = done.size;
+    let sent = 0;
     onParts(sent, total);
 
     for (let partNumber = 1; partNumber <= total; partNumber += 1) {
-        if (done.has(partNumber)) continue;
         const begin = (partNumber - 1) * partSize;
         const slice = file.slice(begin, Math.min(begin + partSize, file.size));
+        const digest = SparkMD5.ArrayBuffer.hash(await slice.arrayBuffer());
+        const existing = stored.get(partNumber);
+        if (
+            existing?.size_bytes === slice.size &&
+            existing.etag.replaceAll('"', '').toLowerCase() === digest
+        ) {
+            sent += 1;
+            onParts(sent, total);
+            continue;
+        }
+        const contentMd5 = btoa(
+            String.fromCharCode(...digest.match(/../g)!.map(byte => parseInt(byte, 16))),
+        );
         const receipt = await dataProvider.archiveUploadPart(
             initiated.object_id,
             partNumber,
             slice,
+            contentMd5,
         );
+        if (receipt.etag.replaceAll('"', '').toLowerCase() !== digest) {
+            throw new Error(
+                'The stored part checksum differs from the bytes sent. Retry the upload.',
+            );
+        }
         parts.push({ part_number: receipt.part_number, etag: receipt.etag });
         sent += 1;
         onParts(sent, total);

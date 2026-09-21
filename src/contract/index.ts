@@ -123,8 +123,12 @@ export type OutputFile = Omit<Schemas['OutputFile'], 'status'> & {
 };
 
 export type ArchiveInitiateRequest = Schemas['InitiateRequest'];
-export type ArchiveInitiate = Omit<Schemas['InitiateResponse'], 'status'> & {
+export type ArchiveInitiate = Omit<
+    Schemas['InitiateResponse'],
+    'status' | 'uploaded_parts'
+> & {
     status: StoredObjectStatus;
+    uploaded_parts?: Schemas['UploadedPart'][];
 };
 export type CompletedPart = Schemas['CompletedPartBody'];
 export type ArchivePartReceipt = Schemas['UploadPartResponse'];

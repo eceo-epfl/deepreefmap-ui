@@ -3194,6 +3194,7 @@ export interface components {
              */
             status: string;
             upload_id?: string | null;
+            uploaded_parts: components['schemas']['UploadedPart'][];
         };
         KeycloakConfigResponse: {
             /** @description Camel case so the object drops straight into a `keycloak-js` constructor. */
@@ -3535,6 +3536,7 @@ export interface components {
             alternatives: components['schemas']['ConfigurationSummary'][];
             baseline?: null | components['schemas']['ConfigurationSummary'];
             configurations: components['schemas']['PerformanceEvidence'][];
+            groups: components['schemas']['ConfigurationSummary'][];
         };
         PerformanceEvidence: {
             basis: string;
@@ -4664,10 +4666,7 @@ export interface components {
             size_bytes: number;
         };
         UploadPartResponse: {
-            /**
-             * @description The `ETag` the store recorded, which is the part's MD5 on every store this
-             *     registry deploys against, so the sender can verify what landed.
-             */
+            /** @description The storage receipt. Clients validate MD5-compatible receipts before resuming. */
             etag: string;
             /** Format: int32 */
             part_number: number;
@@ -4693,6 +4692,13 @@ export interface components {
             created: boolean;
             /** Format: int32 */
             version: number;
+        };
+        UploadedPart: {
+            etag: string;
+            /** Format: int32 */
+            part_number: number;
+            /** Format: int64 */
+            size_bytes: number;
         };
         ValidateRequest: {
             ids: string[];
@@ -5337,7 +5343,10 @@ export interface operations {
     upload_part: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Base64-encoded MD5 of the part bytes, verified by storage */
+                'Content-MD5'?: string | null;
+            };
             path: {
                 /** @description Pending object the part belongs to */
                 object_id: string;

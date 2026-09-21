@@ -63,7 +63,8 @@ for (const view of ['performance', 'device', 'preset']) {
             };
             return route.fulfill({
                 json: {
-                    configurations: [configuration],
+                    configurations: [configuration, alternative.configuration],
+                    groups: url.searchParams.has('min_frames') ? [] : [baseline, alternative],
                     baseline: url.searchParams.has('min_frames') ? null : baseline,
                     alternatives:
                         url.searchParams.get('parameter') === 'fps' ? [alternative] : [],
@@ -74,24 +75,27 @@ for (const view of ['performance', 'device', 'preset']) {
             route.fulfill({ json: { rows: [configuration], total: 1, offset: 0 } }),
         );
         await page.goto(`/e2e/performance-harness.html?view=${view}`);
+        await expect(page.getByTestId('performance-configuration')).toHaveCount(2);
+        await expect(page.getByText('1376 × 768 · 5 fps', { exact: true })).toBeVisible();
+        await expect(page.getByText('1376 × 768 · 10 fps', { exact: true })).toBeVisible();
+        await expect(page.getByText(/DeepReefMap memory/)).toBeVisible();
+        await expect(page.getByTestId('performance-run')).toHaveCount(0);
         await expect(
-            page.getByText('2 completed · 0 failed · 100 to 200 frames'),
-        ).toBeVisible();
-        await expect(page.getByRole('table')).toHaveCount(0);
+            page.getByRole('img', { name: 'RAM distribution', exact: true }),
+        ).toHaveCount(2);
+        await expect(page.getByLabel('Minimum frames')).toHaveCount(0);
         await page.screenshot({ path: testInfo.outputPath('summary.png'), fullPage: true });
-        await expect(page.getByText('No comparable runs.', { exact: true })).toBeVisible();
-        await page.getByRole('combobox', { name: 'Compare parameter', exact: true }).click();
-        await page.getByRole('option', { name: 'Input framerate' }).click();
-        await expect(page.getByText(/10 fps/)).toBeVisible();
-        await page.getByRole('button', { name: 'Explore evidence' }).click();
-        await expect(page.getByRole('table')).toBeVisible();
+        await page
+            .getByRole('button', { name: /2 runs/ })
+            .first()
+            .click();
+        await expect(page.getByTestId('performance-run')).toHaveCount(1);
         await expect(
-            page.getByRole('img', { name: 'RAM peak versus processed frames' }),
-        ).toBeVisible();
+            page.getByRole('img', { name: 'RAM distribution', exact: true }),
+        ).toHaveCount(3);
+        await page.getByRole('button', { name: 'Filters', exact: true }).click();
         await page.getByLabel('Minimum frames').fill('300');
-        await expect(
-            page.getByText('No observations for this configuration and workload.'),
-        ).toBeVisible();
+        await expect(page.getByText('No recorded runs match these filters.')).toBeVisible();
         await page.getByLabel('Maximum frames').fill('200');
         await expect(page.getByRole('alert')).toContainText('minimum no greater than maximum');
     });

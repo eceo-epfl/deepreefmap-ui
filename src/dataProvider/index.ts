@@ -72,6 +72,7 @@ export interface DrmDataProvider extends DataProvider {
         objectId: string,
         partNumber: number,
         body: Blob,
+        contentMd5?: string,
     ) => Promise<ArchivePartReceipt>;
     archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
@@ -352,10 +353,13 @@ const dataProvider = (
 
         // The part's raw bytes, streamed by the registry into the store. The browser
         // sets Content-Length from the blob itself.
-        archiveUploadPart: (objectId, partNumber, body) =>
+        archiveUploadPart: (objectId, partNumber, body, contentMd5) =>
             httpClient(`${apiUrl}/archive/${objectId}/parts/${partNumber}`, {
                 method: 'PUT',
-                headers: new Headers({ 'Content-Type': 'application/octet-stream' }),
+                headers: new Headers({
+                    'Content-Type': 'application/octet-stream',
+                    ...(contentMd5 ? { 'Content-MD5': contentMd5 } : {}),
+                }),
                 body,
             }).then(({ json }) => json as ArchivePartReceipt),
 
