@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Title } from 'react-admin';
 import {
     Box,
+    Button,
     Card,
     CardContent,
     Stack,
@@ -33,6 +34,7 @@ import type { PresetRollup } from './statistics';
 import { usePerformanceSummary } from './usePerformanceSummary';
 import { matchNote, usePresetLookup } from './usePresetLookup';
 import type { PresetLookup } from './usePresetLookup';
+import ComparisonView from './ComparisonView';
 
 type Grouping = 'device' | 'preset';
 
@@ -121,14 +123,13 @@ const PresetRollupTable = ({
 };
 
 /** Fleet resource use per device × preset × models × config, from synced runs. */
-const PerformancePage = () => {
+const FleetStatistics = () => {
     const [grouping, setGrouping] = useState<Grouping>('device');
     const { groups, error } = usePerformanceSummary();
     const lookup = usePresetLookup(groups);
 
     return (
         <Card sx={{ mt: 1 }}>
-            <Title title="Performance" />
             <CardContent>
                 <Stack spacing={2}>
                     <Stack
@@ -167,6 +168,24 @@ const PerformancePage = () => {
                             )}
                         </Box>
                     )}
+                </Stack>
+            </CardContent>
+        </Card>
+    );
+};
+
+const PerformancePage = () => {
+    const [fleet, setFleet] = useState(false);
+    return (
+        <Card sx={{ mt: 1 }}>
+            <Title title="Performance" />
+            <CardContent>
+                <Stack spacing={2}>
+                    <ComparisonView />
+                    <Button onClick={() => setFleet(!fleet)} aria-expanded={fleet}>
+                        Explore fleet statistics
+                    </Button>
+                    {fleet && <FleetStatistics />}
                 </Stack>
             </CardContent>
         </Card>

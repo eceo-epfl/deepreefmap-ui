@@ -158,3 +158,9 @@ export type AssignAllResponse = Schemas['AssignAllResponse'];
 
 export type PerformanceGroup = Schemas['PerformanceGroup'];
 export type PerformanceSummary = Schemas['PerformanceSummary'];
+
+export type PerformanceComparison = Schemas['PerformanceComparison'];
+export type PerformanceEvidencePage = Schemas['PerformanceEvidencePage'];
+export type PerformanceEvidence = Schemas['PerformanceEvidence'];
+export type ConfigurationSummary = Schemas['ConfigurationSummary'];
+export type Distribution = Schemas['Distribution'];

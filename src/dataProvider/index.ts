@@ -31,6 +31,8 @@ import type {
     DeviceRevocation,
     OutputFiles,
     PerformanceSummary,
+    PerformanceComparison,
+    PerformanceEvidencePage,
     RunOutputs,
     PresetAssignment,
     PooledCover,
@@ -75,6 +77,8 @@ export interface DrmDataProvider extends DataProvider {
     archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
     archiveOverview: () => Promise<ArchiveOverview>;
     performanceSummary: () => Promise<PerformanceSummary>;
+    performanceComparison: (query: Record<string, string>) => Promise<PerformanceComparison>;
+    performanceEvidence: (query: Record<string, string>) => Promise<PerformanceEvidencePage>;
     archiveProbe: (hashes: string[]) => Promise<BatchProbe>;
     archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
     archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
@@ -396,6 +400,14 @@ const dataProvider = (
 
         // The registry aggregates per device × preset × models, so peaks compare
         // across the fleet without the console pulling every run.
+        performanceComparison: query =>
+            httpClient(`${apiUrl}/performance/comparison?${new URLSearchParams(query)}`).then(
+                ({ json }) => json as PerformanceComparison,
+            ),
+        performanceEvidence: query =>
+            httpClient(`${apiUrl}/performance/evidence?${new URLSearchParams(query)}`).then(
+                ({ json }) => json as PerformanceEvidencePage,
+            ),
         performanceSummary: () =>
             httpClient(`${apiUrl}/performance/summary`).then(
                 ({ json }) => json as PerformanceSummary,

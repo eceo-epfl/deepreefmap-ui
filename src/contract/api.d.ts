@@ -1305,6 +1305,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/performance/comparison': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations['comparison'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    '/performance/evidence': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations['evidence'];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/performance/summary': {
         parameters: {
             query?: never;
@@ -2776,6 +2808,16 @@ export interface components {
             /** Format: int32 */
             part_number: number;
         };
+        ConfigurationSummary: {
+            completed: number;
+            configuration: components['schemas']['PerformanceEvidence'];
+            count: number;
+            failed: number;
+            stats: {
+                [key: string]: components['schemas']['Distribution'];
+            };
+            workload: components['schemas']['Distribution'];
+        };
         CoverRowList: {
             class_group: string;
             /** Format: date-time */
@@ -3032,6 +3074,19 @@ export interface components {
              *     Enrolment does not stamp it, so null reads as unchanged since enrolment.
              */
             versions_changed_at?: string | null;
+        };
+        Distribution: {
+            /** Format: double */
+            max?: number | null;
+            /** Format: double */
+            median?: number | null;
+            /** Format: double */
+            min?: number | null;
+            n: number;
+            /** Format: double */
+            q1?: number | null;
+            /** Format: double */
+            q3?: number | null;
         };
         DownloadResponse: {
             /**
@@ -3475,6 +3530,42 @@ export interface components {
             pass_id?: string | null;
             /** Format: uuid */
             video_id?: string | null;
+        };
+        PerformanceComparison: {
+            alternatives: components['schemas']['ConfigurationSummary'][];
+            baseline?: null | components['schemas']['ConfigurationSummary'];
+            configurations: components['schemas']['PerformanceEvidence'][];
+        };
+        PerformanceEvidence: {
+            basis: string;
+            /** Format: uuid */
+            device_id?: string | null;
+            device_name?: string | null;
+            /** Format: double */
+            duration_s?: number | null;
+            /** Format: double */
+            frames?: number | null;
+            hardware: unknown;
+            /** Format: uuid */
+            id: string;
+            known: boolean;
+            /** Format: double */
+            ram?: number | null;
+            recorded_at?: string | null;
+            /** Format: double */
+            seconds_per_frame?: number | null;
+            settings: unknown;
+            status: string;
+            /** Format: double */
+            swap?: number | null;
+            timing_note: string;
+            /** Format: double */
+            vram?: number | null;
+        };
+        PerformanceEvidencePage: {
+            offset: number;
+            rows: components['schemas']['PerformanceEvidence'][];
+            total: number;
         };
         PerformanceGroup: {
             /**
@@ -4054,6 +4145,8 @@ export interface components {
             model_revisions?: unknown;
             /** Format: uuid */
             pass_id: string;
+            /** @description Run-time settings, hardware and measurement eligibility. */
+            performance_observation?: unknown;
             /** Format: double */
             pixel_size_m?: number | null;
             /** Format: int32 */
@@ -8394,6 +8487,62 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    comparison: {
+        parameters: {
+            query?: {
+                device_id?: string | null;
+                preset_name?: string | null;
+                preset_version?: number | null;
+                baseline?: string | null;
+                parameter?: 'resolution' | 'fps' | 'batch' | 'models';
+                min_frames?: number | null;
+                max_frames?: number | null;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['PerformanceComparison'];
+                };
+            };
+        };
+    };
+    evidence: {
+        parameters: {
+            query?: {
+                device_id?: string | null;
+                preset_name?: string | null;
+                preset_version?: number | null;
+                baseline?: string | null;
+                parameter?: 'resolution' | 'fps' | 'batch' | 'models';
+                min_frames?: number | null;
+                max_frames?: number | null;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['PerformanceEvidencePage'];
+                };
             };
         };
     };
