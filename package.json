@@ -7,7 +7,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "type-check": "tsc --noEmit",
-    "contract-types": "openapi-typescript ${DRM_API_DIR:-../deepreefmap-api}/contract/openapi.json -o src/contract/api.d.ts && cp ${DRM_API_DIR:-../deepreefmap-api}/contract/preset-schema.json src/contract/preset-schema.json && cp ${DRM_API_DIR:-../deepreefmap-api}/contract/sync-contract.json src/contract/sync-contract.json",
+    "contract-types": "openapi-typescript ${DRM_API_DIR:-../deepreefmap-api}/contract/openapi.json -o src/contract/api.d.ts && cp ${DRM_API_DIR:-../deepreefmap-api}/contract/preset-schema.json src/contract/preset-schema.json && cp ${DRM_API_DIR:-../deepreefmap-api}/contract/sync-contract.json src/contract/sync-contract.json && prettier --write src/contract/api.d.ts src/contract/preset-schema.json src/contract/sync-contract.json",
     "lint": "eslint --fix ./src",
     "format": "prettier --write ./src",
     "e2e": "playwright test -c e2e/playwright.config.ts"
