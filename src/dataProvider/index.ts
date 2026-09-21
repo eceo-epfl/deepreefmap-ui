@@ -1,219 +1,443 @@
-import { stringify } from 'query-string';
-import { fetchUtils, DataProvider } from 'ra-core';
-import { useAuthProvider, AuthProvider } from 'react-admin';
-/**
- * Maps react-admin queries to a simple REST API
- *
- * This REST dialect is similar to the one of FakeRest
- *
- * @see https://github.com/marmelab/FakeRest
- *
- * @example
- *
- * getList     => GET http://my.api.url/posts?sort=['title','ASC']&range=[0, 24]
- * getOne      => GET http://my.api.url/posts/123
- * getMany     => GET http://my.api.url/posts?filter={id:[123,456,789]}
- * update      => PUT http://my.api.url/posts/123
- * create      => POST http://my.api.url/posts
- * delete      => DELETE http://my.api.url/posts/123
- *
- * @example
- *
- * import * as React from "react";
- * import { Admin, Resource } from 'react-admin';
- * import simpleRestProvider from 'ra-data-simple-rest';
- *
- * import { PostList } from './posts';
- *
- * const App = () => (
- *     <Admin dataProvider={simpleRestProvider('http://path.to.my.api/')}>
- *         <Resource name="posts" list={PostList} />
- *     </Admin>
- * );
- *
- * export default App;
- */
-const dataProvider = (
-    apiUrl: string,
-    httpClient = fetchUtils.fetchJson,
-    countHeader: string = 'Content-Range'
-): DataProvider => ({
-    getList: (resource, params) => {
-        const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
+import {
+    fetchUtils,
+    DataProvider,
+    GetListParams,
+    GetManyReferenceParams,
+    HttpError,
+    PaginationPayload,
+    SortPayload,
+} from 'react-admin';
 
-        const rangeStart = (page - 1) * perPage;
-        const rangeEnd = page * perPage - 1;
+import type {
+    ArchiveComplete,
+    ArchiveDownload,
+    ArchiveInitiate,
+    ArchiveInitiateRequest,
+    ArchiveOverview,
+    ArchivePartReceipt,
+    ArchiveProbe,
+    AssignAllResponse,
+    CalibrationUpload,
+    CalibrationUploaded,
+    BatchProbe,
+    BenthicClass,
+    BundleResponse,
+    ClassGroup,
+    CompletedPart,
+    ConnectCode,
+    CoverSeries,
+    DecisionResponse,
+    DeviceRename,
+    DeviceRevocation,
+    OutputFiles,
+    PerformanceSummary,
+    RunOutputs,
+    PresetAssignment,
+    PooledCover,
+    RunRecord,
+    RunsProbe,
+    Transect,
+    ValidateResponse,
+} from '../contract';
 
-        const query = {
-            sort: JSON.stringify([field, order]),
-            range: JSON.stringify([rangeStart, rangeEnd]),
-            filter: JSON.stringify(params.filter),
-        };
-        const url = `${apiUrl}/${resource}?${stringify(query)}`;
-        const options =
-            countHeader === 'Content-Range'
-                ? {
-                    // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                    headers: new Headers({
-                        Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                    }),
-                }
-                : {};
+type HttpClient = typeof fetchUtils.fetchJson;
 
-        return httpClient(url, options).then(({ headers, json }) => {
-            if (!headers.has(countHeader)) {
-                throw new Error(
-                    `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`
-                );
-            }
-            return {
-                data: json,
-                total:
-                    countHeader === 'Content-Range'
-                        ? parseInt(
-                            headers.get('content-range').split('/').pop(),
-                            10
-                        )
-                        : parseInt(headers.get(countHeader.toLowerCase())),
-            };
-        });
-    },
+/** The vendored simple-rest verbs plus the registry's non-CRUD calls. */
+export interface DrmDataProvider extends DataProvider {
+    transectCover: (
+        transectId: string,
+        level: string,
+        campaignId?: string,
+    ) => Promise<PooledCover>;
+    transectCoverSeries: (transectId: string, level: string) => Promise<CoverSeries>;
+    videoRuns: (videoId: string) => Promise<RunRecord[]>;
+    classGroups: () => Promise<ClassGroup[]>;
+    benthicClasses: () => Promise<BenthicClass[]>;
+    runOutputs: (runId: string) => Promise<RunOutputs>;
+    runOutputFiles: (
+        runId: string,
+        purpose: string,
+        offset: number,
+        limit: number,
+    ) => Promise<OutputFiles>;
+    runOutputsBundle: (runId: string, purpose?: string) => Promise<BundleResponse>;
+    mintConnectCode: (deviceName: string) => Promise<ConnectCode>;
+    revokeDevice: (deviceId: string) => Promise<DeviceRevocation>;
+    renameDevice: (deviceId: string, name: string) => Promise<DeviceRename>;
+    assignPreset: (deviceId: string, presetId: string | null) => Promise<PresetAssignment>;
+    archiveInitiate: (body: ArchiveInitiateRequest) => Promise<ArchiveInitiate>;
+    archiveUploadPart: (
+        objectId: string,
+        partNumber: number,
+        body: Blob,
+    ) => Promise<ArchivePartReceipt>;
+    archiveComplete: (objectId: string, parts: CompletedPart[]) => Promise<ArchiveComplete>;
+    archiveByHash: (contentHash: string) => Promise<ArchiveProbe | null>;
+    archiveOverview: () => Promise<ArchiveOverview>;
+    performanceSummary: () => Promise<PerformanceSummary>;
+    archiveProbe: (hashes: string[]) => Promise<BatchProbe>;
+    archiveRunsProbe: (runIds: string[]) => Promise<RunsProbe>;
+    archiveDownload: (objectId: string) => Promise<ArchiveDownload>;
+    assignPresetToAll: (presetId: string) => Promise<AssignAllResponse>;
+    campaignTransects: (campaignId: string) => Promise<Transect[]>;
+    validate: (section: string, ids: string[]) => Promise<ValidateResponse>;
+    acceptChange: (seq: number) => Promise<DecisionResponse>;
+    publishCalibration: (body: CalibrationUpload) => Promise<CalibrationUploaded>;
+    dismissChange: (seq: number) => Promise<DecisionResponse>;
+}
 
-    getOne: (resource, params) =>
-        httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
-            data: json,
-        })),
+// The ledger is keyed by `seq`; react-admin needs an `id` on every record.
+const withId = <T extends Record<string, unknown>>(record: T): T =>
+    'id' in record ? record : { ...record, id: record.seq };
 
-    getMany: (resource, params) => {
-        const query = {
-            filter: JSON.stringify({ id: params.ids }),
-        };
-        const url = `${apiUrl}/${resource}?${stringify(query)}`;
-        return httpClient(url).then(({ json }) => ({ data: json }));
-    },
+const keyed = <T extends Record<string, unknown>>(resource: string, rows: T[]): T[] =>
+    resource === 'changes' ? rows.map(withId) : rows;
 
-    getManyReference: (resource, params) => {
-        const { page, perPage } = params.pagination;
-        const { field, order } = params.sort;
+const DEFAULT_PAGINATION: PaginationPayload = { page: 1, perPage: 25 };
+const DEFAULT_SORT: SortPayload = { field: 'id', order: 'ASC' };
 
-        const rangeStart = (page - 1) * perPage;
-        const rangeEnd = page * perPage - 1;
-
-        const query = {
-            sort: JSON.stringify([field, order]),
-            range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
-            filter: JSON.stringify({
-                ...params.filter,
-                [params.target]: params.id,
-            }),
-        };
-        const url = `${apiUrl}/${resource}?${stringify(query)}`;
-        const options =
-            countHeader === 'Content-Range'
-                ? {
-                    // Chrome doesn't return `Content-Range` header if no `Range` is provided in the request.
-                    headers: new Headers({
-                        Range: `${resource}=${rangeStart}-${rangeEnd}`,
-                    }),
-                }
-                : {};
-
-        return httpClient(url, options).then(({ headers, json }) => {
-            if (!headers.has(countHeader)) {
-                throw new Error(
-                    `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`
-                );
-            }
-            return {
-                data: json,
-                total:
-                    countHeader === 'Content-Range'
-                        ? parseInt(
-                            headers.get('content-range').split('/').pop(),
-                            10
-                        )
-                        : parseInt(headers.get(countHeader.toLowerCase())),
-            };
-        });
-    },
-
-    update: (resource, params) =>
-        httpClient(`${apiUrl}/${resource}/${params.id}`, {
-            method: 'PUT',
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({ data: json })),
-
-    // simple-rest doesn't handle provide an updateMany route, so we fallback to calling update n times instead
-    updateMany: (resource, params) =>
-        Promise.all(
-            params.ids.map(id =>
-                httpClient(`${apiUrl}/${resource}/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(params.data),
-                })
-            )
-        ).then(responses => ({ data: responses.map(({ json }) => json.id) })),
-
-    create: (resource, params) => {
-        return httpClient(`${apiUrl}/${resource}`, {
-            method: 'POST',
-            body: JSON.stringify(params.data),
-        }).then(({ json }) => ({ data: json }))
-    },
-
-    delete: (resource, params) =>
-        httpClient(`${apiUrl}/${resource}/${params.id}`, {
-            method: 'DELETE',
-            headers: new Headers({
-                'Content-Type': 'text/plain',
-            }),
-        }).then(({ json }) => ({ data: json })),
-
-    // simple-rest doesn't handle filters on DELETE route, so we fallback to calling DELETE n times instead
-    deleteMany: (resource, params) =>
-        Promise.all(
-            params.ids.map(id =>
-                httpClient(`${apiUrl}/${resource}/${id}`, {
-                    method: 'DELETE',
-                    headers: new Headers({
-                        'Content-Type': 'text/plain',
-                    }),
-                })
-            )
-        ).then(responses => ({
-            data: responses.map(({ json }) => json.id),
-        })),
-
-
-    getStatus: (resource, params) => {
-        const url = `${apiUrl}/status`;
-        // Return the promise with the JSON array
-        return httpClient(url).then(({ json }) => ({ data: json }));
-    },
-    executeKubernetesJob: (id) => {
-        const url = `${apiUrl}/submissions/${id}/execute`;
-        // Return the promise with the JSON array
-        return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
-    },
-    downloadFile: (url) => {
-        // Get the auth token from url, then forward new URL back to browser
-        return httpClient(url)
-            .then(({ json }) => ({ data: json }))
-            .then(function (signed) {
-                window.location = `${apiUrl}/submissions/download/${signed.data.token}`;
-            });
-    },
-    regenerateVideoStatistics: (id) => {
-        const url = `${apiUrl}/objects/${id}`;
-        return httpClient(url, { method: "POST" }).then(({ json }) => ({ data: json }));
-    },
-    deleteKubernetesJob: (id) => {
-        const url = `${apiUrl}/submissions/jobs/${id}`;
-        return httpClient(url, { method: "DELETE" }).then(({ json }) => ({ data: json }));
-    }
+// The registry hides tombstones from its list routes already. Sent anyway so a console
+// pointed at an older server does not start showing deleted rows.
+const withoutTombstones = (filter: Record<string, unknown> | undefined) => ({
+    deleted_at: null,
+    ...filter,
 });
 
+// react-admin round-trips whole records into save, but the registry owns these
+// columns and refuses payloads that carry them.
+const SERVER_OWNED_KEYS = [
+    'id',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    'device_id',
+    'server_seq',
+    'validated_at',
+    'validated_by',
+];
 
+const stripServerOwned = (data: Record<string, unknown>) =>
+    Object.fromEntries(
+        Object.entries(data).filter(([key]) => !SERVER_OWNED_KEYS.includes(key)),
+    );
+
+const listQuery = (
+    params: GetListParams | GetManyReferenceParams,
+    filter: Record<string, unknown>,
+) => {
+    const { page, perPage } = params.pagination ?? DEFAULT_PAGINATION;
+    const { field, order } = params.sort ?? DEFAULT_SORT;
+    const rangeStart = (page - 1) * perPage;
+    const rangeEnd = page * perPage - 1;
+    return {
+        rangeStart,
+        rangeEnd,
+        query: {
+            sort: JSON.stringify([field, order]),
+            range: JSON.stringify([rangeStart, rangeEnd]),
+            filter: JSON.stringify(filter),
+        },
+    };
+};
+
+const parseTotal = (headers: Headers, countHeader: string): number => {
+    const raw = headers.get(countHeader);
+    if (raw === null) {
+        throw new Error(
+            `The ${countHeader} header is missing in the HTTP Response. The simple REST data provider expects responses for lists of resources to contain this header with the total number of results to build the pagination. If you are using CORS, did you declare ${countHeader} in the Access-Control-Expose-Headers header?`,
+        );
+    }
+    const value = countHeader === 'Content-Range' ? raw.split('/').pop() : raw;
+    return parseInt(value ?? '', 10);
+};
+
+const dataProvider = (
+    apiUrl: string,
+    httpClient: HttpClient = fetchUtils.fetchJson,
+    countHeader = 'Content-Range',
+): DrmDataProvider => {
+    const rangeOptions = (resource: string, rangeStart: number, rangeEnd: number) =>
+        // Chrome omits `Content-Range` on a response unless the request carried a `Range`.
+        countHeader === 'Content-Range'
+            ? { headers: new Headers({ Range: `${resource}=${rangeStart}-${rangeEnd}` }) }
+            : {};
+
+    return {
+        getList: (resource, params) => {
+            const { rangeStart, rangeEnd, query } = listQuery(
+                params,
+                withoutTombstones(params.filter),
+            );
+            const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+            return httpClient(url, rangeOptions(resource, rangeStart, rangeEnd)).then(
+                ({ headers, json }) => ({
+                    data: keyed(resource, json),
+                    total: parseTotal(headers, countHeader),
+                }),
+            );
+        },
+
+        getOne: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}/${params.id}`).then(({ json }) => ({
+                data: resource === 'changes' ? withId(json) : json,
+            })),
+
+        // Every ReferenceField on a page batches into one getMany. Without a range the
+        // registry answers with its default page of ten, and references past the tenth
+        // distinct record silently render empty.
+        getMany: (resource, params) => {
+            const last = Math.max(params.ids.length - 1, 0);
+            const query = {
+                filter: JSON.stringify({ id: params.ids }),
+                range: JSON.stringify([0, last]),
+            };
+            const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+            return httpClient(url, rangeOptions(resource, 0, last)).then(({ json }) => ({
+                data: keyed(resource, json),
+            }));
+        },
+
+        getManyReference: (resource, params) => {
+            const { rangeStart, rangeEnd, query } = listQuery(params, {
+                ...withoutTombstones(params.filter),
+                [params.target]: params.id,
+            });
+            const url = `${apiUrl}/${resource}?${new URLSearchParams(query)}`;
+            return httpClient(url, rangeOptions(resource, rangeStart, rangeEnd)).then(
+                ({ headers, json }) => ({
+                    data: keyed(resource, json),
+                    total: parseTotal(headers, countHeader),
+                }),
+            );
+        },
+
+        update: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}/${params.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(stripServerOwned(params.data)),
+            }).then(({ json }) => ({ data: json })),
+
+        // One PATCH over the registry's batch route, so a selection lands in one transaction.
+        updateMany: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}/batch`, {
+                method: 'PATCH',
+                body: JSON.stringify(
+                    params.ids.map(id => ({ id, ...stripServerOwned(params.data) })),
+                ),
+            }).then(({ json }) => ({
+                data: (json as { id: string }[]).map(row => row.id),
+            })),
+
+        create: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}`, {
+                method: 'POST',
+                body: JSON.stringify(stripServerOwned(params.data)),
+            }).then(({ json }) => ({ data: json })),
+
+        // The registry tombstones rather than removes, so the row keeps coming back
+        // through sync with `deleted_at` set until every laptop has seen it.
+        delete: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}/${params.id}`, {
+                method: 'DELETE',
+                headers: new Headers({ 'Content-Type': 'text/plain' }),
+            }).then(({ json }) => ({ data: json })),
+
+        deleteMany: (resource, params) =>
+            httpClient(`${apiUrl}/${resource}/batch`, {
+                method: 'DELETE',
+                body: JSON.stringify(params.ids),
+            }).then(({ json }) => ({ data: json as string[] })),
+
+        // The registry pools the figure, so the console and the desktop application cannot
+        // report different numbers from the same rows.
+        transectCover: (transectId, level, campaignId) => {
+            const query = new URLSearchParams({ level });
+            if (campaignId) query.set('campaign_id', campaignId);
+            return httpClient(`${apiUrl}/transects/${transectId}/cover?${query}`).then(
+                ({ json }) => json as PooledCover,
+            );
+        },
+
+        // One response carries every survey event's figure, so the statistics tab does
+        // not fan out a request per campaign.
+        transectCoverSeries: (transectId, level) => {
+            const query = new URLSearchParams({ level });
+            return httpClient(`${apiUrl}/transects/${transectId}/cover-series?${query}`).then(
+                ({ json }) => json as CoverSeries,
+            );
+        },
+
+        // Runs hang off a pass, not a clip, so the join lives in the registry rather
+        // than a filter the console would have to reconstruct.
+        videoRuns: videoId =>
+            httpClient(`${apiUrl}/videos/${videoId}/runs`).then(
+                ({ json }) => json as RunRecord[],
+            ),
+
+        // Colours come from the registry, so a class reads the same here as in the
+        // desktop viewer.
+        classGroups: () =>
+            httpClient(`${apiUrl}/config/class-groups`).then(
+                ({ json }) => json as ClassGroup[],
+            ),
+
+        // The registry counts and sizes a run's files by group, so the console never
+        // walks thousands of artifact rows to show the tab.
+        runOutputs: runId =>
+            httpClient(`${apiUrl}/runs/${runId}/outputs`).then(
+                ({ json }) => json as RunOutputs,
+            ),
+
+        runOutputFiles: (runId, purpose, offset, limit) => {
+            const query = new URLSearchParams({
+                purpose,
+                offset: String(offset),
+                limit: String(limit),
+            });
+            return httpClient(`${apiUrl}/runs/${runId}/outputs/files?${query}`).then(
+                ({ json }) => json as OutputFiles,
+            );
+        },
+
+        // Hundreds of objects make one download. The link is minted per click, like a
+        // single object's, and streams the zip from the registry.
+        runOutputsBundle: (runId, purpose) => {
+            const query = purpose ? `?purpose=${encodeURIComponent(purpose)}` : '';
+            return httpClient(`${apiUrl}/runs/${runId}/outputs/bundle${query}`).then(
+                ({ json }) => json as BundleResponse,
+            );
+        },
+
+        // Label ids as a run's ortho writes them, so the console paints a class ortho
+        // in the colours the cover figure already uses.
+        benthicClasses: () =>
+            httpClient(`${apiUrl}/config/classes`).then(({ json }) => json as BenthicClass[]),
+
+        // Minting names the device: the code carries the name enrolment adopts.
+        mintConnectCode: deviceName =>
+            httpClient(`${apiUrl}/devices/connect-codes`, {
+                method: 'POST',
+                body: JSON.stringify({ device_name: deviceName }),
+            }).then(({ json }) => json as ConnectCode),
+
+        revokeDevice: deviceId =>
+            httpClient(`${apiUrl}/devices/${deviceId}/revoke`, {
+                method: 'POST',
+            }).then(({ json }) => json as DeviceRevocation),
+
+        // Devices carry no CRUD update route, so the name is changed through its own call.
+        renameDevice: (deviceId, name) =>
+            httpClient(`${apiUrl}/devices/${deviceId}/rename`, {
+                method: 'POST',
+                body: JSON.stringify({ name }),
+            }).then(({ json }) => json as DeviceRename),
+
+        // Null clears the assignment. Acknowledgement arrives via the device's
+        // next heartbeat, not this response.
+        assignPreset: (deviceId, presetId) =>
+            httpClient(`${apiUrl}/devices/${deviceId}/assign-preset`, {
+                method: 'POST',
+                body: JSON.stringify({ preset_id: presetId }),
+            }).then(({ json }) => json as PresetAssignment),
+
+        archiveInitiate: body =>
+            httpClient(`${apiUrl}/archive/initiate`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }).then(({ json }) => json as ArchiveInitiate),
+
+        // The part's raw bytes, streamed by the registry into the store. The browser
+        // sets Content-Length from the blob itself.
+        archiveUploadPart: (objectId, partNumber, body) =>
+            httpClient(`${apiUrl}/archive/${objectId}/parts/${partNumber}`, {
+                method: 'PUT',
+                headers: new Headers({ 'Content-Type': 'application/octet-stream' }),
+                body,
+            }).then(({ json }) => json as ArchivePartReceipt),
+
+        archiveComplete: (objectId, parts) =>
+            httpClient(`${apiUrl}/archive/${objectId}/complete`, {
+                method: 'POST',
+                body: JSON.stringify({ parts }),
+            }).then(({ json }) => json as ArchiveComplete),
+
+        // Null rather than a thrown 404: nothing archived is an answer, not an error.
+        archiveByHash: contentHash =>
+            httpClient(`${apiUrl}/archive/by-hash/${contentHash}`).then(
+                ({ json }) => json as ArchiveProbe,
+                (error: unknown) => {
+                    if (error instanceof HttpError && error.status === 404) return null;
+                    throw error;
+                },
+            ),
+
+        // One POST answers a whole page of rows, where by-hash would fire one per row.
+        archiveProbe: hashes =>
+            httpClient(`${apiUrl}/archive/probe`, {
+                method: 'POST',
+                body: JSON.stringify({ hashes }),
+            }).then(({ json }) => json as BatchProbe),
+
+        archiveRunsProbe: runIds =>
+            httpClient(`${apiUrl}/archive/runs-probe`, {
+                method: 'POST',
+                body: JSON.stringify({ run_ids: runIds }),
+            }).then(({ json }) => json as RunsProbe),
+
+        archiveOverview: () =>
+            httpClient(`${apiUrl}/archive/overview`).then(
+                ({ json }) => json as ArchiveOverview,
+            ),
+
+        archiveDownload: objectId =>
+            httpClient(`${apiUrl}/archive/${objectId}/download`).then(
+                ({ json }) => json as ArchiveDownload,
+            ),
+
+        // The registry aggregates per device × preset × models, so peaks compare
+        // across the fleet without the console pulling every run.
+        performanceSummary: () =>
+            httpClient(`${apiUrl}/performance/summary`).then(
+                ({ json }) => json as PerformanceSummary,
+            ),
+
+        // Admin-only on the registry. Devices adopt it at their next heartbeat.
+        assignPresetToAll: presetId =>
+            httpClient(`${apiUrl}/presets/${presetId}/assign-all`, {
+                method: 'POST',
+            }).then(({ json }) => json as AssignAllResponse),
+
+        // The registry keeps no campaign-to-transect table: the join goes through passes.
+        campaignTransects: campaignId =>
+            httpClient(`${apiUrl}/campaigns/${campaignId}/transects`).then(
+                ({ json }) => json as Transect[],
+            ),
+
+        // From here on a laptop's change to these rows is a proposal.
+        validate: (section, ids) =>
+            httpClient(`${apiUrl}/changes/validate`, {
+                method: 'POST',
+                body: JSON.stringify({ section, ids }),
+            }).then(({ json }) => json as ValidateResponse),
+
+        acceptChange: seq =>
+            httpClient(`${apiUrl}/changes/${seq}/accept`, { method: 'POST' }).then(
+                ({ json }) => json as DecisionResponse,
+            ),
+
+        dismissChange: seq =>
+            httpClient(`${apiUrl}/changes/${seq}/dismiss`, { method: 'POST' }).then(
+                ({ json }) => json as DecisionResponse,
+            ),
+
+        // The same endpoint a laptop publishes through: idempotent by content, and
+        // a document that differs takes the profile's next version.
+        publishCalibration: body =>
+            httpClient(`${apiUrl}/camera_calibrations/upload`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+            }).then(({ json }) => json as CalibrationUploaded),
+    };
+};
 
 export default dataProvider;

@@ -1,0 +1,112 @@
+{
+  "realm": "deepreefmap",
+  "displayName": "DeepReefMap Development",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 3600,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "clients": [
+    {
+      "clientId": "deepreefmap-ui-local",
+      "name": "DeepReefMap UI",
+      "description": "Public client for the web interface. The desktop application deliberately has no client here: it authenticates with a device token traded for a connect code, so no realm details ship inside a public application.",
+      "enabled": true,
+      "publicClient": true,
+      "fullScopeAllowed": true,
+      "clientAuthenticatorType": "client-secret",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:*",
+        "http://localhost:88/*",
+        "http://localhost:5173/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": ["*"],
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "User ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "sub",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "account-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "account",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@local.dev",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "admin", "temporary": false }],
+      "realmRoles": ["deepreefmap-admin", "deepreefmap-member"]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "user@local.dev",
+      "firstName": "Regular",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "user", "temporary": false }],
+      "realmRoles": ["deepreefmap-member"]
+    },
+    {
+      "username": "norole",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "norole@local.dev",
+      "firstName": "No",
+      "lastName": "Role",
+      "credentials": [{ "type": "password", "value": "norole", "temporary": false }],
+      "realmRoles": []
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "deepreefmap-admin",
+        "description": "May revoke anyone's devices and hard-delete rows"
+      },
+      {
+        "name": "deepreefmap-member",
+        "description": "May read and write survey metadata, and enrol their own devices"
+      }
+    ]
+  },
+  "requiredCredentials": ["password"]
+}

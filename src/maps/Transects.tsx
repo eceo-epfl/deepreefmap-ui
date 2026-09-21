@@ -1,138 +1,119 @@
-import {
-    useRedirect,
-    Button,
-    Link,
-    useCreatePath,
-    Loading,
-    useGetList,
-    useRecordContext,
-} from 'react-admin';
-import {
-    MapContainer,
-    TileLayer,
-    Polygon,
-    Tooltip,
-    FeatureGroup,
-    Popup,
-    Marker,
-} from 'react-leaflet';
-import { EditControl } from "react-leaflet-draw"
-import { BaseLayers } from './Layers';
+import { CSSProperties } from 'react';
+import { Loading, useRedirect } from 'react-admin';
+import { MapContainer, Polyline, Tooltip } from 'react-leaflet';
+import { latLngBounds, LatLngBoundsExpression, LatLngTuple } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Typography } from '@mui/material';
-import { useEffect, useRef } from 'react';
 
-export const TransectMapAll = () => {
-    const redirect = useRedirect();
-    const createPath = useCreatePath();
+import type { Transect } from '../contract';
+import { BaseLayers } from './Layers';
+import { useTransectGeometry } from './useGeometry';
 
-    const { data, total, isLoading, error } = useGetList(
-        'transects', {}
+const MAP_STYLE: CSSProperties = { width: '100%', height: '500px' };
+const WORLD: LatLngBoundsExpression = [
+    [-60, -180],
+    [60, 180],
+];
+
+type FixedTransect = Transect & {
+    start_lat: number;
+    start_lon: number;
+    end_lat: number;
+    end_lon: number;
+};
+
+/** The transects with both end points fixed, which is what a line on a map needs. */
+export const fixed = (transects: Transect[]): FixedTransect[] =>
+    transects.filter(
+        (transect): transect is FixedTransect =>
+            transect.start_lat != null &&
+            transect.start_lon != null &&
+            transect.end_lat != null &&
+            transect.end_lon != null,
     );
 
-    if (isLoading) {
-        return <Loading />;
-    }
+const endPoints = (transect: FixedTransect): [LatLngTuple, LatLngTuple] => [
+    [transect.start_lat, transect.start_lon],
+    [transect.end_lat, transect.end_lon],
+];
 
-    if (data.length === 0 || data === undefined) {
-        return;
-    }
+const boundsOf = (transects: FixedTransect[]): LatLngBoundsExpression => {
+    const points = transects.flatMap(endPoints);
+    return points.length ? latLngBounds(points).pad(0.5) : WORLD;
+};
 
-    const bounds = L.latLngBounds(
-        data.map(
-            (transect) => (
-                [[transect.latitude_start, transect.longitude_start],
-                [transect.latitude_end, transect.longitude_end]]
-            )
-        )
-    ).pad(1);
+const degrees = (lat: number | null | undefined, lon: number | null | undefined) =>
+    lat == null || lon == null ? '—' : `${lat}°, ${lon}°`;
+
+const metres = (value: number | null | undefined) => (value == null ? '—' : `${value} m`);
+
+const TransectSummary = ({ transect }: { transect: Transect }) => (
+    <>
+        <Typography variant="subtitle2">{transect.name}</Typography>
+        <b>Length</b>: {metres(transect.length_m)}
+        <br />
+        <b>Depth</b>: {metres(transect.depth_m)}
+        <br />
+        <b>From</b>: {degrees(transect.start_lat, transect.start_lon)}
+        <br />
+        <b>To</b>: {degrees(transect.end_lat, transect.end_lon)}
+    </>
+);
+
+/** Every transect matching `filter` as a clickable line. */
+export const TransectMapAll = ({ filter }: { filter?: Record<string, unknown> }) => {
+    const redirect = useRedirect();
+    const { data, isPending } = useTransectGeometry(filter);
+
+    if (isPending) return <Loading />;
+    const transects = fixed(data ?? []);
+    // The list's own empty state carries the "define a transect" message.
+    if (!transects.length) return null;
 
     return (
         <MapContainer
-            style={{ width: '100%', height: '500px' }}
+            style={MAP_STYLE}
             minZoom={2}
-            zoom={2}
-            // Set bounds to a wider area than the calculated bounds to allow for
-            // the user to zoom out and see the whole area
-            bounds={bounds}
-            scrollWheelZoom={true}
+            bounds={boundsOf(transects)}
+            scrollWheelZoom
         >
             <BaseLayers />
-            {data.map(
-                (transect, index) => (
-                    <Polygon
-                        key={index}
-                        pathOptions={{ fillOpacity: 0.25, weight: 5 }}  // Increased weight for thicker lines
-                        eventHandlers={{
-                            click: () => {
-                                redirect('show', 'transects', transect['id']);
-                            }
-                        }}
-                        // Structure as transect.latitude_start, transect.longitude_start, transect.latitude_end, transect.longitude_end
-                        positions={[[transect.latitude_start, transect.longitude_start], [transect.latitude_end, transect.longitude_end]]}
-                    >
-                        <Marker
-                            key={index}
-                            position={[transect.latitude_start, transect.longitude_start]}
-                        >
-                            <Tooltip permanent>{transect.name}</Tooltip>
-                            <Popup
-                            // permanent
-                            // interactive={true}
-                            >
-                                <Typography variant="subtitle1" >{transect.name}</Typography>
-                                <b>Length</b>: {transect.length ? transect.length : "N/A"} (m)<br />
-                                <b>Depth</b>: {transect.depth ? transect.depth : "N/A"} (m)<br />
-                                <b>Coordinates</b>:
-                                <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${transect.latitude_start}°, ${transect.longitude_start}°`}
-                                <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`${transect.latitude_end}°, ${transect.longitude_end}°`}<br />
-                                <b>Files</b>: {transect.inputs?.length ? transect.inputs.length : 0}<br />
-                                <b>Submissions</b>: {transect.submissions?.length ? transect.submissions.length : 0}<br />
-                                <Link to={createPath({ resource: 'transects', type: 'show', id: transect.id })}>
-                                    <Button variant="contained" color="primary">View</Button>
-                                </Link>
-                            </Popup>
-                        </Marker>
-                    </Polygon>
-                )
-            )}
-        </MapContainer >
+            {transects.map(transect => (
+                <Polyline
+                    key={transect.id}
+                    positions={endPoints(transect)}
+                    pathOptions={{ weight: 6 }}
+                    eventHandlers={{
+                        click: () => redirect('show', 'transects', transect.id),
+                    }}
+                >
+                    <Tooltip>
+                        <TransectSummary transect={transect} />
+                    </Tooltip>
+                </Polyline>
+            ))}
+        </MapContainer>
     );
 };
 
-export const TransectMapOne = ({ record }) => {
-    if (record === null) {
-        return
+/** A single survey line, with its details pinned open. */
+export const TransectMapOne = ({ record }: { record: Transect }) => {
+    const [line] = fixed([record]);
+    if (!line) {
+        return (
+            <Typography variant="body2" sx={{ color: 'text.secondary', p: 2 }}>
+                No end points recorded.
+            </Typography>
+        );
     }
-    // Set bounds to the first transect (CHANGE THIS)
-    const bounds = L.latLngBounds(
-        [[record.latitude_start, record.longitude_start],
-        [record.latitude_end, record.longitude_end]]
-    ).pad(1);
-
     return (
-        <MapContainer
-            style={{ width: '100%', height: '500px' }}
-            // Set bounds to a wider area than the calculated bounds to allow for
-            // the user to zoom out and see the whole area
-            bounds={bounds}
-            scrollWheelZoom={true}
-        >
+        <MapContainer style={MAP_STYLE} bounds={boundsOf([line])} scrollWheelZoom>
             <BaseLayers />
-            <Polygon
-                pathOptions={{ fillOpacity: 0.25, weight: 20 }}  // Increased weight for thicker lines
-                positions={[[record.latitude_start, record.longitude_start], [record.latitude_end, record.longitude_end]]}
-            >
-                <Tooltip
-                    permanent
-                >
-                    <Typography variant="subtitle1">{record.name}</Typography>
-                    <b>Length</b>: {record.length ? record.length : "N/A"} (m)<br />
-                    <b>Depth</b>: {record.depth ? record.depth : "N/A"} (m)<br />
-                    <b>Coordinates</b>:
-                    <br />&nbsp;&nbsp;<b>From</b>:&nbsp;{`${record.latitude_start}°, ${record.longitude_start}°`}
-                    <br />&nbsp;&nbsp;<b>To</b>:&nbsp;{`<${record.latitude_end}°, ${record.longitude_end}°`}<br />
+            <Polyline positions={endPoints(line)} pathOptions={{ weight: 8 }}>
+                <Tooltip permanent>
+                    <TransectSummary transect={line} />
                 </Tooltip>
-            </Polygon>
+            </Polyline>
         </MapContainer>
     );
 };

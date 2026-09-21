@@ -1,14 +1,15 @@
-import TransectCreate from './TransectCreate';
-import TransactEdit from './TransectEdit';
-import TransectList from './TransectList';
-import TransectShow from './TransectShow';
 import PolylineIcon from '@mui/icons-material/Polyline';
 
+import TransectCreate from './TransectCreate';
+import TransectEdit from './TransectEdit';
+import TransectList from './TransectList';
+import TransectShow from './TransectShow';
+
 export default {
-    create: TransectCreate,
-    edit: TransactEdit,
     list: TransectList,
     show: TransectShow,
+    edit: TransectEdit,
+    create: TransectCreate,
     icon: PolylineIcon,
     options: {
         label: 'Transects',

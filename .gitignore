@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Yarn keeps its install state here. Only patches and plugins are ours to commit.
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -23,3 +28,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Playwright
+e2e/.auth
+e2e/test-results
+e2e/playwright-report
