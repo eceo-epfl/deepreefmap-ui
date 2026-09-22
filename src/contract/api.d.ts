@@ -1337,6 +1337,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    '/performance/observations': {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations['upload_observations'];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     '/performance/summary': {
         parameters: {
             query?: never;
@@ -3159,6 +3175,11 @@ export interface components {
         };
         HeartbeatResponse: {
             assigned_preset?: null | components['schemas']['AssignedPreset'];
+            /**
+             * Format: int32
+             * @description Version of the independent performance-observation upload endpoint.
+             */
+            performance_observations_version: number;
         };
         InitiateRequest: {
             /**
@@ -3230,6 +3251,23 @@ export interface components {
             code: string;
             /** Format: date-time */
             expires_at: string;
+        };
+        ObservationBatch: {
+            observations: components['schemas']['ObservationUpload'][];
+        };
+        ObservationBatchResponse: {
+            accepted: string[];
+            already_present: string[];
+            rejected: components['schemas']['RejectedObservation'][];
+        };
+        ObservationUpload: {
+            /** Format: uuid */
+            id: string;
+            observation: unknown;
+            /** Format: uuid */
+            run_id?: string | null;
+            source?: string;
+            stage_peaks?: unknown;
         };
         /** @description The ledger's word on one entry a device pushed, decided since its cursor. */
         OutboxEntry: {
@@ -3860,6 +3898,11 @@ export interface components {
         };
         /** @description A row that did not land, and why. The ledger keeps its values either way. */
         Refusal: {
+            /** Format: uuid */
+            id: string;
+            reason: string;
+        };
+        RejectedObservation: {
             /** Format: uuid */
             id: string;
             reason: string;
@@ -8551,6 +8594,29 @@ export interface operations {
                 };
                 content: {
                     'application/json': components['schemas']['PerformanceEvidencePage'];
+                };
+            };
+        };
+    };
+    upload_observations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                'application/json': components['schemas']['ObservationBatch'];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    'application/json': components['schemas']['ObservationBatchResponse'];
                 };
             };
         };
